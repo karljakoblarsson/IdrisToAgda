@@ -1,0 +1,110 @@
+\documentclass{scrartcl}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+% \usepackage{parskip}
+% \setlength{\parskip}{10pt}
+\usepackage{tikz}
+\usetikzlibrary{arrows, decorations.markings}
+\usepackage{chngcntr}
+\counterwithout{figure}{section}
+
+
+\begin{document}
+
+\begin{titlepage}
+
+\centering
+{\scshape\LARGE Master thesis project proposal}
+
+\vspace{0.5cm}
+{\huge\bfseries Source-to-source translation between Agda and Idris
+  }
+
+\vspace{2cm}
+{\Large Jakob Larsson \texttt{<jakob@karljakoblarsson.com>}}
+
+\vspace{1.0cm}
+{\large Suggested Supervisor at CSE: Patrik Jansson }
+
+% \vspace{1.5cm}
+\vspace{1.5cm}
+{\large Relevant completed courses:}
+
+{\itshape
+Types for Programs and Proofs, DAT350 \\
+Advanced Functional programming, TDA342 \\
+}
+
+\vfill
+{\large \today}
+
+\end{titlepage}
+
+% \section{Introduction}
+
+Agda~\cite{agda} and Idris~\cite{idris} are two dependently typed programming
+languages.  Agda is mainly focused on automated theorem proving while Idris
+prioritizes general purpose programming.  However, while both languages have
+different focus, they have most of their features in common. The type systems
+are very similar.
+
+We wish to investigate if it is possible to construct a source to source
+translation of a common subset from Idris to Agda.  A further goal is to do
+bidirectional translation between the languages, but this is probably too
+ambitious for this project.  The first challenge is to find a common subset for
+which it is possible to translate. The task is to construct a compiler which
+handles as much of this subset as possible.
+
+% Idris to Agda as the main step. Bidirectional is probably hard.
+
+% Målet är att göra översättningen åt båda hållen, fast det kanske är
+% rimligt att fokusera åt ett håll från början. Det är såklart väldigt
+% svårt, kanske omöjligt. Men det är svårt att svara på idag hur svårt
+% det är.
+
+This would allow Idris libraries to be reused in Agda. A Idris program may be
+more easily proved in Agda. With bidirectional translation it would be possible
+to use Idris to interface a well-proven Agda program with the world.  It will
+also increase the confidence in a given proof if it is valid in both languages.
+
+A small start is to just transpile small functions with non-dependent types
+over Nat for example. Then we develop the implementation to support bigger
+types. The goal then is to translate dependent types.  Functionality which is
+not available in both languages should be represented by holes. That way the
+user can implement whats missing.
+
+To test the implementation we will use the Sequential Decision Problem library
+IdrisLibs~\footnote{https://gitlab.pik-potsdam.de/botta/IdrisLibs} which is one
+of the bigger Idris codebases available. This will guide our implementation by
+first supporting the features used in the core parts of IdrisLibs. And then
+work to support more and more of the library.
+
+If possible we wish to reuse the Idris complier front-end for our
+implementation, but there is always a challenge to interface with existing
+code.  Another hard task is to find the biggest common subset of the languages.
+It is trivial to name a few common features, bu a useful compiler needs to
+support most widely used features. But there are incompatible differences
+between Agda and Idris which complicates things.
+
+% ~\cite{sdpcontrib}
+
+
+
+% \section{Goals and Challenges}
+
+% \section{Approach}
+
+
+
+\bibliographystyle{plain}
+
+\bibliography{ita}
+
+\end{document}
