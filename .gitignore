@@ -1,2 +1,10 @@
 *.ibc
 *.o
+
+*.aux
+*.pdf
+*.bbl
+*.blg
+*.log
+*.out
+
