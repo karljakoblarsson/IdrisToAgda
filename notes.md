@@ -1,3 +1,35 @@
+2019-04-09
+==========
+
+Patrik's notes when he was trying to manually translate IdrisLibs into Agda:
+https://github.com/patrikja/SeqDecProb_Agda
+
+Agda is totalt, but Idris is not. Which will probably be a problem some day.
+No, sorry thats wrong. Both Agda and Idris is total by default but includes
+'bot' if you want it.
+
+Idris 1 uses A-normal form in its complilation. May be good to know someday.
+[Idris compilation pipeline](https://github.com/idris-lang/Idris-dev/wiki/Idris-Compilation-Pipeline)
+
+loadModule in the file s/Id/Parser.hs is the main function which reads and
+parses an Idris file.
+In the same file the function 'fnOpt' is parseing file options.
+
+The function idrisMain is the main entrypoint to the Idris 1 compiler.
+The Idris 1 compiler takes the option '--codegen' which determines which
+codegen to use. I'm trying to add Agda as an option here with some success.
+
+Done Today
+----
+- Find backend code in Idris 1
+  Which intermediate language should I use? Should I just write a codegen
+  similar to the c and JS variants and hope that works. The codegen can decide
+  which level of intermediate it gets (which decl). But is it high enough
+  level?
+- Complie Idris 1 with changes. I have tried to copy code into a new backend,
+  it complies but crashes on runtime.
+
+
 2019-04-04
 ==========
 
@@ -9,8 +41,11 @@ least.
 TODO
 ----
 - Write simple Idris programs
+  See simpleIdris.idr
 - Write simple Agda programs again
+  See simpleAgda.agda
 - Write manual translation between STLC Idris -> Agda
+  See simpleAgda.agda
 - Find backend code in Blodwen
     Or since Idris and Agda are so similar should I just use the AST directly
     after parsing?
