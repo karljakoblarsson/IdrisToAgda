@@ -1,0 +1,3 @@
+[submodule "Idris-dev"]
+	path = Idris-dev
+	url = git@github.com:karljakoblarsson/Idris-dev.git
