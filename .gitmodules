@@ -1,3 +1,6 @@
 [submodule "Idris-dev"]
 	path = Idris-dev
 	url = git@github.com:karljakoblarsson/Idris-dev.git
+[submodule "Blodwen"]
+	path = Blodwen
+	url = git@github.com:karljakoblarsson/Blodwen.git

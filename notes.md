@@ -1,3 +1,12 @@
+2019-04-10
+==========
+
+Now I'm able to use my Agda backend to put out some IR from the Idris
+1 compiler! It's not an instance of 'show' so it's not pretty but it works.
+
+TODO Onto Blodwen I guess.
+
+
 2019-04-09
 ==========
 
