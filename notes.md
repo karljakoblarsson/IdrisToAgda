@@ -1,3 +1,28 @@
+2019-04-11
+==========
+It will be harder to write a Blodwen backend. The backend code is more tightly
+integrated with the tyepchecking. But there are clearly defined IR's like TT
+and TTImp which is positive for me.
+
+I'm starting to think a bit how to handle Universe, in Agda they are implicit
+but in Idris implicit. As I understand it now. That's one of the main
+diffrences between the languages for simple functions and definitions.
+
+Now I have written a stub Agda backen in Blodwen. It doesn't do anything yet,
+but it compiles and is runnable. So it will be possible to use Blodwen as well.
+But it feels like it would be harder. The translation will be the same, it
+only the implementation which differ. It is cool to use the latest version,
+however the project is not about that so if I spend to much time fighting with
+blodwen, the project can suffer. So maybe thats the argument to target Idris1.
+And probably the latest stable version of Agda, 2.5.4.
+
+I should look more into IdrisLibs. And I should have contacted Nicola several
+days ago.
+
+The practical parts are mostly done for the planning part. How can I progress
+on the
+"Decide progression of language features to implement/Order-of-attack"-part?
+
 2019-04-10
 ==========
 
