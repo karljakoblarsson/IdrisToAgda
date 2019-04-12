@@ -1,3 +1,98 @@
+2019-04-12
+==========
+I should be writing on the planning report all day today.
+
+"Decide progression of language features to implement/Order-of-attack"-part?
+----------------------------------------------------------------------------
+I should start with simple data typ declarations like:
+```Idris
+data Bool = True | False
+data Nat = Zero | Succ Nat
+```
+
+And simple functions which work on the simple types.
+```
+add : Nat -> Nat -> Nat
+add Z s = s
+add (Suc a) b = add a (Suc b)
+
+not : Bool -> Bool -> Bool
+not True = False
+not False = True
+
+```
+
+However, from here on it's harder to know the way. I would like to continue
+with simple dependent types, since that's the main point of the project. To be
+able to translate the usual Vector example. But than I need some simple pattern
+matching, which is supposed to be hard. I already need simple pattern matching
+in these simple examples.
+
+After that Product-types, and sum-types is maybe the next step. But I imagine
+that here be dragons. Around here I will find the problems that will be the
+interesting content in the final thesis. Some which maybe impossible to solve,
+or at least take a few years of research.
+
+Then there probably won't be time, but records/classes/interfaces is next. The
+final frontier maybe. I should not belive I will get that far. But I probably
+need to have a plan, just in case.
+
+### Simply Typed Lambda-calc, from my types notes
+```
+T, A, B, … ::= Bool | T → T
+
+t ::= true | false | x | t t | λ (x : A) t  -- With names
+                   | n | t t | λ A t  -- Namefree
+
+bV ::= true | false
+fV ::= λ(x : A) t
+```
+
+### Syntax constructs I need to handle (Unconclusive)
+Which is maybe not big logical problems or so, but they are still work that
+needs to be done. Ordered similar to the Idris Tutorial
+- Type signatures
+- Declarations
+- "Assignment"
+- Strings
+- Numbers int/double
+- Function definitions
+- Pattern matching
+- Data declarations
+- Function application
+- where-clauses
+- Holes
+    Idris has two kinds of Holes, but Agda only one?
+- Types as first class values
+- Dependent types
+- Infix-application
+- Implict arguments (In Agda they need to be explicit? So I need that info from the compiler)
+- `using`-notation
+- `mutual`-blocks
+- IO ?
+- `do`-notation
+- Lazy-eval. Idris is eager by default, and I belive Agda is as well? But Idris
+    support lazy, i'm not sure if Agda does.
+- Codata types
+- Records (Which in Agda is basically classes as well)
+- List comprehensions
+- `case`-expressions
+- How to handle Totality
+- Modules
+    - Import declarations
+    - Export declarations
+- Namespaces
+- Idris Interfaces...
+
+Practical software problems
+---------------------------
+In the file `Agda.Syntax.Concrete` the full AST for Agda as produced by the
+parser is. Maybe I can reuse this code, then I get a lot of code for free.
+Especially if I target Idris 1 since it's written in haskell just like Agda.
+But maybe also for Blodwen since simple Haskell is really similar to Idris. But
+this might be an argument for targeting Idris 1.
+
+
 2019-04-11
 ==========
 It will be harder to write a Blodwen backend. The backend code is more tightly
