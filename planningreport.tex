@@ -8,13 +8,12 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
-% \usepackage{parskip}
-% \setlength{\parskip}{10pt}
+\usepackage{parskip}
+\setlength{\parskip}{10pt}
 \usepackage{tikz}
 \usetikzlibrary{arrows, decorations.markings}
 \usepackage{chngcntr}
 \counterwithout{figure}{section}
-
 
 \begin{document}
 
@@ -22,6 +21,8 @@
 
 \centering
 {\scshape\LARGE Master thesis Planning report}
+
+% * Preliminary title.
 
 \vspace{0.5cm}
 {\huge\bfseries Source-to-source translation between Agda and Idris
@@ -36,7 +37,6 @@
 
 % \vspace{1.5cm}
 \vspace{1.5cm}
-{\large Relevant completed courses:}
 
 \vfill
 {\large \today}
@@ -55,37 +55,28 @@
 % The following points are a good start:
 %
 % * Preliminary title.
-% * Background to the assignment. Why is it relevant?
-% * Aim for the work. What should be accomplished?   Partial translation of Idris code to Agda code. (semantics-preserving)
-% * The formulation of the problem at hand and, the assignment. This
-%   should include an extended version of the scientific problem
-%   definition and references to knowledge within the area given in the
-%   thesis proposal.
-% * Limitations. What should be left out and why?
-% * Method of accomplishment. How should the work be carried out?
-% * Risk analysis and ethical considerations.
-% * Time plan.
+% Source-to-source translation between Agda and Idris
 
-% The time plan should give an approximate date when the work is to be
-% finished. It should also list mandatory seminars and milestones for
-% the project with dates for critical steps that are needed to finish
-% the work (intermediate and final report, presentation, opposition
-% etc).
-%
-% The time plan can be updated if and when needed, always in
-% collaboration with your supervisor and upon approval of the
-% examiner.
 %%%%%%%%%%%%%%%%
 
-
-
 % \section{Introduction}
+
+% * Background to the assignment. Why is it relevant?
 
 Agda~\cite{agda} and Idris~\cite{idris} are two dependently typed programming
 languages.  Agda is mainly focused on automated theorem proving while Idris
 prioritizes general purpose programming.  However, while both languages have
 different focus, they have most of their features in common. The type systems
 are very similar.
+
+% Mostly the same as the proposal. And read a few other dependent-types
+% paper-intros, and write something similar.
+
+
+% * Aim for the work. What should be accomplished?
+Partial translation of Idris code to Agda code. (semantics-preserving)
+Translate as much as possible of used Idris code into Agda, which type-checks,
+hopefully runs and maybe have the same output.
 
 We wish to investigate if it is possible to construct a source to source
 translation of a common subset from Idris to Agda.  A further goal is to do
@@ -94,29 +85,61 @@ ambitious for this project.  The first challenge is to find a common subset for
 which it is possible to translate. The task is to construct a compiler which
 handles as much of this subset as possible.
 
-% Idris to Agda as the main step. Bidirectional is probably hard.
+This would allow Idris libraries to be reused in Agda. A Idris program may be
+more easily proved in Agda. With bidirectional translation it would be possible
+to use Idris to interface a well-proven Agda program with the world.  It will
+also increase the confidence in a given proof if it is valid in both languages.
 
+% * Limitations. What should be left out and why?
+Only Idris to Agda. Some advanced language features State the lang features
+progression, and where it's resonable to land.  Code which is untranslateable
+should be left as holes, with the source as comments.
+Automated testing of program output is probably to hard, I need a simpler
+verification criteria.
+
+% Idris to Agda as the main step. Bidirectional is probably hard.
 % Målet är att göra översättningen åt båda hållen, fast det kanske är
 % rimligt att fokusera åt ett håll från början. Det är såklart väldigt
 % svårt, kanske omöjligt. Men det är svårt att svara på idag hur svårt
 % det är.
 
-This would allow Idris libraries to be reused in Agda. A Idris program may be
-more easily proved in Agda. With bidirectional translation it would be possible
-to use Idris to interface a well-proven Agda program with the world.  It will
-also increase the confidence in a given proof if it is valid in both languages.
+% * The formulation of the problem at hand and, the assignment. This should
+%   include an extended version of the scientific problem definition and
+%   references to knowledge within the area given in the thesis proposal.
+I should mention which parts are extra hard. Like: dependent types, reccords,
+classes/interfaces. implicit arguments. Maybe partial functions. But I'm not
+sure which parts are yet.
+
+I should some paper related to transpiling and cite. As well as both Idris and
+Agda implementation-papers. Maybe the faq about differences between the
+languages.
+
+Dependent type-system are still very much research so they are not
+very well understood. That makes this project hard since not just the output
+needs to be correct, the advanced types still need to type-check. And that is
+non-obvious how to do. And how do you leave useful holes where the transpiler
+fail, which are possible for humans to fill in.
+
+How to test and verify to translations? It's probably not feasible to get a lot
+of code runnable without manual intervention. Can I even get it to type-check?
+And what does it mean just that the code is well-typed in both languages.
+Equality is hard, especially with dependent types.
+
+
+% * Method of accomplishment. How should the work be carried out?
+Developing from the Idris1 or Blodwen codebase, utilizing as much of the AST
+and pretty printer from the Agda-source as possible.
+Working step by step, first translating only very simple programs, then adding
+more and more features. Representing unimplemented features with holes so that
+it is always possible to translate code. It just becomes more and more complete
+as I progress. It is a fun thing to count as well, the numbers of holes left
+for a given program.
 
 A small start is to just transpile small functions with non-dependent types
 over Nat for example. Then we develop the implementation to support bigger
 types. The goal then is to translate dependent types.  Functionality which is
 not available in both languages should be represented by holes. That way the
 user can implement whats missing.
-
-To test the implementation we will use the Sequential Decision Problem library
-IdrisLibs~\footnote{https://gitlab.pik-potsdam.de/botta/IdrisLibs} which is one
-of the bigger Idris codebases available. This will guide our implementation by
-first supporting the features used in the core parts of IdrisLibs. And then
-work to support more and more of the library.
 
 If possible we wish to reuse the Idris complier front-end for our
 implementation, but there is always a challenge to interface with existing
@@ -125,33 +148,82 @@ It is trivial to name a few common features, bu a useful compiler needs to
 support most widely used features. But there are incompatible differences
 between Agda and Idris which complicates things.
 
-% ~\cite{sdpcontrib}
-
+To test the implementation we will use the Sequential Decision Problem library
+IdrisLibs~\footnote{https://gitlab.pik-potsdam.de/botta/IdrisLibs} which is one
+of the bigger Idris codebases available. This will guide our implementation by
+first supporting the features used in the core parts of IdrisLibs. And then
+work to support more and more of the library.
 
 
 % \section{Goals and Challenges}
 
+% * Risk analysis and ethical considerations.
+Working with existing code can be timeconsuming. Dependent types are hard.
+Idris and Agda are not exactly alike, the languages and the type-systems differ
+is a few subtle ways, some ways which are probably not possible to translate.
+How do we measure success in a useful, efficient and possible way. Equality is
+hard, especially regarding dependent types.
+
+Ethical considerations and risks are not relevant. There will not be different
+from any other programming language. Both Agda and Idris are general purpose
+programming languages which can be used any program. They can also be Turing
+complete if desired. If used non-turing complete there are actually less risks
+since there is simpler to reason about the programs behavior. Dependet types
+can be more easily formmally verified, which also means there is easier to use
+formal method to find bugs to exploit, (Of course, since the bugs are the same
+even if the intentions differ.) But It's easier for a user to verify untrusted
+software which decreases risk.
+
+
+% * Time plan.
+%   The time plan should give an approximate date when the work is to be
+%   finished. It should also list mandatory seminars and milestones for the
+%   project with dates for critical steps that are needed to finish the work
+%   (intermediate and final report, presentation, opposition etc).
+When should I be finished? I need to ask Patrik what is reasonable. And what
+will I do this summer?
+
+Do I need milestones for specific parts of the "experiment", like certain
+features or steps? I plan to write the report in tandem with the project, at
+least work a bit on it every week, probably every other day or so.
+
+The testing and verification is the big uncertainty right now. It should be in
+the plan but I have no Idea on how to do it. And I probably won't have until
+I have gotten quite far.
+
+Do I need to give exact dates or is something like "week 5" okay?
+
+I need to lookup mandatory seminars.
+I'm signed up for the industry seminar.
+I will probably need to do the writing seminars this fall. In study period 1.
+I just missed the one i April.
+
+And times for final report presentation and opposition.
+Sometime in August/September hopefully.
+
+% The time plan can be updated if and when needed, always in collaboration with
+% your supervisor and upon approval of the examiner.
+
+
 % \section{Approach}
 
 % Notes
-There is a lot to be done. I first need to decide how to implement the
-transpiler. It still seems resonable to use the actual Idris implementation and
-just add a compilation target. But there are problems. I still need to figure
-out the roadmap of language features. I.e. what features to start with and what
-to delay.
+% There is a lot to be done. I first need to decide how to implement the
+% transpiler. It still seems resonable to use the actual Idris implementation and
+% just add a compilation target. But there are problems. I still need to figure
+% out the roadmap of language features. I.e. what features to start with and what
+% to delay.
 
-But it starts to come together a bit at least.
+% I plan to target the latest version of Agda, 2.5.4
+% And I think Idris 1. The Blodwen implementation is very different so it will be
+% hard to port to the new version. But today It's not ready enough yet.
 
-I plan to target the latest version of Agda, 2.5.4
-And I think Idris 1. The Blodwen implementation is very different so it will be
-hard to port to the new version. But today It's not ready enough yet.
+% I will try to leverages as much availible code as possible for the
+% implementation. Implementing my own BNC is not a good use of my time.
 
-I will try to leverages as much availible code as possible for the
-implementation. Implementing my own BNC is not a good use of my time.
-
-The language features progression is harder to come up with. STLC, i.e. simple
-functions without dependable types is of course the first step. But from there
-on it's not clear.
+% The language features progression is harder to come up with. STLC, i.e. simple
+% functions without dependable types is of course the first step. But from there
+% on it's not clear.
 
 
 % Maybe useful things to cite:
