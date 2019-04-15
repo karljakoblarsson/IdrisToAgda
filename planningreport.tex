@@ -66,56 +66,73 @@
 Agda~\cite{agda} and Idris~\cite{idris} are two dependently typed programming
 languages.  Agda is mainly focused on automated theorem proving while Idris
 prioritizes general purpose programming.  However, while both languages have
-different focus, they have most of their features in common. The type systems
-are very similar.
+different focus, they share most of their features. The type systems are
+similar.
 
 % Mostly the same as the proposal. And read a few other dependent-types
 % paper-intros, and write something similar.
 
 
 % * Aim for the work. What should be accomplished?
-Partial translation of Idris code to Agda code. (semantics-preserving)
-Translate as much as possible of used Idris code into Agda, which type-checks,
-hopefully runs and maybe have the same output.
-
 We wish to investigate if it is possible to construct a source to source
-translation of a common subset from Idris to Agda.  A further goal is to do
-bidirectional translation between the languages, but this is probably too
-ambitious for this project.  The first challenge is to find a common subset for
-which it is possible to translate. The task is to construct a compiler which
-handles as much of this subset as possible.
+translation of a common subset from Idris to Agda which preserves semantics.
+A goal for further projects is to do bidirectional translation between the
+languages.
 
 This would allow Idris libraries to be reused in Agda. A Idris program may be
 more easily proved in Agda. With bidirectional translation it would be possible
 to use Idris to interface a well-proven Agda program with the world.  It will
 also increase the confidence in a given proof if it is valid in both languages.
+The first challenge is to find a common subset for which it is possible to
+translate. The task is to construct a compiler which handles as much of this
+subset as possible.
+
 
 % * Limitations. What should be left out and why?
-Only Idris to Agda. Some advanced language features State the lang features
-progression, and where it's resonable to land.  Code which is untranslateable
-should be left as holes, with the source as comments.
-Automated testing of program output is probably to hard, I need a simpler
-verification criteria.
+% TODO This part needs to be improved.
+Only translation from Idris to Agda will be considered in this project.
+Bidirectional translation will be to much work. Hopefully ideas and code can be
+reused for further work on Agda to Idris translation.
 
-% Idris to Agda as the main step. Bidirectional is probably hard.
-% Målet är att göra översättningen åt båda hållen, fast det kanske är
-% rimligt att fokusera åt ett håll från början. Det är såklart väldigt
-% svårt, kanske omöjligt. Men det är svårt att svara på idag hur svårt
-% det är.
+% Some advanced language features. State the lang features
+It is not feasible to translate every language feature and edge case.
+The transpiler will built step by step, supporting a biger subset of language
+features for each step.
+% progression, and where it's resonable to land.
+
+% Code which is untranslateable
+There may be valid Idris code which is impossible to translate to Agda. Those
+parts will be left as holes for the user to fill in a reasonable translation in
+that specific case.
+% should be left as holes, with the source as comments.
+
+Dependent reccords 
+Different levels of universes.
+
+% Automated testing of program output is probably to hard, I need a simpler
+% verification criteria.
+Ideally we would run both the source and translated program for randomized
+input to make sure the output is the same. However, it is probably unfeasible
+to get larger programs to type check and run without manual intervention.
+Therefore we will use weaker forms of validation.
 
 % * The formulation of the problem at hand and, the assignment. This should
 %   include an extended version of the scientific problem definition and
 %   references to knowledge within the area given in the thesis proposal.
-I should mention which parts are extra hard. Like: dependent types, reccords,
-classes/interfaces. implicit arguments. Maybe partial functions. But I'm not
-sure which parts are yet.
 
-I should some paper related to transpiling and cite. As well as both Idris and
-Agda implementation-papers. Maybe the faq about differences between the
-languages.
+Translate as much as possible of used Idris code into Agda, which type-checks,
+hopefully runs and maybe have the same output.
+
+% I should mention which parts are extra hard. Like: dependent types, reccords,
+% classes/interfaces. implicit arguments. Maybe partial functions. But I'm not
+% sure which parts are yet.
+
+% I should some paper related to transpiling and cite. As well as both Idris and
+% Agda implementation-papers. Maybe the faq about differences between the
+% languages.
 
 Dependent type-system are still very much research so they are not
-very well understood. That makes this project hard since not just the output
+well understood. That makes this project hard since not just the output
 needs to be correct, the advanced types still need to type-check. And that is
 non-obvious how to do. And how do you leave useful holes where the transpiler
 fail, which are possible for humans to fill in.
@@ -127,21 +144,22 @@ Equality is hard, especially with dependent types.
 
 
 % * Method of accomplishment. How should the work be carried out?
-Developing from the Idris1 or Blodwen codebase, utilizing as much of the AST
-and pretty printer from the Agda-source as possible.
-Working step by step, first translating only very simple programs, then adding
-more and more features. Representing unimplemented features with holes so that
-it is always possible to translate code. It just becomes more and more complete
-as I progress. It is a fun thing to count as well, the numbers of holes left
-for a given program.
-
 A small start is to just transpile small functions with non-dependent types
 over Nat for example. Then we develop the implementation to support bigger
 types. The goal then is to translate dependent types.  Functionality which is
 not available in both languages should be represented by holes. That way the
 user can implement whats missing.
 
-If possible we wish to reuse the Idris complier front-end for our
+Developing from the Idris 1 or Blodwen codebase, utilizing as much of the AST
+and pretty printer from the Agda-source as possible.
+
+Working step by step, first translating only very simple programs, then adding
+more and more features. Representing unimplemented features with holes so that
+it is always possible to translate code. It just becomes more and more complete
+as I progress. It is a fun thing to count as well, the numbers of holes left
+for a given program.
+
+We wish to reuse the Idris complier front-end for our
 implementation, but there is always a challenge to interface with existing
 code.  Another hard task is to find the biggest common subset of the languages.
 It is trivial to name a few common features, bu a useful compiler needs to
@@ -158,7 +176,10 @@ work to support more and more of the library.
 % \section{Goals and Challenges}
 
 % * Risk analysis and ethical considerations.
-Working with existing code can be timeconsuming. Dependent types are hard.
+%
+% Project risks.
+Working with existing code can be timeconsuming.
+Dependent types are hard.
 Idris and Agda are not exactly alike, the languages and the type-systems differ
 is a few subtle ways, some ways which are probably not possible to translate.
 How do we measure success in a useful, efficient and possible way. Equality is
@@ -169,7 +190,7 @@ from any other programming language. Both Agda and Idris are general purpose
 programming languages which can be used any program. They can also be Turing
 complete if desired. If used non-turing complete there are actually less risks
 since there is simpler to reason about the programs behavior. Dependet types
-can be more easily formmally verified, which also means there is easier to use
+can be more easily formally verified, which also means there is easier to use
 formal method to find bugs to exploit, (Of course, since the bugs are the same
 even if the intentions differ.) But It's easier for a user to verify untrusted
 software which decreases risk.
@@ -180,6 +201,7 @@ software which decreases risk.
 %   finished. It should also list mandatory seminars and milestones for the
 %   project with dates for critical steps that are needed to finish the work
 %   (intermediate and final report, presentation, opposition etc).
+% TODO Consult this with Patrik.
 When should I be finished? I need to ask Patrik what is reasonable. And what
 will I do this summer?
 
