@@ -85,7 +85,8 @@ A goal for further projects is to do bidirectional translation between the
 languages.
 
 This translator would allow Idris libraries to be reused in Agda. A Idris
-program may be more easily proved in Agda. With bidirectional translation it
+program may be more easily proved in Agda. %TODO remove ref to bidirectional
+With bidirectional translation it
 would be possible to use Idris to interface a well proven Agda program with the
 world.  It will also increase the confidence in a given proof if it is valid in
 both languages.  The first challenge is to find a common subset for which it is
@@ -99,6 +100,7 @@ much of this subset as possible.
 Only translation from Idris to Agda will be considered in this project.
 Bidirectional translation is to much work. Hopefully ideas and code can be
 reused for further work on Agda to Idris translation.
+%TODO remove all refs to bidirectional
 
 % Some advanced language features. State the lang features
 It is not feasible to translate every language feature and edge case.  The goal
@@ -117,15 +119,16 @@ that specific case.
 
 % Dependent records
 
+% Cummutally Set hierarchy. Type in type in Idris.
 In Agda there are different levels of \texttt{Set} since the set of types can not be
-part of it self. (Gödel's Incompleteness theorem) This is useful for proofs, but
+part of itself. (Gödel's Incompleteness theorem) This is useful for proofs, but
 will not be considered in this project.
 
 % Automated testing of program output is probably to hard, I need a simpler
 % verification criteria.
 Ideally we would run both the source and translated program with randomized
 input to automatically test the they return the same result. However, it is
-probably unfeasible to get larger programs to type check and run without manual
+probably infeasible to get larger programs to type check and run without manual
 intervention.  Therefore we will use weaker forms of validation.
 
 \section{Problem}
@@ -150,6 +153,8 @@ usefulness of both languages. The work of implementation of it can give us
 greater knowledge of the differences between the type systems. As well as the
 strengths and weaknesses of both languages.
 
+% TODO "not possible" is bad writing. Not implemented yet and impossible.
+% Semi-automatic translator is maybe a more correct description.
 The goal of this project is to construct a translator which can translate
 a subset of Idris into valid Agda. The language features which are not possible
 to translate will be left as holes to allow the user to provide the missing
@@ -164,10 +169,13 @@ parts.
 % languages.
 
 Dependent type systems are still an active research topic, which makes the
-translation hard.  Not just the output needs to be correct, the advanced types
-still need to type check after the translation, which is hard.  Where the
-translator fails we wish to leave holes for the user to provide the correct
-translation. The holes must be constructed so that is possible which is
+translation hard. 
+% TODO redo this sentence. The question is what it means and not mean if both
+% programs type check.
+Not just the output needs to be correct, the advanced types
+still need to type check after the translation, which is hard.
+Where the translator fails we wish to leave holes for the user to provide the
+correct translation. The holes must be constructed so that is possible which is
 non-obvious to do.
 
 % How to test and verify to translations? It's not feasible to get a lot
@@ -185,17 +193,33 @@ equality in the context of dependent types.
 % TODO Add specific Ideas about how to verify the implementation.
 
 
+% TODO Better title
 \section{Method of Accomplishment}
 % * Method of accomplishment. How should the work be carried out?
 The first step is to translate simple declarations of types and functions,
 without dependent types. A subset roughly corresponding to Simply Typed Lambda
 Calculus. Since dependent types are the focus of the project the next step is
 to translate simple dependent types. There are several syntactic constructs
+% TODO Kriteriet for att oversatta eller inte ar inte om det ar latt eller
+% svart. Both Idris and Agda are large languages. What features are most
+% important to translate?
 which are not obvious to translate, for example \texttt{mutual}-blocks and
 \texttt{do}-notation. They are de-sugared in the Idris compiler so are not strictly
 necessary to implement. However correctly translating them will increase the
-readability and the usefulness of the generated code. After simple dependent
+readability and the usefulness of the generated code.
+% TODO Talk about the type language.
+After simple dependent
 types the next step is to implement Sum and Product types.
+% type lang
+% base types
+% variable
+% application t1 t2
+% function definition (x : t1) -> t2
+
+% Sum/ simple enumeration T | F
+% prod/data P = P Bool Bool
+
+% Indexerad data typer
 
 % Developing from the Idris 1 or Blodwen codebase, utilizing as much of the AST
 % and pretty printer from the Agda-source as possible.
@@ -220,8 +244,9 @@ and more complete as the project progresses. The number of holes left for
 a given project also works as an informal method of verification, less holes
 corresponds to a better translator.
 
+% TODO refer direcetly to SDP which is a part of IdrisLibs.
 To test the implementation we will use the Sequential Decision Problem library
-IdrisLibs\footnote{\url{https://gitlab.pik-potsdam.de/botta/IdrisLibs}} which is one
+from IdrisLibs\footnote{\url{https://gitlab.pik-potsdam.de/botta/IdrisLibs}} which is one
 of the bigger Idris codebases available. This will guide our implementation by
 first supporting the features used in the core parts of IdrisLibs. And then
 work to support more and more of the library.
@@ -285,13 +310,23 @@ I just missed the one i April.
 And times for final report presentation and opposition.
 Sometime in August/September hopefully.
 
+% Dela planeringen i:
+% - Obligatoriskt
+% - Skrivande
+% - Implementering
+% - Ev. test
 \begin{itemize}
   \item Planningreport. (Tomorrow)
   \item First runnable implementation of STLC.
   \item First runnable Dependent types example.
   \item Decide verification method.
+    % Olika for olika delsteg. STLC is runable. Sen blir det svarare for varje
+    % steg. Jamfora partial correectness is interesting research in itself.
+    % Idea: specify which parts of the agda source should be run. Sp=o the
+    % whole program needs not to be translated, only the important parts.
   \item Content complete draft of half-time report.
-  \item Half-time report. (In 6 weeks?)
+  \item Half-time report. (In 6 weeks?) till 2019-06-06. Till Patrik en vecka
+    innan. 2019-05-31
   \item Implementation of Sum-types.
   \item Final implementation version.
   \item Content complete draft of Final report.
@@ -302,6 +337,12 @@ Sometime in August/September hopefully.
 % The time plan can be updated if and when needed, always in collaboration with
 % your supervisor and upon approval of the examiner.
 
+% Tid: 2019/04/01 - 12w - 2019-07-07
+% 2019-09-02 - 8w - 2019-10-27
+
+% list.chalmers.se
+% Proglog
+% Fp
 
 % \section{Approach}
 
