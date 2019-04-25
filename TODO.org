@@ -1,0 +1,29 @@
+* Time plan
+(from the planning report + later additions)
+** DONE 2019-04-18; WR; Planning report.
+** TODO 2019-04-26; A;  Book supervision meetings
+** TODO 2019-04-29; TW; First runnable implementation of STLC.
+** TODO 2019-05-05; TW; First runnable Dependent types example.
+** TODO 2019-05-10; CE; Industry and career advancement seminar
+** TODO 2019-05-19; TW; Decide verification method.
+** TODO 2019-05-19; WR; Incorporate planning report suggestions into half-time report
+** TODO 2019-05-19; WR; Content complete draft of half-time report.
+** TODO 2019-05-31; WR; Final draft of half-time report to supervisor.
+** TODO 2019-06-06; WR; Half-time report done.
+** TODO 2019-06-07; WR; Half-time presentation.
+** TODO 2019-09-08; TW; Implementation of Implicit arguments done.
+** TODO 2019-09-08; WR; Content complete draft of Background in Final report.
+** TODO 2019-09-22; TW; Final implementation version.
+** TODO 2019-09-29; TW; Final verification.
+** TODO 2019-09-29; WR; Content complete draft of Final report.
+** TODO 2019-09-??; CE; Opposition.
+** TODO 2019-09-??; CE; Writing seminar I
+** TODO 2019-09-??; CE; Writing seminar II
+** TODO 2019-10-06; WR; Complete draft of Final report to supervisor
+** TODO 2019-10-20; WR; Final report.
+** TODO 2019-10-??; CE; Presentation.
+* Time plan notation
+From the planning report
++ TW = 6.1 Technical work
++ WR = 6.2 Writing
++ CE = 6.3 Compulsory events
