@@ -1,3 +1,16 @@
+2019-04-23
+==========
+
+
+
+2019-04-22
+==========
+There have been several days spent on the report and then a few days of easter.
+
+I met Patrik on thg 16/4 with a okay draft. The final version was sent to NAD
+on early 18/4. Currently awaiting feedback.
+
+
 2019-04-12
 ==========
 I should be writing on the planning report all day today.
