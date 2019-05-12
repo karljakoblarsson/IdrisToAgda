@@ -8,11 +8,12 @@ import Agda.Syntax.Literal
 import Agda.Syntax.Common
 import Agda.Syntax.Fixity
 import Agda.Syntax.Notation
+import Idris.Parser
 
 name :: String -> Name
 name n = Name NoRange InScope [(Id n)]
 qname :: String -> QName
-qname n = QName $ name n
+qname n = QName $ Main.name n
 
 iden n = Ident $ qname n
 
