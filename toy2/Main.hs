@@ -9,6 +9,12 @@ import Agda.Syntax.Common
 import Agda.Syntax.Fixity
 import Agda.Syntax.Notation
 import Idris.Parser
+import Idris.AbsSyntax
+
+import Util.System (readSource)
+
+import Control.Monad.Trans.Except (runExceptT)
+import Control.Monad.Trans.State.Strict (execStateT, runStateT)
 
 name :: String -> Name
 name n = Name NoRange InScope [(Id n)]
@@ -50,6 +56,22 @@ mkFixity = Fixity' f not NoRange
 
 main = putStrLn $ prettyShow rapp
  
+loadIdr :: FilePath -> IO (Idris [PDecl])
+loadIdr f = do (file :: String) <- readSource f
+               print file
+               let syntax = defaultSyntax{
+                     syn_namespace = reverse ["testModule"],
+                     maxline = Nothing }
+               return $ parseProg syntax f file Nothing
+
+printIdr :: IO ()
+printIdr = do prog <- idr
+              let e = runStateT prog idrisInit
+              res <- runExceptT e
+              print $ show res
+  where idr = loadIdr "../simpleIdris.idr"
+
+
 modality :: Modality
 modality = Modality Relevant Quantity0
 
