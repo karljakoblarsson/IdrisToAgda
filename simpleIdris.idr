@@ -1,7 +1,7 @@
-module Main
+-- module Main
 
-main : IO ()
-main = putStrLn "Testing simple Idris"
+-- main : IO ()
+-- main = putStrLn "Testing simple Idris"
 
 
 
@@ -18,10 +18,11 @@ add : N -> N -> N
 add Z s = s
 add (Suc a) b = add a (Suc b)
 
+infixr 10 ::
 data Vec : N -> Type -> Type where
   Nil : Vec Z a
   (::) : a -> Vec n a -> Vec (Suc n) a
-  
+
 -- (::) : A -> Vec n A -> Vec (Suc n) A
 
 empt : Vec Z N

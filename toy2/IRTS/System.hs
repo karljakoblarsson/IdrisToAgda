@@ -16,7 +16,7 @@ module IRTS.System( getIdrisDataFileByName
                   , getIdrisJSRTSDir
                   , getIncFlags
                   , getEnvFlags
-                  {- , version -}
+                  , version
                   ) where
 
 {- #ifdef FREESTANDING -}
@@ -27,6 +27,7 @@ module IRTS.System( getIdrisDataFileByName
 {- #endif -}
 {- import BuildFlags_idris -}
 
+
 import Control.Applicative ((<$>))
 import Data.List.Split
 import Data.Maybe (fromMaybe)
@@ -34,6 +35,7 @@ import System.Environment
 import System.FilePath (addTrailingPathSeparator, dropTrailingPathSeparator,
                         (</>))
 
+version = undefined
 
 getIdrisDataDir :: IO String
 getIdrisDataDir = undefined --do

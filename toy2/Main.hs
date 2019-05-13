@@ -9,10 +9,13 @@ import Agda.Syntax.Common
 import Agda.Syntax.Fixity
 import Agda.Syntax.Notation
 import Idris.Parser
+import Idris.Parser.Stack
 import Idris.AbsSyntax
 
 import Util.System (readSource)
 
+import Data.List (intersperse)
+import Data.Foldable
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (execStateT, runStateT)
 
@@ -54,15 +57,29 @@ mkFixity = Fixity' f not NoRange
         rstring = Ranged NoRange "RawName"
         not = [IdPart rstring]
 
+-- TODO START HERE
+-- Read in the filename. Parse that file as Idris. Then run a dummy
+-- translationfunciton on it. Then print some Agda code
 main = putStrLn $ prettyShow rapp
  
 loadIdr :: FilePath -> IO (Idris [PDecl])
 loadIdr f = do (file :: String) <- readSource f
-               print file
-               let syntax = defaultSyntax{
-                     syn_namespace = reverse ["testModule"],
-                     maxline = Nothing }
+               putStrLn file
+               let syntax = defaultSyntax
                return $ parseProg syntax f file Nothing
+
+testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
+
+-- TODO START HERE
+-- This functions parses and prints the PDecls in simpleIdris.idr successfully!
+-- Now I need to make this robust and then its only to translate to the Agda AST.
+tp = do (file :: String) <- readSource f
+        let res = testParse file
+        case res of
+          Left err -> putStrLn $ prettyError err
+          Right pd -> putPDecls pd
+  where f = "../simpleIdris.idr"
+        putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 printIdr :: IO ()
 printIdr = do prog <- idr

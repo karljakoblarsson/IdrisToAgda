@@ -120,7 +120,7 @@ completeConsoleWidth = completeWord Nothing " \t" completeW
     where completeW = return . completeWith ["auto", "infinite", "80", "120"]
 
 isWhitespace :: Char -> Bool
-isWhitespace = (flip elem) " \t\n"
+isWhitespace = (flip elem) (" \t\n" :: String)
 
 lookupInHelp :: String -> Maybe CmdArg
 lookupInHelp cmd = lookupInHelp' cmd allHelp

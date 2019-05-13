@@ -29,7 +29,7 @@ import Idris.Imports (installedPackages)
 import Idris.Options (loggingCatsStr)
 import qualified IRTS.System as S
 
-import Version_idris (gitHash)
+-- import Version_idris (gitHash)
 
 import Data.Version
 import System.Directory
@@ -64,7 +64,7 @@ getIdrisCC = S.getCC
 
 getIdrisVersion = showVersion S.version ++ suffix
   where
-    suffix = if gitHash =="" then "" else "-" ++ gitHash
+    suffix = undefined -- if gitHash =="" then "" else "-" ++ gitHash
 
 getIdrisVersionNoGit = S.version
 

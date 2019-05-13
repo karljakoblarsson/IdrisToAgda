@@ -125,7 +125,7 @@ prove mode info opt ctxt lit n ty
          solveDeferred emptyFC n
          case idris_outputmode i of
            IdeMode n h ->
-             runIO . hPutStrLn h $ IdeMode.convSExp "return" (IdeMode.SymbolAtom "ok", "") n
+             runIO . hPutStrLn h $ IdeMode.convSExp "return" (IdeMode.SymbolAtom "ok", ("" :: String)) n
            _ -> return ()
 
 elabStep :: ElabState EState -> ElabD a -> Idris (a, ElabState EState)

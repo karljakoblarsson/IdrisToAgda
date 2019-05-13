@@ -101,7 +101,10 @@ import Util.DynamicLinker
 import Util.Net (listenOnLocalhost, listenOnLocalhostAnyPort)
 import Util.Pretty hiding ((</>))
 import Util.System
-import Version_idris (gitHash)
+-- import Version_idris (gitHash)
+
+gitHash :: String
+gitHash = undefined
 
 -- | Run the REPL
 repl :: IState -- ^ The initial state
@@ -310,8 +313,8 @@ runIdeModeCommand h id orig fn mods (IdeMode.Interpret cmd) =
                case idris_outputmode i of
                  IdeMode n h -> -- signal completion of proof to ide
                    runIO . hPutStrLn h $
-                     IdeMode.convSExp "return"
-                       (IdeMode.SymbolAtom "ok", "")
+                     IdeMode.convSExp ("return" :: String)
+                       (IdeMode.SymbolAtom "ok", ("" :: String))
                        n
                  _ -> return ())
            (\e -> do ist <- getIState
@@ -319,7 +322,7 @@ runIdeModeCommand h id orig fn mods (IdeMode.Interpret cmd) =
                      case idris_outputmode i of
                        IdeMode n h ->
                          runIO . hPutStrLn h $
-                           IdeMode.convSExp "abandon-proof" "Abandoned" n
+                           IdeMode.convSExp "abandon-proof" ("Abandoned" :: String) n
                        _ -> return ()
                      iRenderError $ pprintErr ist e)
        Right (Right cmd) -> idrisCatch
