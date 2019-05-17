@@ -668,7 +668,7 @@ data PDecl' t
    -- | FC is decl-level, for errors, and Strings represent the
    -- namespace
    | PRunElabDecl FC t [String]
- deriving (Functor, Generic)
+ deriving (Functor, Generic, Show)
 {-!
 deriving instance Binary PDecl'
 !-}
@@ -694,7 +694,7 @@ data Directive = DLib Codegen String
                | DFragile Name String
                | DAutoImplicits Bool
                | DUsed FC Name Name
-  deriving Generic
+  deriving (Generic, Show)
 
 -- | A set of instructions for things that need to happen in IState
 -- after a term elaboration when there's been reflected elaboration.
@@ -739,7 +739,7 @@ data PClause' t = PClause  FC Name t [t] t                    [PDecl' t] -- ^ A 
                 | PWith    FC Name t [t] t (Maybe (Name, FC)) [PDecl' t]
                 | PClauseR FC        [t] t                    [PDecl' t]
                 | PWithR   FC        [t] t (Maybe (Name, FC)) [PDecl' t]
-    deriving (Functor, Generic)
+    deriving (Functor, Generic, Show)
 {-!
 deriving instance Binary PClause'
 !-}
@@ -756,7 +756,7 @@ data PData' t  =
   | PLaterdecl { d_name    :: Name
                , d_name_fc :: FC
                , d_tcon    :: t
-  } deriving (Functor, Generic)
+  } deriving (Functor, Generic, Show)
 
 -- | Transform the FCs in a PData and its associated terms. The first
 -- function transforms the general-purpose FCs, and the second
@@ -1000,12 +1000,12 @@ data PTerm = PQuote Raw         -- ^ Inclusion of a core term into the
            | PConstSugar FC PTerm
              -- ^ A desugared constant. The FC is a precise source
              -- location that will be used to highlight it later.
-       deriving (Eq, Ord, Data, Typeable, Generic)
+       deriving (Eq, Ord, Data, Typeable, Generic, Show)
 
 data PAltType = ExactlyOne Bool -- ^ flag sets whether delay is allowed
               | FirstSuccess
               | TryImplicit
-       deriving (Eq, Ord, Data, Generic, Typeable)
+       deriving (Eq, Ord, Data, Generic, Typeable, Show)
 
 -- | Transform the FCs in a PTerm. The first function transforms the
 -- general-purpose FCs, and the second transforms those that are used
@@ -1169,7 +1169,7 @@ data PDo' t = DoExp  FC t
             | DoLet  FC RigCount Name FC t t   -- ^ second FC is precise name location
             | DoLetP FC t t [(t,t)]
             | DoRewrite FC t          -- rewrite in do block
-    deriving (Eq, Ord, Functor, Data, Generic, Typeable)
+    deriving (Eq, Ord, Functor, Data, Generic, Typeable, Show)
 {-!
 deriving instance Binary PDo'
 !-}
@@ -1600,17 +1600,17 @@ piBindp p ((n, ty):ns) t = PPi p n NoFC ty (piBindp p ns t)
 -- These "show" implementations render to an absurdly wide screen because inserted line breaks
 -- could interfere with interactive editing, which calls "show".
 
-instance Show PTerm where
-  showsPrec _ tm = (displayS . renderPretty 1.0 10000000 . prettyImp defaultPPOption) tm
+-- instance Show PTerm where
+--   showsPrec _ tm = (displayS . renderPretty 1.0 10000000 . prettyImp defaultPPOption) tm
 
-instance Show PDecl where
-  showsPrec _ d = (displayS . renderPretty 1.0 10000000 . showDeclImp verbosePPOption) d
+-- instance Show PDecl where
+--   showsPrec _ d = (displayS . renderPretty 1.0 10000000 . showDeclImp verbosePPOption) d
 
-instance Show PClause where
-  showsPrec _ c = (displayS . renderPretty 1.0 10000000 . showCImp verbosePPOption) c
+-- instance Show PClause where
+--   showsPrec _ c = (displayS . renderPretty 1.0 10000000 . showCImp verbosePPOption) c
 
-instance Show PData where
-  showsPrec _ d = (displayS . renderPretty 1.0 10000000 . showDImp defaultPPOption) d
+-- instance Show PData where
+--   showsPrec _ d = (displayS . renderPretty 1.0 10000000 . showDImp defaultPPOption) d
 
 instance Pretty PTerm OutputAnnotation where
   pretty = prettyImp defaultPPOption
