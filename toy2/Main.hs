@@ -19,10 +19,10 @@ import Data.Foldable
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (execStateT, runStateT)
 
-name :: String -> Name
-name n = Name NoRange InScope [(Id n)]
+mkName :: String -> Name
+mkName n = Name NoRange InScope [(Id n)]
 qname :: String -> QName
-qname n = QName $ Main.name n
+qname n = QName $ Main.mkName n
 
 iden n = Ident $ qname n
 
@@ -44,11 +44,42 @@ fundecl = FunClause lh rh wh test
         rh = RHS rapp
         wh = NoWhere
         test = True
+
+datadecl :: Declaration
+datadecl = Data range induc name lbBind expr typesigs
+  where range = NoRange
+        induc = Inductive -- Inductive | CoInductive
+        name = Main.mkName "DataTest"
+        lbBind = [
+          DomainFull (TBind NoRange [] (lit 333))
+                 ]
+        expr = Set NoRange
+        typesigs = [
+          typesig "Z" (iden "N")
+          , typesig "suc" $ funcExpr "N" (iden "N")
+                   ] -- [Declaration]
+-- -- data N = Z | Suc N
+-- data N : Set where
+--   Z : N
+--   suc : N -> N
+
+-- type LamBinding = LamBinding' TypedBinding
+-- data LamBinding' a
+--   = DomainFree (NamedArg BoundName) -- ^ . @x@ or @{x}@ or @.x@ or @.{x}@ or @{.x}@
+--   | DomainFull a                    -- ^ . @(xs : e)@ or @{xs : e}@
+
+-- type TypedBinding = TypedBinding' Expr
+-- data TypedBinding' e
+--   = TBind Range [NamedArg BoundName] e  -- ^ Binding @(x1 ... xn : A)@.
+--   | TLet  Range [Declaration]           -- ^ Let binding @(let Ds)@ or @(open M args)@.
+
+--   | Data        Range Induction Name [LamBinding] Expr [TypeSignatureOrInstanceBlock]
+a = prettyShow datadecl
  
 pie :: Expr
-pie = Pi tl (Ident id1)
+pie = undefined -- Pi tl (Ident id1)
   -- where tl = [TBind NoRange [arg "ArgName" (mkBoundName (name "Hej") mkFixity)] (lit 13)]
-  where tl = [TLet NoRange [typesig]]
+  -- where tl = [TLet NoRange [typesig]]
 --   | TLet  Range [Declaration]           -- ^ Let binding @(let Ds)@ or @(open M args)@.
 
 mkFixity :: Fixity'
@@ -59,8 +90,8 @@ mkFixity = Fixity' f not NoRange
 
 -- TODO START HERE
 -- Read in the filename. Parse that file as Idris. Then run a dummy
--- translationfunciton on it. Then print some Agda code
-main = putStrLn $ prettyShow rapp
+-- translation funciton on it. Then print some Agda code. Then write to file
+main = tp
  
 loadIdr :: FilePath -> IO (Idris [PDecl])
 loadIdr f = do (file :: String) <- readSource f
@@ -96,11 +127,21 @@ arg :: String -> a -> NamedArg a
 arg name expr = Arg (ArgInfo NotHidden modality UserWritten UnknownFVs) $
   Named (Just (Ranged NoRange name)) expr
 
-typesig :: TypeSignature
-typesig = TypeSig argInfo name expr
+funcExpr :: String -> Expr -> Expr
+funcExpr name body = Fun NoRange (Arg argInfo (iden name)) body
+  where argInfo = (ArgInfo NotHidden modality UserWritten UnknownFVs)
+
+typesig :: String -> Expr -> TypeSignature
+typesig name body = TypeSig argInfo n body
   where argInfo = ArgInfo NotHidden modality UserWritten UnknownFVs
-        name = Name NoRange InScope [(Id "addOne")]
-        expr = pie
+        n = mkName name
+        expr = funcExpr "argTest" (iden "FunctionTest")
+
+s = prettyShow  $ typesig "addOne" $ funcExpr "argTest" (iden "FunctionTest")
+--   | Fun Range (Arg Expr) Expr                  -- ^ ex: @e -> e@ or @.e -> e@ (NYI: @{e} -> e@)
+
+--   | Lam Range [LamBinding] Expr                -- ^ ex: @\\x {y} -> e@ or @\\(x:A){y:B} -> e@
+  -- Makes a lambda function. Not what I want.
         
 -- data Pattern
 --   = IdentP QName                           -- ^ @c@ or @x@
