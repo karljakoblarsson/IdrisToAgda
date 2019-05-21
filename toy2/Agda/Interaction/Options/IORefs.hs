@@ -15,4 +15,5 @@ data UnicodeOrAscii = UnicodeOk | AsciiOnly
 
 {-# NOINLINE unicodeOrAscii #-}
 unicodeOrAscii :: IORef UnicodeOrAscii
-unicodeOrAscii = UNSAFE.unsafePerformIO $ newIORef UnicodeOk
+-- unicodeOrAscii = UNSAFE.unsafePerformIO $ newIORef UnicodeOk
+unicodeOrAscii = UNSAFE.unsafePerformIO $ newIORef AsciiOnly
