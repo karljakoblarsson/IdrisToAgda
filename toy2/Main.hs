@@ -47,34 +47,28 @@ fundecl = FunClause lh rh wh test
         wh = NoWhere
         test = True
 
--- PData
---   (DocString
---     (Options {sanitize = True,
---               allowRawHtml = False,
---               preserveHardBreaks = True,
---               debug = False})
---     (fromList []))
---   []
---   syntaxInfo
---   (test):1:6
---   []
---   (PDatadecl {d_name = N,
---               d_name_fc = (test):1:6,
---               d_tcon = PType (test):1:6,
---               d_cons = [(DocString (Options {sanitize = True,
---                                              allowRawHtml = False,
---                                              preserveHardBreaks = True,
---                                              debug = False})
---                                    (fromList []) , [] ,Z ,(test):1:10,PRef (test):1:6 [] N ,(test):1:10 ,[]),
---                         (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []),[],Suc,(test):1:14-16,PPi (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW}) {_t_0} No location (PRef (test):1:18 [(test):1:18] N) (PRef (test):1:6 [] N),(test):1:14-18,[])
---                        ]})
-    -- PDatadecl { d_name    :: Name -- ^ The name of the datatype
-    --           , d_name_fc :: FC   -- ^ The precise location of the type constructor name
-    --           , d_tcon    :: t    -- ^ Type constructor
-    --           , d_cons    :: [(Docstring (Either Err PTerm), [(Name, Docstring (Either Err PTerm))], Name, FC, t, FC, [Name])] -- ^ Constructors
+-- PData (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList [])) [] syntaxInfo (test):1:6 [] (PDatadecl {d_name = N, d_name_fc = (test):1:6, d_tcon = PType (test):1:6, d_cons = [(DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []) , [] ,Z ,(test):1:10,PRef (test):1:6 [] N ,(test):1:10 ,[]), (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []),[],Suc,(test):1:14-16,PPi (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW}) {_t_0} No location (PRef (test):1:18 [(test):1:18] N) (PRef (test):1:6 [] N),(test):1:14-18,[])]})
 
--- PTy (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList [])) [] (Syn {using = [], syn_params = [], syn_namespace = [], no_imp = [], imp_methods = [], decoration = <<fn>>, inPattern = False, implicitAllowed = False, constraintAllowed = False, maxline = Nothing, mut_nesting = 0, dsl_info = DSL {dsl_bind = PRef (builtin) [] >>=, dsl_apply = PRef (builtin) [] <*>, dsl_pure = PRef (builtin) [] pure, dsl_var = Nothing, index_first = Nothing, index_next = Nothing, dsl_lambda = Nothing, dsl_let = Nothing, dsl_pi = Nothing}, syn_in_quasiquote = 0, syn_toplevel = True, withAppAllowed = True}) (test):3:5 [] one (test):3:1-3 (PRef (test):3:7 [(test):3:7] N)
--- PClauses (test):4:1-11 [] {__2} [PClause (test):4:7-11 one (PApp (test):4:1-3 (PRef (test):4:1-3 [(test):4:1-3] one) []) [] (PApp (test):4:7-11 (PRef (test):4:7-9 [(test):4:7-9] Suc) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef (test):4:11 [(test):4:11] Z}]) []]
+-- PTy (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []))
+--     []
+--     (Syn {using = [], syn_params = [], syn_namespace = [], no_imp = [], imp_methods = [], decoration = <<fn>>, inPattern = False, implicitAllowed = False, constraintAllowed = False, maxline = Nothing, mut_nesting = 0, dsl_info = DSL {dsl_bind = PRef (builtin) [] >>=, dsl_apply = PRef (builtin) [] <*>, dsl_pure = PRef (builtin) [] pure, dsl_var = Nothing, index_first = Nothing, index_next = Nothing, dsl_lambda = Nothing, dsl_let = Nothing, dsl_pi = Nothing}, syn_in_quasiquote = 0, syn_toplevel = True, withAppAllowed = True})
+--     (test):3:5
+--     []
+--     one
+--     (test):3:1-3
+--     (PRef (test):3:7 [(test):3:7] N)
+
+-- PTy
+--   (Docstring (Either Err PTerm))
+--   [(Name, Docstring (Either Err PTerm))]
+--   SyntaxInfo
+--   FC
+--   FnOpts
+--   Name
+--   FC
+--   PTerm
+
+-- PClauses FC FnOpts Name [PClause' t]
 
 itaDecl :: PDecl -> Declaration
 itaDecl (PData doc names synInfo range types
@@ -91,7 +85,108 @@ itaDecl (PData doc names synInfo range types
           typesig "Z" (iden "N")
           , typesig "suc" $ funcExpr "N" (iden "N")
                    ] -- [Declaration]
+itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
+  typesig (Main.prettyName nameIdr) (itaTerm terms)
+itaDecl (PClauses range fnopts name clauses) = -- Pattern clause
+  itaClauses clauses
+itaDecl (PFix fc fixIdr strings) = Infix fixAgda (map Main.mkName strings)
+  where fixAgda = itaFixity fixIdr
 itaDecl _ = undefined
+
+itaFixity :: Idris.AbsSyntax.Fixity -> Agda.Syntax.Fixity.Fixity
+itaFixity (Infixl prec) = Fixity NoRange (Related (toInteger prec)) LeftAssoc
+itaFixity (Infixr prec) = Fixity NoRange (Related (toInteger prec)) RightAssoc
+itaFixity (InfixN prec) = Fixity NoRange (Related (toInteger prec)) NonAssoc
+itaFixity (PrefixN prec) = undefined -- I don't know that this is.
+
+itaClauses :: [PClause] -> Declaration
+itaClauses clauses = case length clauses of
+  1 -> itaClause $ head clauses -- Safe because of the case stmt.
+  _ -> undefined -- I don't know when this case happen. But it's not common.
+
+  -- TODO START HERE The pattern and equals sign is not int the correct order
+itaClause :: PClause -> Declaration
+itaClause (PClause fc name whole with rhsIdr whrIdr) =
+    FunClause lhs rhs whr bool
+  where lhs = LHS ptn rewriteExpr withExpr
+        rhs = RHS rhsexp -- Can also be 'AbsurdRHS'
+        whr = NoWhere -- Can also be 'AnyWhere [Decls]'
+        bool = False
+        rhsexp = itaTerm rhsIdr
+  -- TODO This does not work for general patterns
+  -- But I talked about skipping dependent patterns in the planning report.
+  -- TODO Research Problem
+  -- The LHS in Agda is represented as a 'Pattern'-type while it's a simple
+  -- 'PTerm' in Idris. It's not obvious how to convert betwen them.
+  -- TODO This is wrong. The LHS pattern is much more complex than just a name
+        ptn = IdentP $ qname $ Main.prettyName name
+        rewriteExpr = []
+        withExpr = []
+
+pat :: Declaration
+pat = FunClause lhs rhs whr bool
+  where lhs = LHS ptn rewriteExpr withExpr
+        rhs = RHS rhsexp -- Can also be 'AbsurdRHS'
+        whr = NoWhere -- Can also be 'AnyWhere [Decls]'
+        bool = True
+        rhsexp = application "test" [iden "id1", iden "id2"]
+        ptn = IdentP $ qname "abc"
+        rewriteExpr = []
+        withExpr = []
+
+application :: String -> [Expr] -> Expr
+application name args = RawApp NoRange ((iden name) : args)
+
+--  One clause of a top-level definition. Term arguments to constructors are:
+-- 1. The whole application (missing for PClauseR and PWithR because they're within a "with" clause)
+-- 2. The list of extra 'with' patterns
+-- 3. The right-hand side
+-- 4. The where block (PDecl' t)
+-- data PClause' t = PClause  FC Name t [t] t                    [PDecl' t] -- ^ A normal top-level definition.
+--                 | PWith    FC Name t [t] t (Maybe (Name, FC)) [PDecl' t]
+--                 | PClauseR FC        [t] t                    [PDecl' t]
+--                 | PWithR   FC        [t] t (Maybe (Name, FC)) [PDecl' t]
+
+itaTerm :: PTerm -> Expr
+itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
+itaTerm (PApp range fst args) = RawApp NoRange ((itaTerm fst) : (map itaArgs args))
+itaTerm (PPi plicity name fc term1 term2) =
+  Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
+  where argInfo = (ArgInfo NotHidden modality UserWritten UnknownFVs)
+itaTerm (PConstSugar fc term) = itaTerm term
+itaTerm (PConstant fc const) = Lit (itaConst const)
+itaTerm (PAlternative namePair alttype terms) = case length terms of
+  1 -> itaTerm $ head terms -- Safe because of case stmt.
+  0 -> undefined
+  _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
+itaTerm _ = undefined
+
+itaConst :: TT.Const -> Literal
+itaConst (TT.I int) = LitNat NoRange (toInteger int)
+itaConst (TT.BI integer) = LitNat NoRange integer
+itaConst (TT.Fl double) = LitFloat NoRange double
+itaConst (TT.Ch char) = LitChar NoRange char
+itaConst (TT.Str string) = LitString NoRange string
+itaConst (TT.B8 word8) = undefined
+itaConst (TT.B16 word16) = undefined
+itaConst (TT.B32 word32) = undefined
+itaConst (TT.B64 word64) = undefined
+itaConst (TT.AType arithty) = undefined
+itaConst TT.StrType = undefined
+itaConst TT.WorldType = undefined
+itaConst TT.TheWorld = undefined
+itaConst TT.VoidType = undefined
+itaConst TT.Forgot = undefined
+
+itaName :: TT.Name -> Name
+itaName n = Main.mkName $ Main.prettyName n
+-- TODO This is not strictly correct. But for 'RawApp' which only take Exprs as
+-- args it's okay
+-- type PArg = PArg' PTerm
+-- getTm :: PTerm
+itaArgs :: PArg -> Expr
+itaArgs (PExp prio argopts pname getTm) = itaTerm getTm
+itaArgs _ = undefined
 
 addComment = (++)
   -- There is also AbsStyntaxTree.prettyName but it's harder to use.
@@ -128,29 +223,9 @@ datadecl = Data range induc name lbBind expr typesigs
                    ] -- [Declaration]
 
 
--- -- data N = Z | Suc N
--- data N : Set where
---   Z : N
---   suc : N -> N
-
--- type LamBinding = LamBinding' TypedBinding
--- data LamBinding' a
---   = DomainFree (NamedArg BoundName) -- ^ . @x@ or @{x}@ or @.x@ or @.{x}@ or @{.x}@
---   | DomainFull a                    -- ^ . @(xs : e)@ or @{xs : e}@
-
--- type TypedBinding = TypedBinding' Expr
--- data TypedBinding' e
---   = TBind Range [NamedArg BoundName] e  -- ^ Binding @(x1 ... xn : A)@.
---   | TLet  Range [Declaration]           -- ^ Let binding @(let Ds)@ or @(open M args)@.
-
---   | Data        Range Induction Name [LamBinding] Expr [TypeSignatureOrInstanceBlock]
 a = putStrLn $ prettyShow datadecl
- 
-pie :: Expr
-pie = undefined -- Pi tl (Ident id1)
-  -- where tl = [TBind NoRange [arg "ArgName" (mkBoundName (name "Hej") mkFixity)] (lit 13)]
-  -- where tl = [TLet NoRange [typesig]]
---   | TLet  Range [Declaration]           -- ^ Let binding @(let Ds)@ or @(open M args)@.
+
+agda d = putStrLn $ prettyShow d
 
 mkFixity :: Fixity'
 mkFixity = Fixity' f not NoRange
@@ -178,10 +253,11 @@ tp = do (file :: String) <- readSource f
         let res = testParse file
         case res of
           Left err -> putStrLn $ prettyError err
-          Right pd -> putStrLn $ prettyShow $ itaDecl $ head pd
+          Right pd -> putStrLn $ prettyShow $ map itaDecl pd
+          -- Right pd -> putStrLn $ prettyShow $ itaDecl $ head pd
           -- Right pd -> putPDecls pd
   -- where f = "../simpleIdris.idr"
-  where f = "../idrisData.idr"
+  where f = "../simpleIdris.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 printIdr :: IO ()
