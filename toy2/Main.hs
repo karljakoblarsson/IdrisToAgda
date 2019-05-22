@@ -34,22 +34,6 @@ iden n = Ident $ qname n
 lit :: Integer -> Expr
 lit i = Lit $ LitNat NoRange i
 
-id1 :: QName
-id1 = QName $ Name NoRange InScope [(Id "id1")]
-id2 :: QName
-id2 = QName $ Name NoRange InScope [(Id "id2")]
-id3 :: QName
-id3 = QName $ Name NoRange InScope [(Id "id3")]
-
-rapp = RawApp NoRange [(Ident id1), (Ident id2), Lit $ LitNat NoRange 123]
-
-fundecl :: Declaration
-fundecl = FunClause lh rh wh test
-  where lh = LHS (IdentP id3) [] []
-        rh = RHS rapp
-        wh = NoWhere
-        test = True
-
 itaDecl :: PDecl -> Declaration
 itaDecl (PData doc names synInfo range types
           (PDatadecl nameIdr _ typeconstructor dataconstructors)) =
@@ -73,6 +57,7 @@ itaDecl (PFix fc fixIdr strings) = Infix fixAgda (map Main.mkName strings)
   where fixAgda = itaFixity fixIdr
 itaDecl _ = undefined
 
+-- TODO Proporly display infix operators in the Agda AST.
 itaFixity :: Idris.AbsSyntax.Fixity -> Agda.Syntax.Fixity.Fixity
 itaFixity (Infixl prec) = Fixity NoRange (Related (toInteger prec)) LeftAssoc
 itaFixity (Infixr prec) = Fixity NoRange (Related (toInteger prec)) RightAssoc
@@ -92,9 +77,9 @@ itaClause (PClause fc name whole with rhsIdr whrIdr) =
         whr = NoWhere -- Can also be 'AnyWhere [Decls]'
         bool = False
         rhsexp = itaTerm rhsIdr
-  -- TODO This does not work for general patterns
-  -- But I talked about skipping dependent patterns in the planning report.
   -- TODO Research Problem
+  -- This does not work for general patterns
+  -- But I talked about skipping dependent patterns in the planning report.
   -- The LHS in Agda is represented as a 'Pattern'-type while it's a simple
   -- 'PTerm' in Idris. It's not obvious how to convert betwen them.
         ptn = itaPattern whole
@@ -110,34 +95,15 @@ itaArgsToTerm :: PArg -> PTerm
 itaArgsToTerm (PExp prio argopts pname getTm) = getTm
 itaArgsToTerm _ = undefined
 
--- itaTerm :: PTerm -> Expr
--- itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
--- itaTerm (PApp range fst args) = RawApp NoRange ((itaTerm fst) : (map itaArgs args))
-
-pat :: Declaration
-pat = FunClause lhs rhs whr bool
-  where lhs = LHS ptn rewriteExpr withExpr
-        rhs = RHS rhsexp -- Can also be 'AbsurdRHS'
-        whr = NoWhere -- Can also be 'AnyWhere [Decls]'
-        bool = True
-        rhsexp = application "test" [iden "id1", iden "id2"]
-        ptn = IdentP $ qname "abc"
-        rewriteExpr = []
-        withExpr = []
-
 application :: String -> [Expr] -> Expr
 application name args = RawApp NoRange ((iden name) : args)
 
---  One clause of a top-level definition. Term arguments to constructors are:
--- 1. The whole application (missing for PClauseR and PWithR because they're within a "with" clause)
--- 2. The list of extra 'with' patterns
--- 3. The right-hand side
--- 4. The where block (PDecl' t)
--- data PClause' t = PClause  FC Name t [t] t                    [PDecl' t] -- ^ A normal top-level definition.
---                 | PWith    FC Name t [t] t (Maybe (Name, FC)) [PDecl' t]
---                 | PClauseR FC        [t] t                    [PDecl' t]
---                 | PWithR   FC        [t] t (Maybe (Name, FC)) [PDecl' t]
-
+-- TODO START HERE
+-- Parenthesis are explicit in the concrete Agda AST but are not represented in
+-- the Idris PDecl lang. So that information is lost. I need to reconstruct that
+-- somehow to get the output to typecheck. It is certainly possible to do with a
+-- post-processing pass. But the output won't match the input. And how hard is
+-- it to do correctly?
 itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
 itaTerm (PApp range fst args) = RawApp NoRange ((itaTerm fst) : (map itaArgs args))
@@ -173,8 +139,7 @@ itaName :: TT.Name -> Name
 itaName n = Main.mkName $ Main.prettyName n
 -- TODO This is not strictly correct. But for 'RawApp' which only take Exprs as
 -- args it's okay
--- type PArg = PArg' PTerm
--- getTm :: PTerm
+-- type PArg = PArg' PTerm -- getTm :: PTerm
 itaArgs :: PArg -> Expr
 itaArgs (PExp prio argopts pname getTm) = itaTerm getTm
 itaArgs _ = undefined
