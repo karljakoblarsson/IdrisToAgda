@@ -1,16 +1,38 @@
+* Notes 2019-05-23
+TODO: Priortering: uttrycksspråket
+TODO: hur kan lämpliga Idris-funktioner fylla på med exempelvis dolda arg.?
+TODO: statistikverktyg
+TODO: "Explicit" hidden arguments
+TODO: hur kan man enkelt "komma runt" nedanstående begränsningar? Kan Agda ge hjälp?
+
+IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr
+
+Senare: datatyper med parametrar och index
+  -- how frequent?
+
+Senare: not even declared hidden arguments
+  -- how frequent?
+
+IdrisLibs/SequentialDecisionProblems/examples/Example1.lidr (and friends)
+
+Agda:
+id : {A : Set} -> A -> A
+id {A} x = x
+
+
 * Time plan
 (from the planning report + later additions)
 ** DONE 2019-04-18; WR; Planning report.
-** TODO 2019-04-26; A;  Book supervision meetings
-** TODO 2019-04-29; TW; First runnable implementation of STLC.
-** TODO 2019-05-05; TW; First runnable Dependent types example.
-** TODO 2019-05-10; CE; Industry and career advancement seminar
-** TODO 2019-05-19; TW; Decide verification method.
-** TODO 2019-05-19; WR; Incorporate planning report suggestions into half-time report
-** TODO 2019-05-19; WR; Content complete draft of half-time report.
-** TODO 2019-05-31; WR; Final draft of half-time report to supervisor.
-** TODO 2019-06-06; WR; Half-time report done.
-** TODO 2019-06-07; WR; Half-time presentation.
+** DONE 2019-04-26; A;  Book supervision meetings
+** DONE 2019-04-29; TW; First runnable implementation of STLC.
+** TODO 2019-05-05; TW; First runnable Dependent types example. (without hidden arg.)
+** DONE 2019-05-10; CE; Industry and career advancement seminar
+** TODO 2019-06-01; TW; Decide verification method.
+** DONE 2019-05-19; WR; Incorporate planning report suggestions into half-time report
+** TODO 2019-06-10; WR; Half-time presentation.
+** TODO 2019-06-19; WR; Content complete draft of half-time report.
+** TODO 2019-06-22; WR; Final draft of half-time report to supervisor.
+** TODO 2019-06-30; WR; Half-time report done.
 ** TODO 2019-09-08; TW; Implementation of Implicit arguments done.
 ** TODO 2019-09-08; WR; Content complete draft of Background in Final report.
 ** TODO 2019-09-22; TW; Final implementation version.
