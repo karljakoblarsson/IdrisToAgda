@@ -11,6 +11,7 @@ import Agda.Syntax.Notation
 import Idris.Parser
 import Idris.Parser.Stack
 import Idris.AbsSyntax
+import Idris.Docstrings
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
@@ -34,30 +35,64 @@ iden n = Ident $ qname n
 lit :: Integer -> Expr
 lit i = Lit $ LitNat NoRange i
 
+-- TODO START HERE
+-- Try to handle implict/explict arguments. The whole '{a : Set}' thing.
+
+-- The '{a : A}' is a definition of a implicit function space.
+-- To give an implicit argument explicit to a function, enclose it in brackets.
+
+-- There seems to be no information in the Idris AST about implicit
+-- arguments. Which probably is to be expected at this stage before type
+-- checking. Do I need to run elaboration/typechecking before being able to
+-- generate correct Agda? Agda is much more demanding about these things.
+
+-- TODO Handle parameterized Datatypes. 
+-- TODO Handle indexed Datatypes. 
+-- The parameters are required to be the same for all constructors, but indices
+-- vary. In 'data Vector (A : Set) : Nat → Set where', 'A' is parameter and
+-- 'Nat' a index. Parameters are bound once for all constructors, indices are
+-- bound locally for each constructor. (In Agda)
+
+-- Idris doesn't syntactically differentiate between indices and parameters,
+-- while Agda does. I wonder when Idris computes that information? Because I
+-- need that to generate correct Agda.
+
+-- Instance arguments, is another thing I don't know well. They are solved by a
+-- special instance resolution algorithm. Normal implicit arguments are solved
+-- by unification. Instance arguments are similar to Haskell's type class
+-- constraints. They are enclodsed in double brackets '{{ a : Show }}'
 itaDecl :: PDecl -> Declaration
+-- TODO Add the Agda {a : Set} argument declaration
 itaDecl (PData doc names synInfo range types
           (PDatadecl nameIdr _ typeconstructor dataconstructors)) =
     Data range induc name lbBind expr typesigs
   where range = NoRange
         induc = Inductive -- Inductive | CoInductive
-        name = Main.mkName $ Main.prettyName $ nameIdr
+        name = itaName nameIdr
         lbBind = [
-          DomainFull (TBind NoRange [] (lit 333))
+          DomainFull (TBind NoRange [] (lit 333)) -- TODO This is not correct.
                  ]
-        expr = Set NoRange
-        typesigs = [
-          typesig "Z" (iden "N")
-          , typesig "suc" $ funcExpr "N" (iden "N")
-                   ] -- [Declaration]
+        expr = itaTerm typeconstructor
+        typesigs = map itaDC dataconstructors
 itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
-  typesig (Main.prettyName nameIdr) (itaTerm terms)
+  typesig (itaName nameIdr) (itaTerm terms)
 itaDecl (PClauses range fnopts name clauses) = -- Pattern clause
   itaClauses clauses
 itaDecl (PFix fc fixIdr strings) = Infix fixAgda (map Main.mkName strings)
   where fixAgda = itaFixity fixIdr
 itaDecl _ = undefined
 
--- TODO Proporly display infix operators in the Agda AST.
+-- | Translate Data Constructors
+itaDC :: ( Docstring (Either TT.Err PTerm)
+         , [(TT.Name, Docstring (Either TT.Err PTerm))]
+         , TT.Name
+         , TT.FC
+         , PTerm
+         , TT.FC
+         , [TT.Name]) -> TypeSignature
+itaDC (doc, _, name, fc1, body, fc2, _) = typesig (itaName name) (itaTerm body)
+
+-- TODO Properly display infix operators in the Agda AST.
 itaFixity :: Idris.AbsSyntax.Fixity -> Agda.Syntax.Fixity.Fixity
 itaFixity (Infixl prec) = Fixity NoRange (Related (toInteger prec)) LeftAssoc
 itaFixity (Infixr prec) = Fixity NoRange (Related (toInteger prec)) RightAssoc
@@ -88,8 +123,9 @@ itaClause (PClause fc name whole with rhsIdr whrIdr) =
 
 itaPattern :: PTerm -> Pattern
 itaPattern (PRef _ _ name) = IdentP $ qname $ Main.prettyName name
+-- With the simple parenthesis hack. This should be done correctly soon.
 itaPattern (PApp range fst args) =
-  RawAppP NoRange ((itaPattern fst) : (map (itaPattern . itaArgsToTerm) args))
+  ParenP NoRange (RawAppP NoRange ((itaPattern fst) : (map (itaPattern . itaArgsToTerm) args)))
 
 itaArgsToTerm :: PArg -> PTerm
 itaArgsToTerm (PExp prio argopts pname getTm) = getTm
@@ -98,25 +134,39 @@ itaArgsToTerm _ = undefined
 application :: String -> [Expr] -> Expr
 application name args = RawApp NoRange ((iden name) : args)
 
--- TODO START HERE
+paren :: Expr -> Expr
+paren e = Paren NoRange e
 -- Parenthesis are explicit in the concrete Agda AST but are not represented in
 -- the Idris PDecl lang. So that information is lost. I need to reconstruct that
 -- somehow to get the output to typecheck. It is certainly possible to do with a
 -- post-processing pass. But the output won't match the input. And how hard is
 -- it to do correctly?
+-- Right now there is this ugly hack.
+
 itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
-itaTerm (PApp range fst args) = RawApp NoRange ((itaTerm fst) : (map itaArgs args))
+itaTerm whole@(PApp range fst args) = itaFI whole
 itaTerm (PPi plicity name fc term1 term2) =
   Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
-  where argInfo = (ArgInfo NotHidden modality UserWritten UnknownFVs)
+  where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
 itaTerm (PConstSugar fc term) = itaTerm term
 itaTerm (PConstant fc const) = Lit (itaConst const)
 itaTerm (PAlternative namePair alttype terms) = case length terms of
   1 -> itaTerm $ head terms -- Safe because of case stmt.
   0 -> undefined
   _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
+itaTerm (PType fc) = iden "Set"
 itaTerm _ = undefined
+
+-- Hack for 'fromInteger'
+-- Deep pattern matching is bad form. But this is a ugly hack any way.
+-- This seems to work but is ugly. Should be done in a pre-processing step to
+-- remove all Idris quirks.
+itaFI :: PTerm -> Expr
+itaFI (PApp range fst@(PRef _ _ name) args) =
+  if (Main.prettyName name) == "fromInteger"
+  then head $ (map itaArgs args)
+  else paren $ RawApp NoRange ((itaTerm fst) : (map itaArgs args))
 
 itaConst :: TT.Const -> Literal
 itaConst (TT.I int) = LitNat NoRange (toInteger int)
@@ -164,23 +214,6 @@ prettySN (TT.MethodN a) = "MethodN"
 prettySN (TT.CaseN a b) = "CaseN"
 prettySN (TT.ImplementationCtorN a) = "ImplementationCtorN"
 prettySN (TT.MetaN a b) = "MetaN"
-
-datadecl :: Declaration
-datadecl = Data range induc name lbBind expr typesigs
-  where range = NoRange
-        induc = Inductive -- Inductive | CoInductive
-        name = Main.mkName "DataTest"
-        lbBind = [
-          DomainFull (TBind NoRange [] (lit 333))
-                 ]
-        expr = Set NoRange
-        typesigs = [
-          typesig "Z" (iden "N")
-          , typesig "suc" $ funcExpr "N" (iden "N")
-                   ] -- [Declaration]
-
-
-a = putStrLn $ prettyShow datadecl
 
 agda d = putStrLn $ prettyShow d
 
@@ -256,8 +289,7 @@ funcExpr :: String -> Expr -> Expr
 funcExpr name body = Fun NoRange (Arg argInfo (iden name)) body
   where argInfo = (ArgInfo NotHidden modality UserWritten UnknownFVs)
 
-typesig :: String -> Expr -> TypeSignature
-typesig name body = TypeSig argInfo n body
+typesig :: Name -> Expr -> TypeSignature
+typesig name body = TypeSig argInfo name body
   where argInfo = ArgInfo NotHidden modality UserWritten UnknownFVs
-        n = mkName name
         expr = funcExpr "argTest" (iden "FunctionTest")
