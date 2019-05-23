@@ -1,42 +1,43 @@
 -- module Main
 
--- main : IO ()
--- main = putStrLn "Testing simple Idris"
-
-
-
-data N = Z | Suc N
+data N = Zero | Suc N
   
-one : N
-one = Suc Z
-
 addOne : N -> N
-addOne Z = Suc Z
+addOne Zero = Suc Zero
 addOne (Suc n) = Suc (Suc n)
 
+One : N
+One = Suc Zero
+Two : N
+Two = (Suc (Suc Zero))
+Three : N
+Three = addOne Two
+Four : N
+Four = addOne Three
+Five : N
+Five = addOne Four
+
+
 add : N -> N -> N
-add Z s = s
+add Zero s = s
 add (Suc a) b = add a (Suc b)
 
-infixr 10 ::
-data Vec : N -> Type -> Type where
-  Nil : Vec Z a
-  (::) : a -> Vec n a -> Vec (Suc n) a
+data Vec : Type -> N -> Type where
+  Nil : Vec a Zero
+  Cons : a -> Vec a n -> Vec a (Suc n)
 
--- (::) : A -> Vec n A -> Vec (Suc n) A
-
-empt : Vec Z N
+empt : Vec N Zero
 empt = Nil
 
-test : Vec (Suc Main.one) Nat
-test = 1 :: 2 :: Nil
+test : Vec N Two
+test = Cons One (Cons Two Nil)
 
-test2 : Vec (Suc (Suc Main.one)) Nat
-test2 = 3 :: 4 :: 5 :: Nil
+test2 : Vec N Three
+test2 = Cons Three (Cons Four (Cons Five Nil))
 
-concat : Vec a g -> Vec b g -> Vec (add a b) g
+concat : Vec g a -> Vec g b -> Vec g (add a b)
 concat Nil rest = rest
-concat (a :: rest) b = concat rest (a :: b)
+concat (Cons a rest) b = concat rest (Cons a b)
 
-t3 : Vec (addOne $ addOne $ addOne $ addOne Main.one) Nat
+t3 : Vec N (addOne (addOne (addOne (addOne One))))
 t3 = concat test test2
