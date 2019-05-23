@@ -156,6 +156,7 @@ itaTerm (PAlternative namePair alttype terms) = case length terms of
   0 -> undefined
   _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
 itaTerm (PType fc) = iden "Set"
+itaTerm (PIfThenElse fc ift thent elset) = undefined
 itaTerm _ = undefined
 
 -- Hack for 'fromInteger'
