@@ -1,5 +1,6 @@
 *.ibc
 *.o
+*.agdai
 
 *.aux
 *.pdf
