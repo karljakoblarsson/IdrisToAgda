@@ -204,7 +204,3 @@ executable ita
                  Util.DynamicLinker
                  Util.ScreenSize
                  Util.System
-
-
-                    -- Lexer
-                    -- Parser

@@ -18,7 +18,6 @@ import Util.System (readSource)
 
 import Data.List (intersperse)
 import qualified Data.Text as Text
-import Data.Foldable
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (execStateT, runStateT)
 
@@ -157,6 +156,7 @@ itaTerm (PAlternative namePair alttype terms) = case length terms of
   _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
 itaTerm (PType fc) = iden "Set"
 itaTerm (PIfThenElse fc ift thent elset) = undefined
+itaTerm (PPair fc fcs puninfo termA termB) = undefined
 itaTerm _ = undefined
 
 -- Hack for 'fromInteger'
@@ -188,6 +188,7 @@ itaConst TT.Forgot = undefined
 
 itaName :: TT.Name -> Name
 itaName n = Main.mkName $ Main.prettyName n
+
 -- TODO This is not strictly correct. But for 'RawApp' which only take Exprs as
 -- args it's okay
 -- type PArg = PArg' PTerm -- getTm :: PTerm
@@ -224,17 +225,16 @@ mkFixity = Fixity' f not NoRange
         rstring = Ranged NoRange "RawName"
         not = [IdPart rstring]
 
--- TODO START HERE
--- Read in the filename. Parse that file as Idris. Then run a dummy
--- translation funciton on it. Then print some Agda code. Then write to file
-main :: IO ()
-main = getArgs >>= parse
 
+main :: IO ()
+main = getArgs >>= parse >>= runITA
+
+parse :: [String] -> IO (FilePath, Maybe FilePath)
 parse ["-h"] = usage >> exit
 parse ["-v"] = version >> exit
 parse [] = usage >> exit
-parse ["-o", outfile, infile] = runITA infile (Just outfile)
-parse [infile] = runITA infile Nothing
+parse ["-o", outfile, infile] = return (infile, Just outfile)
+parse [infile] = return (infile, Nothing)
 
 usage = putStrLn "Usage: ita [-vh] [-o outfile.agda] [infile.idr]"
 version = putStrLn "IdrisToAgda 0.1"
@@ -247,8 +247,8 @@ error infile err =
   putStrLn ("Error while compiling file: " ++ infile ++ "\n\n" ++
             (prettyError err)) >> Main.die
   
-runITA :: FilePath -> Maybe FilePath -> IO ()
-runITA infile outfile =
+runITA :: (FilePath, Maybe FilePath) -> IO ()
+runITA (infile, outfile) =
   do (file :: String) <- readSource infile
      let out = tryCompile file infile
      case out of
