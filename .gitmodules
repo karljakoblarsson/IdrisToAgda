@@ -4,3 +4,6 @@
 [submodule "Blodwen"]
 	path = Blodwen
 	url = git@github.com:karljakoblarsson/Blodwen.git
+[submodule "agda"]
+	path = agda
+	url = git@github.com:karljakoblarsson/agda.git
