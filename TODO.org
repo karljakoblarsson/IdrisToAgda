@@ -1,19 +1,19 @@
 * Notes 2019-05-23
 ** Priolista
-*** TODO: Priortering: uttrycksspråket
-*** TODO: hur kan lämpliga Idris-funktioner fylla på med exempelvis dolda arg.?
+*** TODO Priortering: uttrycksspråket
+*** TODO hur kan lämpliga Idris-funktioner fylla på med exempelvis dolda arg.?
     Here, I have some leads. It should be doable, but the problem can be how to connect the two representations to each other.
-*** TODO: Structure build system.
+*** DONE Structure build system.
 Pull in Idris and Agda as submodules to track updates and patches. Create executables for printing parse trees and statistics.
 
-*** TODO: statistikverktyg
+*** TODO statistikverktyg
     This should be easy once I have all the sources in one repo.
-*** TODO: "Explicit" hidden arguments
-*** TODO: hur kan man enkelt "komma runt" nedanstående begränsningar? Kan Agda ge hjälp?
-*** TODO: Skriva på half-time report.
-*** TODO: Planera half-time presentation.
-*** TODO: Kolla om det är möjligt att få mer info från Idris, om argument osv. Genom att köra fler steg i compilation-pipeline
-*** TODO: Kolla om det är möjligt att köra Agdas type-checker för att få info om var `ita` klarar och inte klarar.
+*** TODO "Explicit" hidden arguments
+*** TODO hur kan man enkelt "komma runt" nedanstående begränsningar? Kan Agda ge hjälp?
+*** TODO Skriva på half-time report.
+*** TODO Planera half-time presentation.
+*** TODO Kolla om det är möjligt att få mer info från Idris, om argument osv. Genom att köra fler steg i compilation-pipeline
+*** TODO Kolla om det är möjligt att köra Agdas type-checker för att få info om var `ita` klarar och inte klarar.
 
 ** Notes
 IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr

@@ -10,6 +10,7 @@ import Agda.Syntax.Fixity
 import Agda.Syntax.Notation
 import Idris.Parser
 import Idris.Parser.Stack
+import Idris.ElabDecls (elabDecls)
 import Idris.AbsSyntax
 import Idris.Docstrings
 import qualified Idris.Core.TT as TT
@@ -17,12 +18,21 @@ import qualified Idris.Core.TT as TT
 import Util.System (readSource)
 
 import Data.List (intersperse)
+import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text
 import Control.Monad.Trans.Except (runExceptT)
-import Control.Monad.Trans.State.Strict (execStateT, runStateT)
+import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
+import Control.Monad.Trans (lift, liftIO)
 
 import System.Environment
 import System.Exit
+
+
+runIdr :: Idris a -> IO (Either TT.Err IState)
+runIdr prog = runExceptT $ execStateT prog idrisInit
+
+testElab decls = runIdr $ elabDecls elabinfo decls
+  where elabinfo = toplevel
 
 mkName :: String -> Name
 mkName n = Name NoRange InScope [(Id n)]
@@ -265,7 +275,7 @@ tryCompile infile filename =
   Left err -> Left err
   Right pd -> Right $ prettyShow $ map itaDecl pd
   
--- Test function while developing
+-- Test functions while developing
 tp = do (file :: String) <- readSource f
         let res = testParse file
         case res of
@@ -275,6 +285,35 @@ tp = do (file :: String) <- readSource f
           -- Right pd -> putPDecls pd
   where f = "../simpleIdris.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
+
+te :: IO (Either TT.Err IState)
+te = do (file :: String) <- readSource f
+        let q = testParse file
+        let w = fromRight [] q
+        e <- elab w
+        -- do w <- elab q
+        --    return w
+        -- w <- elab q
+          -- left err -> putstrln $ prettyerror err
+          -- right pd -> testelab pd
+        return e
+    where f = "simpleIdris.idr"
+          elab pdecl = liftIO (testElab pdecl)
+          parseErr e = putStrLn $ prettyError e
+  -- tt_ctxt on IState is a good guess
+  -- Returns a `Context` which has a field `definitions :: Context -> Ctxt TTDecl`
+-- type Ctxt a = Map.Map Name (Map.Map Name a)
+-- type TTDecl = (Def, RigCount, Injectivity, Accessibility, Totality, MetaInformation)
+-- data Def = Function !Type !Term
+--          | TyDecl NameType !Type
+--          | Operator Type Int ([Value] -> Maybe Value)
+--          | CaseOp CaseInfo
+--                   !Type
+--                   ![(Type, Bool)] -- argument types, whether canonical
+--                   ![Either Term (Term, Term)] -- original definition
+--                   ![([Name], Term, Term)] -- simplified for totality check definition
+--                   !CaseDefs
+
 
 testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
 
