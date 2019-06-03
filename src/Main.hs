@@ -126,15 +126,23 @@ itaClause (PClause fc name whole with rhsIdr whrIdr) =
   -- But I talked about skipping dependent patterns in the planning report.
   -- The LHS in Agda is represented as a 'Pattern'-type while it's a simple
   -- 'PTerm' in Idris. It's not obvious how to convert betwen them.
-        ptn = itaPattern whole
+        ptn = itaPattern 0 whole
         rewriteExpr = []
         withExpr = []
 
-itaPattern :: PTerm -> Pattern
-itaPattern (PRef _ _ name) = IdentP $ qname $ Main.prettyName name
+-- The depth parameter is used to put parenthesis only when needed.
+-- This is a ugly hack which should be redone.
+-- We probably should retain the parenthesis placement from Idris, but I don't
+-- think that's posssible
+itaPattern :: Int -> PTerm -> Pattern
+itaPattern _ (PRef _ _ name) = IdentP $ qname $ Main.prettyName name
 -- With the simple parenthesis hack. This should be done correctly soon.
-itaPattern (PApp range fst args) =
-  ParenP NoRange (RawAppP NoRange ((itaPattern fst) : (map (itaPattern . itaArgsToTerm) args)))
+itaPattern 0 (PApp range fst args) = 
+    (RawAppP NoRange ((itaPattern 1 fst) : (map ((itaPattern 1) . itaArgsToTerm) args)))
+itaPattern d (PApp range fst args) = ParenP NoRange
+    (RawAppP
+      NoRange
+      ((itaPattern (d + 1) fst) : (map ((itaPattern (d + 1)) . itaArgsToTerm) args)))
 
 itaArgsToTerm :: PArg -> PTerm
 itaArgsToTerm (PExp prio argopts pname getTm) = getTm
@@ -154,7 +162,7 @@ paren e = Paren NoRange e
 
 itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
-itaTerm whole@(PApp range fst args) = itaFI whole
+itaTerm whole@(PApp range fst args) = itaApp whole 0
 itaTerm (PPi plicity name fc term1 term2) =
   Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
   where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
@@ -173,11 +181,14 @@ itaTerm _ = undefined
 -- Deep pattern matching is bad form. But this is a ugly hack any way.
 -- This seems to work but is ugly. Should be done in a pre-processing step to
 -- remove all Idris quirks.
-itaFI :: PTerm -> Expr
-itaFI (PApp range fst@(PRef _ _ name) args) =
+-- Also puts a pair of parenthesis around repeated function applications.
+itaApp :: PTerm -> Int -> Expr
+itaApp (PApp range fst@(PRef _ _ name) args) depth =
   if (Main.prettyName name) == "fromInteger"
-  then head $ (map itaArgs args)
-  else paren $ RawApp NoRange ((itaTerm fst) : (map itaArgs args))
+  then head $ (map (itaArgs 0) args)
+  else case depth of
+    0 -> RawApp NoRange ((itaTerm fst) : (map (itaArgs 1) args))
+    d -> paren $ RawApp NoRange ((itaTerm fst) : (map (itaArgs d) args))
 
 itaConst :: TT.Const -> Literal
 itaConst (TT.I int) = LitNat NoRange (toInteger int)
@@ -197,14 +208,24 @@ itaConst TT.VoidType = undefined
 itaConst TT.Forgot = undefined
 
 itaName :: TT.Name -> Name
-itaName n = Main.mkName $ Main.prettyName n
+-- itaName n = Main.mkName $ Main.prettyName n
+itaName n = Main.mkName $ show n
 
 -- TODO This is not strictly correct. But for 'RawApp' which only take Exprs as
 -- args it's okay
 -- type PArg = PArg' PTerm -- getTm :: PTerm
-itaArgs :: PArg -> Expr
-itaArgs (PExp prio argopts pname getTm) = itaTerm getTm
-itaArgs _ = undefined
+-- This also has the depth hack to make sure we only put parenthesis when needed.
+-- But the logic is probably not correct
+itaArgs :: Int -> PArg -> Expr
+itaArgs depth (PExp prio argopts pname getTm) =
+  if (isPApp getTm)
+     then itaApp getTm depth
+     else itaTerm getTm
+itaArgs _ _ = undefined
+
+isPApp :: PTerm -> Bool
+isPApp (PApp _ _ _) = True
+isPApp _ = False
 
 addComment = (++)
   -- There is also AbsStyntaxTree.prettyName but it's harder to use.
@@ -283,7 +304,7 @@ tp = do (file :: String) <- readSource f
           Right pd -> putStrLn $ prettyShow $ map itaDecl pd
           -- Right pd -> putStrLn $ prettyShow $ itaDecl $ head pd
           -- Right pd -> putPDecls pd
-  where f = "../simpleIdris.idr"
+  where f = "simpleIdris.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 te :: IO (Either TT.Err IState)
