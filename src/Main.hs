@@ -16,7 +16,7 @@ import Idris.Docstrings
 import Idris.IBC
 import Idris.Info (getIdrisLibDir)
 import Idris.ElabDecls (elabPrims, elabDecls)
-import Idris.Core.Evaluate (definitions)
+import Idris.Core.Evaluate (definitions, TTDecl, Def, Def(..))
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
@@ -25,6 +25,7 @@ import Data.List (intersperse)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text
 import qualified Data.Map as Map
+import qualified Data.Maybe as Maybe
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
 import Control.Monad.Trans (lift, liftIO)
@@ -151,8 +152,8 @@ itaArgsToTerm :: PArg -> PTerm
 itaArgsToTerm (PExp prio argopts pname getTm) = getTm
 itaArgsToTerm _ = undefined
 
-application :: String -> [Expr] -> Expr
-application name args = RawApp NoRange ((iden name) : args)
+application :: Expr -> [Expr] -> Expr
+application head args = RawApp NoRange (head : args)
 
 paren :: Expr -> Expr
 paren e = Paren NoRange e
@@ -454,6 +455,7 @@ tp = do (file :: String) <- readSource f
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 -- te :: IO (Either TT.Err IState)
+-- te :: IO ()
 te = do (file :: String) <- readSource f
         let q = testParse file
         let w = fromRight [] q
@@ -463,27 +465,89 @@ te = do (file :: String) <- readSource f
         -- w <- elab q
           -- left err -> putstrln $ prettyerror err
           -- right pd -> testelab pd
-        return e
+        let r = fromRight undefined e
+        let t = definitions $ tt_ctxt r
+        let names = Map.keys t
+        let concatName = TT.sUN "concat"
+        let concat = ttLookup concatName t
+        let ty = getDef concat
+        let ttty = Maybe.fromJust $ getTTType ty
+        sig <- tttExpr ttty
+        putStrLn $ show ttty
+        putStrLn "Agda:"
+        agda sig
+        -- return r
     where f = "simpleIdris.idr"
           elab pdecl = liftIO (testElab pdecl)
           parseErr e = putStrLn $ prettyError e
   -- tt_ctxt on IState is a good guess
   -- Returns a `Context` which has a field `definitions :: Context -> Ctxt TTDecl`
--- type Ctxt a = Map.Map Name (Map.Map Name a)
--- type TTDecl = (Def, RigCount, Injectivity, Accessibility, Totality, MetaInformation)
--- data Def = Function !Type !Term
---          | TyDecl NameType !Type
---          | Operator Type Int ([Value] -> Maybe Value)
---          | CaseOp CaseInfo
---                   !Type
---                   ![(Type, Bool)] -- argument types, whether canonical
---                   ![Either Term (Term, Term)] -- original definition
---                   ![([Name], Term, Term)] -- simplified for totality check definition
---                   !CaseDefs
 
+ttLookup :: TT.Name -> TT.Ctxt TTDecl -> TTDecl
+ttLookup name ctxt = Maybe.fromJust (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
+
+getDef :: TTDecl -> Def
+getDef (def, _, _, _, _, _)  = def
+
+getTTType :: Def -> Maybe TT.Type
+getTTType (TyDecl nametype ty) = Just ty
+getTTType _ = Nothing
+
+tttExpr :: TT.Type -> IO Expr
+tttExpr (TT.P nametype n tt) = do putStrLn $ "P " ++ show n
+                                  tttExpr tt
+tttExpr (TT.V i) = do putStrLn $ "V " ++ (show i)
+                      return (lit $ fromIntegral i)
+tttExpr (TT.Bind n binder tt) = do putStrLn $ "Bind " ++ show n
+                                   tttaBind n binder tt
+                                   -- tttExpr tt
+tttExpr (TT.App appstatus tt1 tt2) = do putStrLn "App"
+                                        a <- tttExpr tt1
+                                        b <- tttExpr tt2
+                                        return $ application a [b]
+
+tttExpr (TT.Constant const) = undefined
+tttExpr (TT.Proj tt i) = undefined
+tttExpr (TT.Erased) = undefined
+tttExpr (TT.Impossible) = undefined
+tttExpr (TT.Inferred tt) = undefined
+tttExpr t@(TT.TType uexp) = do putStrLn $ "TType" ++ (show uexp)
+                               return (iden $ show uexp)
+tttExpr (TT.UType universe) = undefined
+  
+itaTTNameType :: TT.NameType -> Name
+itaTTNameType (TT.Ref) = undefined
+itaTTNameType _ = undefined
+
+impl :: TT.ImplicitInfo -> Bool
+impl (TT.Impl tc toplevel machine_gen) = toplevel
+
+  -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
+tttaBind :: TT.Name -> TT.Binder (TT.Term) -> TT.Term -> IO Expr
+tttaBind name b@(TT.Pi rigCount implI ty kind) term =
+  do putStrLn $ "Binder: "  ++ (show b)
+     putStrLn $ show (itaName name)
+     putStrLn $ show (name)
+     -- putStrLn $ show ty
+     -- putStrLn "Binder term:"
+     -- putStrLn $ show term
+     -- putStrLn "End Binder"
+     t <- tttExpr ty
+     ter <- tttExpr term
+     case implI of
+       Just _ -> return (Fun NoRange (Arg argInfo (hiddenArg (itaName name) t)) ter)
+       Nothing -> return (Fun NoRange (Arg argInfo t) ter)
+  -- Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
+  where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
+tttaBind _ _ _ = undefined
+
+-- type Named_ = Named RString
+  -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
+hiddenArg :: Name -> Expr -> Expr
+hiddenArg n e = HiddenArg NoRange name
+  where name = Named (Just (Ranged NoRange (prettyShow n))) e
 
 testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
-
 
 --------------------------------------------------------------------------------
 -- Agda constructors
@@ -532,6 +596,9 @@ hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
 funcExpr :: String -> Expr -> Expr
 funcExpr name body = Fun NoRange (Arg argInfo (iden name)) body
   where argInfo = (ArgInfo NotHidden modality UserWritten UnknownFVs)
+
+hole :: String -> Expr
+hole comment = QuestionMark NoRange Nothing
 
 typesig :: Name -> Expr -> TypeSignature
 typesig name body = TypeSig argInfo name body
