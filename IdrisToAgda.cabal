@@ -205,8 +205,9 @@ executable ita
                  Util.System
 
 
-executable stats
+executable sts
   main-is:          Stats.hs
+  ghc-options:    -main-is Stats
   hs-source-dirs: src, agda/src/full, Idris-dev/src
   build-depends:  aeson >= 0.6 && < 1.5
                 , annotated-wl-pprint >= 0.7 && < 0.8

@@ -5,9 +5,9 @@
     Here, I have some leads. It should be doable, but the problem can be how to connect the two representations to each other.
 *** DONE Structure build system.
 Pull in Idris and Agda as submodules to track updates and patches. Create executables for printing parse trees and statistics.
-
 *** TODO statistikverktyg
     This should be easy once I have all the sources in one repo.
+    Ongoing
 *** TODO "Explicit" hidden arguments
 *** TODO hur kan man enkelt "komma runt" nedanstående begränsningar? Kan Agda ge hjälp?
 *** TODO Skriva på half-time report.
