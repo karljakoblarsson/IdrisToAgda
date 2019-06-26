@@ -49,132 +49,35 @@
 \end{titlepage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Plan for halftime report
-========================
+% Plan for halftime report
+% ========================
 
-Talk about possible verification methods. Pros and cons fo each, and how
-feasible they are for use in a master thesis. See Wibergh's master thesis for
-inspo.
+% Talk about possible verification methods. Pros and cons fo each, and how
+% feasible they are for use in a master thesis. See Wibergh's master thesis for
+% inspo.
 
-Talk about differences between Agda and Idris
-Philosphically and technically. And in implementation.
+% Talk about differences between Agda and Idris
+% Philosphically and technically. And in implementation.
 
-Problems with how to re-use existing code. Maybe discuss problems with using
-internal interfaces.
+% Problems with how to re-use existing code. Maybe discuss problems with using
+% internal interfaces.
 
-Tell about my progress so far:
-------------------------------
-- Digging in Idris and Agda internals
-- Reusing Idris parser and Agda pretty-printer
-- Converting AST-to-AST directly with `ita`
-- Stats tool, and maybe results from running it
+% Tell about my progress so far:
+% ------------------------------
+% - Digging in Idris and Agda internals
+% - Reusing Idris parser and Agda pretty-printer
+% - Converting AST-to-AST directly with `ita`
+% - Stats tool, and maybe results from running it
 
-Short background about Dependently typed programming and the need for it?
+% Short background about Dependently typed programming and the need for it?
 
-References:
------------
-- Both Idris implementation papers
-- Agda presentation/implementation paper
-- Automatic Agda refactoring thesis maybe?
-- What more?
+% References:
+% -----------
+% - Both Idris implementation papers
+% - Agda presentation/implementation paper
+% - Automatic Agda refactoring thesis maybe?
+% - What more?
 
-
-Verification
-------------
-How to verify corectness of the translation is hard. Especially while work is
-in progress, because if the translation is not complete the program won't
-compile.
-
-The first step if is the program compiles.
-Then if it runs without errors.
-The next step would be to test the translated program with automatic tests.
-But this is often hard to do fully, and depeneds on the program under test.
-Finally we could formally prove the program correct and that it is the same
-as the source program. This very much work, and far outside the scope of this
-project.
-
-It is also possible to compare the output to hand-translated programs, however,
-there are few such programs in Agda and Idris.
-
-In a perfect world we would have test suit with many different programs
-translated and proven correct in many languages. To compare our compilers to.
-But even then it is not obvious to prove correctness, since programs may look
-very different but stil do the same thing.
-
-Hopefully we can use the Agda compiler to test if the generated programs
-compiles. We can also use this (maybe) to guide are translator, if the final
-program does not compile it needs to be redone. Or the translator needs to be
-more explicit in that spot. This however require us to keep the source
-positions during the translation. Both the Agda and Idris does this, but are
-translator does not now.
-
-To formally prove correctness of the translation is the ideal verification, but
-it is far outside the scope of this project, so we will have to settle for less
-rigorous methods. It is the safest way, and what would provide full confidence.
-But hopefully we can still provide some degree of confidence in the
-translation.
-
-
-Progress
---------
-
-I have constructed a translator for a small subset of Idris. It handles the
-expression language and type signatures, (which are the same thing though). And
-data declarations (barely). It does not handle implicit argument, which has to
-be declared in Agda but not in Idris. The translator re-uses both the Idris
-parser and the Agda pretty-printer from their main implementations. This has
-several advantages. But also many drawback, much time has been sunk into
-working with and most often around the existing code. Real-life
-implementations make a lot of practiacal considerations which complicates the
-code a lot, and are not relevant for an academic project.
-
-Both projects are imported as git submodules in this projects repo, which means
-all changes we have made, to the official implementations are recorded and
-possible to apply again, on updated version. However, we took care to make as
-few changes as possible to keep the posibillity to use the latests versions in
-the future. But since the code depends on a lot of internal interfaces, it will
-still be hard to keep up.
-
-Just the problem of building both project with the same version of GHC and
-dependencies took some time. It was doable however.
-
-Implicit arguments are only known and calculated in the elaboration step of
-Idris compilation. There for it is hard to translate them after only parsing.
-
-Something something about the crazy Idris implementation with a big state monad
-used everywhere with a huge state. Its an imperative program, just written in
-haskell. Nothing more. Impossible to reuse. (I may be a bit angry right now)
-
-
-Method
-------
-
-### Stats tool
-In the course of the project we needed a way to prioritize languages features
-to implement in the translator. Ideally we want the translator to handle
-as much real-world code as soon as possible. To guide our implementation we
-wrote a tool which parses Idris into its AST and then records which data
-constructors are most often used.
-
-"Future:" Then we ran this tool on the 'IdrisLibs' Sequantial Decision
-Problems library. See the results in figure. Right now the translator handles
-XX of YY constructors of the Idris Term language and ZZ of WW constructors of
-the declaration language.
-
-We aim to have implementend ?? of the most widely used constructors when this
-project is done.
-
-
-Ideally we will define a new intermediate language which covers the union of
-Agda and Idris features. This will make it simpler to translate to and from
-both languages. We can also use QuickCheck to generate test programs in this
-intermediate language to test the code generation. This is not done yet.
-Language features in the source languages which are not supported in the target
-language will either fail the translator, as they are not possible to represent
-in the intermediate language, or require to be compiled down to simpler
-language feature before being translated in to the intermediate. If this is
-done it would probably be very helpful for the target language implementors if
-they would want to implement that feature in the future.
 
 
 % From Canvas:
@@ -291,13 +194,10 @@ that specific case.
 % Comment from NAD:  Man kan t ex inspektera typsignaturer manuellt och sedan
 % förlita sig på att typcheckaren gör sitt jobb (om typsignaturen är
 % tillräckligt precis). TODO
-Här är det lite bra input. Det låter som en rimlig start.
-Ideally we would run both the source and translated program with randomized
-input to automatically test the they return the same result. However, it is
-probably infeasible to get larger programs to type check and run without manual
-intervention.  Therefore we will use weaker forms of validation.
+% Här är det lite bra input. Det låter som en rimlig start.
 
-\section{Problem}
+\section{Background}
+% TODO Change from "The Problem" to "Background".
 % * The formulation of the problem at hand and, the assignment. This should
 %   include an extended version of the scientific problem definition and
 %   references to knowledge within the area given in the thesis proposal.
@@ -423,124 +323,119 @@ is one of the bigger Idris codebases available. This will guide our
 implementation by first supporting the features used in the core parts of the
 SDP library. And then work to support more and more of the library.
 
+% Method
+% ------
 
-\section{Challenges and Risks}
-% * Risk analysis and ethical considerations.
-% Project risks.
-% TODO Elaborate on this. But these points are talked about earlier.
-Working with existing code can be time-consuming, and pose problems not related
-to the actual project.  Idris and Agda are not exactly alike, the languages and
-the type systems differ is a few subtle ways, some ways which are probably not
-possible to translate.  How do we measure success in a useful, efficient and
-possible way. Equality is hard, especially regarding dependent types.
-
-% Ethical risks
-Ethical risks are not a big concern for this project. The wider aim is to
-improve programming languages and make it easier to write correct programs.
-Both Agda and Idris are general purpose programming languages which can be
-used for every possible application. If desired both can be Turing-complete.
-
-% Ethical considerations and risks are not relevant. There will not be different
-% from any other programming language. Both Agda and Idris are general purpose
-% programming languages which can be used any program. They can also be Turing
-% complete if desired. If used non-turing complete there are actually less risks
-% since there is simpler to reason about the programs behavior. Dependent types
-% can be more easily formally verified, which also means there is easier to use
-% formal method to find bugs to exploit, (Of course, since the bugs are the same
-% even if the intentions differ.) But It's easier for a user to verify untrusted
-% software which decreases risk.
+Ideally we will define a new intermediate language which covers the union of
+Agda and Idris features. This will make it simpler to translate to and from
+both languages. We can also use QuickCheck to generate test programs in this
+intermediate language to test the code generation. This is not done yet.
+Language features in the source languages which are not supported in the target
+language will either fail the translator, as they are not possible to represent
+in the intermediate language, or require to be compiled down to simpler
+language feature before being translated in to the intermediate. If this is
+done it would probably be very helpful for the target language implementors if
+they would want to implement that feature in the future.
 
 
-\section{Time Plan}
-% * Time plan.
-%   The time plan should give an approximate date when the work is to be
-%   finished. It should also list mandatory seminars and milestones for the
-%   project with dates for critical steps that are needed to finish the work
-%   (intermediate and final report, presentation, opposition etc).
 
-% Do I need milestones for specific parts of the "experiment", like certain
-% features or steps? I plan to write the report in tandem with the project, at
-% least work a bit on it every week, probably every other day or so.
+\subsection{Statistics tool}
+In the course of the project we needed a way to prioritize languages features
+to implement in the translator. Ideally we want the translator to handle
+as much real-world code as soon as possible. To guide our implementation we
+wrote a tool which parses Idris into its AST and then records which data
+constructors are most often used.
 
-% The testing and verification is the big uncertainty right now. It should be in
-% the plan but I have no Idea on how to do it. And I probably won't have until
-% I have gotten quite far.
+"Future:" Then we ran this tool on the 'IdrisLibs' Sequantial Decision
+Problems library. See the results in figure. Right now the translator handles
+XX of YY constructors of the Idris Term language and ZZ of WW constructors of
+the declaration language.
 
-% Do I need to give exact dates or is something like "week 5" okay?
+We aim to have implementend ?? of the most widely used constructors when this
+project is done.
 
-% I need to lookup mandatory seminars.
-% I'm signed up for the industry seminar.
-% I will probably need to do the writing seminars this fall. In study period 1.
-% I just missed the one i April.
 
-% And times for final report presentation and opposition.
-% Sometime in August/September hopefully.
+\subsection{Verification}
+How to verify corectness of the translation is hard. Especially while work is
+in progress, because if the translation is not complete the program won't
+compile.
 
-% Dela planeringen i:
-% - Obligatoriskt
-% - Skrivande
-% - Implementering
-% - Ev. test
-% Ett grovt blockschem for de delarna
+- The first step if is the program compiles.
+- Then if it runs without errors.
+- The next step would be to test the translated program with automatic tests.
+  But this is often hard to do fully, and depeneds on the program under test.
+- Finally we could formally prove the program correct and that it is the same
+  as the source program. This very much work, and far outside the scope of this
+  project.
 
-The plan is to work on the project in two parts. First in 12 weeks from
-2019-04-01 to 2019-07-07. Then after summer in 8 weeks from 2019-09-02 to
-2019-10-27. As much as possible, we will work on writing and technical work in
-parallel.
+It is also possible to compare the output to hand-translated programs, however,
+there are few such programs in Agda and Idris.
 
-\subsection{Technical work}
-\begin{itemize}
-  \item (Last week of April) First runnable implementation of STLC.
-  \item (First week of MayMay) First runnable Dependent types example.
-  \item (Third week of May) Decide verification method.
-    % Olika for olika delsteg. STLC is runable. Sen blir det svarare for varje
-    % steg. Jamfora partial correectness is interesting research in itself.
-    % Idea: specify which parts of the agda source should be run. Sp=o the
-    % whole program needs not to be translated, only the important parts.
-  \item (First week in September) Implementation of Implicit arguments done.
-  \item (Third week of Semptember) Final implementation version.
-  \item (Last week of Semptember) Final verification.
-\end{itemize}
+In a perfect world we would have test suit with many different programs
+translated and proven correct in many languages. To compare our compilers to.
+But even then it is not obvious to prove correctness, since programs may look
+very different but stil do the same thing.
 
-\subsection{Writing}
-\begin{itemize}
-  \item (2019-04-18) Planning report.
-  \item (Third week in May) Content complete draft of half-time report.
-  \item (2019-05-31) Final draft of half-time report to supervisor.
-  \item (2019-06-06) Half-time report done.
-  \item (First week in June) Half-time presentation.
-  \item (First week in September) Content complete draft of Background in Final
-    report.
-  \item (Last week in September) Content complete draft of Final report.
-  \item (First week in October) Complete draft of Final report to supervisor
-  \item (Third week in October) Final report.
-\end{itemize}
+Ideally we would run both the source and translated program with randomized
+input to automatically test the they return the same result. However, it is
+probably infeasible to get larger programs to type check and run without manual
+intervention.  Therefore we will use weaker forms of validation.
 
-\subsection{Compulsory events}
-\begin{itemize}
-  \item (10/5) Industry and career advancement seminar
-  \item (September) Writing seminar I
-  \item (September) Writing seminar II
-  \item (September) Opposition.
-  \item (First two weeks in October) Presentation.
-\end{itemize}
+Hopefully we can use the Agda compiler to test if the generated programs
+compiles. We can also use this (maybe) to guide are translator, if the final
+program does not compile it needs to be redone. Or the translator needs to be
+more explicit in that spot. This however require us to keep the source
+positions during the translation. Both the Agda and Idris does this, but are
+translator does not now.
 
-% The time plan can be updated if and when needed, always in collaboration with
-% your supervisor and upon approval of the examiner.
+To formally prove correctness of the translation is the ideal verification, but
+it is far outside the scope of this project, so we will have to settle for less
+rigorous methods. It is the safest way, and what would provide full confidence.
+But hopefully we can still provide some degree of confidence in the
+translation.
 
-% Tid: 2019/04/01 - 12w - 2019-07-07
-% 2019-09-02 - 8w - 2019-10-27
 
-% list.chalmers.se
-% Proglog
-% Fp
+\section{Results}
+% TODO Is this the right section?
+% TODO How to structure the report?
+% TODO What should I include in the half-time report?
+% TODO Should I includes some general theory abount Dependently typed
+%      programming?
+% TODO Should I write about things which aren't done yet?
+\subsection{Progress}
 
-% \section{Approach}
+We have constructed a translator from a subset of Idris to Agda. It handles the
+expression language, type signatures and data declarations.  It fails for
+implicit argument, which has to be declared in Agda but not in Idris. The
+translator re-uses both the Idris parser and the Agda pretty-printer from their
+main implementations. This has several advantages. But also many drawback, much
+time has been sunk into working with and most often around the existing code.
+Real-life implementations make a lot of practiacal considerations which
+complicates the code a lot, and are not relevant for an academic project.
 
-% Mention Agda 2.5.4 and Idris 1.3.1 somewhere.
-% I plan to target the latest version of Agda, 2.5.4
-% And I think Idris 1. The Blodwen implementation is very different so it will be
-% hard to port to the new version. But today It's not ready enough yet.
+Both projects are imported as git submodules in this projects repo, which means
+all changes we have made, to the official implementations are recorded and
+possible to apply again, on updated version. However, we took care to make as
+few changes as possible to keep the posibillity to use the latests versions in
+the future. But since the code depends on a lot of internal interfaces, it will
+still be hard to keep up.
+
+Just the problem of building both project with the same version of GHC and
+dependencies took some time. It was doable however. Unfourtunally it was a very
+manual process of comparing cabal-files and trying to find versions of
+dependencies which matches both. And in some cases change one project to use
+a more recent version of a dependency with a updated interface.
+
+Implicit arguments are only known and calculated in the elaboration step of
+Idris compilation. There for it is hard to translate them after only parsing.
+
+% Something something about the crazy Idris implementation with a big state
+% monad used everywhere with a huge state. Its almost an imperative program,
+% just written in haskell.
+
+
+
+\section{Conclusions}
 
 
 % Maybe useful things to cite:
