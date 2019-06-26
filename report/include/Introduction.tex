@@ -1,0 +1,137 @@
+% CREATED BY DAVID FRISK, 2015
+\chapter{Introduction}
+
+% * Background to the assignment. Why is it relevant?
+Agda~\cite{agda} and Idris~\cite{idris} are two dependently typed programming
+languages.  Agda is mainly focused on interactive theorem proving while Idris
+prioritizes general purpose programming.  However, while both languages have
+different focus, they share most of their features. Their type systems are
+similar.
+
+% Mostly the same as the proposal. And read a few other dependent types
+% paper-intros, and write something similar.
+
+
+% * Aim for the work. What should be accomplished?
+% This part is an okay draft now.
+We wish to investigate if it is possible to construct a source to source
+translation of a common subset from Idris to Agda. A translation which
+preserves semantics. The translation should handle as large subset of Idris as
+possible, but it is unreasonable to expect to cover 100\% of the language.
+A goal for further projects is to do bidirectional translation between the
+languages.
+
+This translator would allow Idris libraries to be reused in Agda. A Idris
+program may be more easily proved in Agda.  It will also increase the
+confidence in a given proof if it is valid in both languages.  The first
+challenge is to find a common subset for which it is possible to translate. The
+task is to construct a compiler which handles as much of this subset as
+possible.
+
+
+\section{Limitations}
+% * Limitations. What should be left out and why?
+% TODO This part needs to be improved.
+Only translation from Idris to Agda will be considered in this project. We will
+target Idris 1.3.1 and Agda 2.6.0. It is not feasible to translate every
+language feature and edge case.  The goal is to cover a large subset of Idris
+features, but it is hard to give an exact goal.  The translator will built step
+by step, supporting a bigger subset of language features for each step. The
+translator should be usable early on and then improved.
+% progression, and where it's reasonable to land.
+
+% Code which is untranslateable
+There may be valid Idris code which is impossible to translate to Agda. There
+may also be code where the correct translation is application dependent. Those
+parts will be left as holes for the user to fill in a reasonable translation in
+that specific case.
+% should be left as holes, with the source as comments.
+
+% Dependent records
+
+% Cummutally Set hierarchy. Type in type in Idris.
+% Remove since Idris has different levels of Set as well, only it is always
+% interfered and cannot be explicitly specified by the programmer.
+% In Agda there are different levels of \texttt{Set} since the set of types can
+% not be part of itself. This is useful for proofs, but will not be considered in
+% this project.
+
+% Automated testing of program output is probably to hard, I need a simpler
+% verification criteria.
+
+% Comment from NAD:  Man kan t ex inspektera typsignaturer manuellt och sedan
+% förlita sig på att typcheckaren gör sitt jobb (om typsignaturen är
+% tillräckligt precis). TODO
+Här är det lite bra input. Det låter som en rimlig start.
+Ideally we would run both the source and translated program with randomized
+input to automatically test the they return the same result. However, it is
+probably infeasible to get larger programs to type check and run without manual
+intervention.  Therefore we will use weaker forms of validation.
+
+\section{Problem}
+% * The formulation of the problem at hand and, the assignment. This should
+%   include an extended version of the scientific problem definition and
+%   references to knowledge within the area given in the thesis proposal.
+
+Dependently typed programming is the application of
+% Martin-Löf
+% TODO
+% Maybe mention about other forms of type theories. Agda is explicitly based on
+% Martin-Löf, it says so in the first paragraph of the documentation.
+% "It is an extension of Martin-Löf’s type theory, and is the latest in the
+% tradition of languages developed in the programming logic group at Chalmers."
+Intuitionistic Type Theory~\cite{martinlof} to practical programming.
+Types are allowed to depend on values, which allows the compiler to check much
+richer properties about the program than Hindley-Milner~\cite{hindley}~\cite{milner}
+style types. However, how to efficiently implement a dependently typed
+programming language is active research.
+
+Agda and Idris are two of the mostly widely used dependently type programming
+languages, with much in common. The Idris website states that Idris is inspired
+by Agda but with more focus on practical
+programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
+An automatic translator form Idris to Agda source code could increase the
+usefulness of both languages. The work of implementation of it can give us
+greater knowledge of the differences between the type systems. As well as the
+strengths and weaknesses of both languages.
+
+% Semi-automatic translator is maybe a more correct description.
+The goal of this project is to construct a semi-automatic translator which can
+translate a subset of Idris into valid Agda. The language features which are
+not yet implemented will be left as holes to allow the user to provide the
+missing parts.
+
+% I should mention which parts are extra hard. Like: dependent types, records,
+% classes/interfaces. Implicit arguments. Maybe partial functions. But I'm not
+% sure which parts are yet.
+
+% I should some paper related to transpiling and cite. As well as both Idris and
+% Agda implementation-papers. Maybe the faq about differences between the
+% languages.
+
+Dependent type systems are still an active research topic, which makes the
+translation hard.
+% redo this sentence. The question is what it means and not mean if both
+% programs type check.
+Even if both the source and translated programs type check, it does not
+necessarily mean the translation is correct.  Where the translator fails we
+wish to leave holes for the user to provide the correct translation. The holes
+must be constructed so that is possible which is non-obvious to do.
+
+% How to test and verify to translations? It's not feasible to get a lot
+% of code runnable without manual intervention. Can I even get it to type check?
+% And what does it mean just that the code is well typed in both languages.
+% Equality is hard, especially with dependent types.
+It is not obvious how to verify the translation, ideally the translated
+programs both type check and can be run. Then it would be possible to compare
+the outputs are the same. However it is hard enough to get the programs to type
+check without manual intervention. The type systems are similar but not
+identical. This means that even if both the source and translated program
+type check we can not be sure that they represent the same semantics.
+Especially if one of the programs contain holes. It is hard to reason about
+equality in the context of dependent types.
+% TODO Add specific Ideas about how to verify the implementation.
+% Ideas:
+% - 
+% - 
+

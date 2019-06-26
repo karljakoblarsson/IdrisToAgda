@@ -1,0 +1,26 @@
+% CREATED BY DAVID FRISK, 2016
+\chapter{Background}
+
+\section{Figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\linewidth, trim=3cm 11cm 3cm 11cm]{figure/X.pdf}
+\includegraphics[width=0.45\linewidth, trim=3cm 11cm 3cm 11cm]{figure/Y.pdf}
+\caption{Surface and contour plots showing the two dimensional function $z(x,y)=\sin(x+y)\cos(2x)$.}
+\end{figure}
+
+
+
+\section{Source code listing}
+\begin{minted}[frame=single]{matlab}
+% Generate x- and y-nodes
+x=linspace(0,1); y=linspace(0,1);
+
+% Calculate z=f(x,y)
+for i=1:length(x)
+ for j=1:length(y)
+  z(i,j)=x(i)+2*y(j);
+ end
+end
+\end{minted}
+

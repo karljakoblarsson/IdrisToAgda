@@ -1,0 +1,58 @@
+% CREATED BY DAVID FRISK, 2016
+\chapter{Methods}
+
+The first step is to translate simple declarations of types and functions,
+without dependent types. A subset roughly corresponding to Simply Typed Lambda
+Calculus. Since dependent types are the focus of the project the next step is
+to translate them. Starting with application in the type level, and functions
+definitions. Continuing with indexed data types.
+Both Idris and Agda are large languages, some features are more important to
+implement then other.  For example \texttt{mutual}-blocks and
+\texttt{do}-notation. They are de-sugared in the Idris compiler so are not
+strictly necessary to implement. However correctly translating them will
+increase the readability and the usefulness of the generated code.
+% TODO Talk about the type language.
+% type lang
+% base types
+% variable
+% application t1 t2
+% function definition (x : t1) -> t2
+
+% Sum/ simple enumeration T | F
+% prod/data P = P Bool Bool
+
+% Indexerad data typer
+
+% Kriteriet for att oversatta eller inte ar inte om det ar latt eller
+% svart. Both Idris and Agda are large languages. What features are most
+% important to translate?
+
+% Developing from the Idris 1 or Blodwen codebase, utilizing as much of the AST
+% and pretty printer from the Agda-source as possible.
+
+We wish to reuse the Idris complier front-end for our implementation, by
+implementing the translator as a back-end. Hopefully we can reuse the abstract
+syntax tree (AST) definition and pretty-printer from the Agda implementation as
+well. This means that most of the code needed is handling the actual
+translation, minimizing work needed on surrounding infrastructure.  However,
+there is always a challenge to interface with existing code.
+
+% | Below is stated elsewhere.
+% Another hard task is to find the biggest common subset of the languages.
+% It is trivial to name a few common features, bu a useful compiler needs to
+% support most widely used features. But there are incompatible differences
+% between Agda and Idris which complicates things.
+
+Working step by step, we first translate only very simple programs, then adding
+more and more features. Currently unimplemented features are represented with
+holes so that it is always possible to translate code. The output becomes more
+and more complete as the project progresses. The number of holes left for
+a given project also works as an informal method of verification, less holes
+corresponds to a better translator.
+
+To test the implementation we will use the Sequential Decision Problem (SDP)
+implementation in
+IdrisLibs\footnote{\url{https://gitlab.pik-potsdam.de/botta/IdrisLibs}} which
+is one of the bigger Idris codebases available. This will guide our
+implementation by first supporting the features used in the core parts of the
+SDP library. And then work to support more and more of the library.
