@@ -52,32 +52,35 @@
 % Plan for halftime report
 % ========================
 
-% Talk about possible verification methods. Pros and cons fo each, and how
-% feasible they are for use in a master thesis. See Wibergh's master thesis for
+% Talk about possible verification methods. Pros and cons for each, and how
+% feasible they are for use in a MSc thesis. See Wibergh's MSc thesis for
 % inspo.
 
 % Talk about differences between Agda and Idris
 % Philosphically and technically. And in implementation.
 
 % Problems with how to re-use existing code. Maybe discuss problems with using
-% internal interfaces.
+% internal interfaces. [TODO gärna med referens till litteraturen]
 
 % Tell about my progress so far:
 % ------------------------------
-% - Digging in Idris and Agda internals
+% - Digging in Idris and Agda internals   [bugs found? "bad" design? perhaps refer to Edwin Brady and Idris 2 = Blodwen]
 % - Reusing Idris parser and Agda pretty-printer
-% - Converting AST-to-AST directly with `ita`
+% - Converting AST-to-AST directly with `ita` [main Idris - to - Agda function]
 % - Stats tool, and maybe results from running it
 
-% Short background about Dependently typed programming and the need for it?
+% Short background about Dependently typed programming and the need for it? [Yes - half a page?]
+% (leads also to some of the problems: lots of type information needed for the translation
+%   challenges in translation "two coupled artefacts": spec + code)
 
 % References:
 % -----------
 % - Both Idris implementation papers
 % - Agda presentation/implementation paper
-% - Automatic Agda refactoring thesis maybe?
-% - What more?
+% - Automatic Agda refactoring thesis maybe? [Definitely]
+% - What more? [some SE resource about depencies, legacy code, etc.]
 
+% [perhaps later: Consider what is long term of the learning: not just the code, but the new realisations: advice on moving forward after the project]
 
 
 % From Canvas:
@@ -261,8 +264,8 @@ Especially if one of the programs contain holes. It is hard to reason about
 equality in the context of dependent types.
 % TODO Add specific Ideas about how to verify the implementation.
 % Ideas:
-% - 
-% - 
+% -
+% -
 
 
 \section{Method}
@@ -360,13 +363,15 @@ How to verify corectness of the translation is hard. Especially while work is
 in progress, because if the translation is not complete the program won't
 compile.
 
-- The first step if is the program compiles.
-- Then if it runs without errors.
-- The next step would be to test the translated program with automatic tests.
+\begin{itemize}
+\item The first step if is the program compiles.
+\item Then if it runs without errors.
+\item The next step would be to test the translated program with automatic tests.
   But this is often hard to do fully, and depeneds on the program under test.
-- Finally we could formally prove the program correct and that it is the same
+\item Finally we could formally prove the program correct and that it is the same
   as the source program. This very much work, and far outside the scope of this
   project.
+\end{itemize}
 
 It is also possible to compare the output to hand-translated programs, however,
 there are few such programs in Agda and Idris.
