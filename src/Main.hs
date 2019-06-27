@@ -301,10 +301,10 @@ tp = do (file :: String) <- readSource f
         let res = testParse file
         case res of
           Left err -> putStrLn $ prettyError err
-          Right pd -> putStrLn $ prettyShow $ map itaDecl pd
+          Right pd -> putStrLn $ show $ map itaDecl pd
           -- Right pd -> putStrLn $ prettyShow $ itaDecl $ head pd
           -- Right pd -> putPDecls pd
-  where f = "simpleIdris.idr"
+  where f = "patrik.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 te :: IO (Either TT.Err IState)

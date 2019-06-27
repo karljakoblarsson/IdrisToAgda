@@ -28,7 +28,6 @@ import qualified Data.Data as Data
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
 import Control.Monad.Trans (lift, liftIO)
-import Text.Regex.Base as Regex
 
 import System.Environment
 import System.Exit
@@ -101,11 +100,11 @@ tl = do (file :: String) <- readSource f
 -- collect :: [PDecl] -> [PDecl]
 
 tp = do (file_in :: String) <- readSource f
-        file <- if lidr
-            then tclift $ unlit f file_in
-            else return file_in
+        -- file <- if lidr
+        --     then tclift $ unlit f file_in
+        --     else return file_in
         -- file <- if lidr then tclift $ unlit f file_in else return file_in
-        let res = testParse f file
+        let res = testParse f file_in
         case res of
           Left err -> putStrLn $ prettyError err
           Right pd -> putStrLn $ showStats $ countD pd
