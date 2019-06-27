@@ -1,3 +1,12 @@
+* Notes 2019-06-27
++ diskuterar halvtidsrapportens frågor
++ söker buggar i sts och ita (lovand ingångar funna)
++ Patrik kan bygga koden [yeah!] - lägg in i README hur man bygger "from git checkout"
++ Plan: skicka brev till NAD CC: patrik angående ny tidplan
+++ skicka halvtidsrapport til Patrik senast 27:e juli
+++ Patrik läser och kommenterar senast 1:a aug.
+++ skicka till NAD 3:e Aug
+
 * Notes 2019-05-23
 ** Priolista
 *** TODO Priortering: uttrycksspråket
