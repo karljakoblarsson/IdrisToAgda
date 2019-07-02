@@ -47,6 +47,9 @@ lit i = Lit $ LitNat NoRange i
 -- TODO START HERE
 -- Try to handle implict/explict arguments. The whole '{a : Set}' thing.
 
+-- TODO Right now the translator throws away names for arguments in type
+-- signatures. Don't do that.
+
 -- The '{a : A}' is a definition of a implicit function space.
 -- To give an implicit argument explicit to a function, enclose it in brackets.
 
@@ -129,6 +132,9 @@ itaClause (PClause fc name whole with rhsIdr whrIdr) =
         ptn = itaPattern 0 whole
         rewriteExpr = []
         withExpr = []
+itaClause (PWith _ _ _ _ _ _ _) = undefined
+itaClause (PClauseR _ _ _ _) = undefined
+itaClause (PWithR _ _ _ _ _) = undefined
 
 -- The depth parameter is used to put parenthesis only when needed.
 -- This is a ugly hack which should be redone.
@@ -164,6 +170,8 @@ itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
 itaTerm whole@(PApp range fst args) = itaApp whole 0
 itaTerm (PPi plicity name fc term1 term2) =
+  -- This maybe should be an Agda.Pi istead. Related to argument names thrown
+  -- away.
   Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
   where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
 itaTerm (PConstSugar fc term) = itaTerm term
