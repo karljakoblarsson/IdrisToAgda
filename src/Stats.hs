@@ -16,6 +16,7 @@ import Idris.AbsSyntaxTree
 import Idris.Docstrings
 import Idris.Unlit
 import Idris.Error (tclift)
+import Idris.IBC
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
@@ -60,19 +61,36 @@ testParse filepath file = runparser (prog defaultSyntax) idrisInit filepath file
 -- testParse' :: FilePath -> String -> Either ParseError [PDecl]
 -- testParse' filepath file = parseProg defaultSyntax filepath file Nothing
 
-tl = do (file :: String) <- readSource f
+showErr :: (Show a) => IO (Either TT.Err a) -> IO ()
+showErr a = do q <- a
+               case q of
+                 Right q -> putStrLn "Success"
+                 Left w -> print w
+
+tk a = showErr $ runExceptT (evalStateT a idrisInit)
+
+iPrint a = liftIO $ print a
+
+tl = do (file :: String) <- liftIO $ readSource f
   -- case P.parse (runWriterT (evalStateT p i)) inputname s of
         -- let fileR = Regex.subRegex "import.*$" file ""
-        let a = res file
-        b <- runExceptT a
-        let (c, d, e, f) = fromRight undefined b
-        putStrLn $ show c
-        putStrLn $ show d
-        -- Det här blev jag ju inte det minsta klokare på.
-        -- It has to be something with `prog` and `defaultSyntax` or similar
-        -- settings. Therer seems to be nothing crazy done in `loadSource`
-        putStrLn $ show f
-        -- b <- parseProg f file mark
+
+        -- q <- parseImports f file
+                  -- file <- if lidr then tclift $ unlit f file_in else return file_in
+        -- let (c, d, e, f) = q
+        -- let res = tp
+
+        -- let a = res file
+        -- b <- runExceptT a
+        -- let (c, d, e, f) = fromRight undefined b
+        -- iPrint c
+-- TODO This fails because idrisDataDir env var is not set. Probably since I'm
+-- not building Idris in the normal way. I should write something about this in
+-- the report. But it's more about the SE side of things.
+--
+-- It fails in idris/src/IRTS/System.hs
+        loadModule f IBC_Building
+        -- loadSource False f Nothing
         return ()
   where f = "Blodwen/src/Core/Primitives.idr"
         lidr = False
@@ -109,8 +127,9 @@ tp = do (file_in :: String) <- readSource f
           Left err -> putStrLn $ prettyError err
           Right pd -> putStrLn $ showStats $ countD pd
   -- where f = "simpleIdris.idr"
-  -- where f = "Blodwen/src/Core/Primitives.idr"
-  where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  -- where f = "patrik.idr"
+  where f = "Blodwen/src/Core/Primitives.idr"
+  -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
         lidr = True
 
 
@@ -143,15 +162,23 @@ recdt name term m = (addD name) (countT' term m)
 rect :: String -> [PTerm] -> Stats -> Stats
 rect name terms m = (addD name) (foldl (flip countT') m terms)
 
--- countD'
--- countT
+recpc :: String -> [PClause] -> Stats -> Stats
+recpc name clauses m = (addD name) (foldl (flip pclfn) m clauses)
 
+pclfn :: PClause -> Stats -> Stats
+                                            -- Same as `rect`
+pclfn (PClause _ _ whole withs rhs whr) m = (foldl (flip countT') m' pterms)
+  where pterms = whole : rhs : withs
+        -- Same as `recf`
+        m' = foldl (flip countD') m whr
+pclfn (PWith _ name whole withs rhs _ wher) m = undefined
+-- Constructors below are within a `with`-statement.
+pclfn (PClauseR _ withs rhs wher) m = undefined
+pclfn (PWithR _ withs rhs _ wher) m = undefined
 
 -- Determine if I want to save the stats as a tree shape, och a flat list.
 -- flat list will do for now.
 
--- TODO START HERE
--- There is a bug here. I don't think it traverses the tree at all.
 countD' :: PDecl -> Stats -> Stats
 countD' (PFix _ _ _) = addD "PFix"
    -- | Type declaration (last FC is precise name location)
@@ -159,7 +186,7 @@ countD' (PTy _ _ _ _ _ _ _ t) = recdt "PTy" t
    -- | Postulate, second FC is precise name location
 countD' (PPostulate _ _ _ _ _ _ _ t) = recdt "PPostulate" t
    -- | Pattern clause
-countD' (PClauses _ _ _ clauses) = addD "PClauses"
+countD' (PClauses _ _ _ clauses) = recpc "PClauses" clauses -- TODO recurse on clauses.
    -- | Top level constant
 countD' (PCAF _ _ t) = recdt "PCAF" t
    -- | Data declaration.
