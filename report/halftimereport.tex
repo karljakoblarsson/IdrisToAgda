@@ -62,6 +62,24 @@
 % Problems with how to re-use existing code. Maybe discuss problems with using
 % internal interfaces. [TODO gärna med referens till litteraturen]
 
+% Write for someone who is taking the same masters program but may not have
+% taken the same electives as you. So someone who has taken, logic in computer
+% science, programming language technology and algorithms. But haven't taken AFP
+% and types and programming languages. So the basics of a compiler and parser
+% is known, and most algorithms used. The reader knows basic functional
+% programming and some Haskell. But none of Agda or Idris
+
+% I need to talk about the basics of dependently typed programming, for someone
+% with a background in functional programming with algebraic data types (but no
+% GADTs) and some logic. So I can just mention Curry-Howard in passing. The
+% difference between propositional logic and predicate logic.
+
+% But I need to talk about types parametrizied by values, and not only types.
+% And how this relate to theorem proving, difference between Agda/Idris and
+% theorem provers such as Coq/Isabelle, a little.  Why is dependently typed
+% programming useful? And what are the problems with it?
+
+
 % Tell about my progress so far:
 % ------------------------------
 % - Digging in Idris and Agda internals   [bugs found? "bad" design? perhaps refer to Edwin Brady and Idris 2 = Blodwen]
@@ -201,9 +219,6 @@ that specific case.
 
 \section{Background}
 % TODO Change from "The Problem" to "Background".
-% * The formulation of the problem at hand and, the assignment. This should
-%   include an extended version of the scientific problem definition and
-%   references to knowledge within the area given in the thesis proposal.
 
 Dependently typed programming is the application of
 % Martin-Löf
@@ -219,9 +234,12 @@ style types. However, how to efficiently implement a dependently typed
 programming language is active research.
 
 Agda and Idris are two of the mostly widely used dependently type programming
-languages, with much in common. The Idris website states that Idris is inspired
+languages. They have many features in common. The Idris website states that Idris is inspired
 by Agda but with more focus on practical
 programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
+% TODO Refer to the Idris paper instead.
+Agda is developed as a research language, with the focus on interactive theorem
+proving.
 An automatic translator form Idris to Agda source code could increase the
 usefulness of both languages. The work of implementation of it can give us
 greater knowledge of the differences between the type systems. As well as the
@@ -296,7 +314,7 @@ increase the readability and the usefulness of the generated code.
 % svart. Both Idris and Agda are large languages. What features are most
 % important to translate?
 
-% Developing from the Idris 1 or Blodwen codebase, utilizing as much of the AST
+% Developing from the Idris 1 codebase, utilizing as much of the AST
 % and pretty printer from the Agda-source as possible.
 
 We wish to reuse the Idris complier front-end for our implementation, by
@@ -433,9 +451,89 @@ a more recent version of a dependency with a updated interface.
 Implicit arguments are only known and calculated in the elaboration step of
 Idris compilation. There for it is hard to translate them after only parsing.
 
+% My progress so far
+% TODO
+%
+We have developed a tool to translate simple Idris programs into agda. It works
+for a subset of Idris, namely:
+
+\begin{enumeration}
+  \item Data declarations
+  \item Simple expressions
+  \item And some more things
+\end{enumeration}
+
+We have not yet proven correctness except for manual inspection.
+But the translation type checks. It's a medium good verification method. But the
+goal is the have a more thorough verification in the end of the project.
+
+In the pbeginning the proces was to run the translation, then try to load the
+program in Agda and see if it compiles. The manually fix it so that it
+compiles, then changing the translator to do the same thing we just did
+manually. % Remove last sentance probably.
+
+The translator does not handle implicit arguments yet. Agda and Idris av
+different type checkers, Agda requires more explicit definitions. A implicit
+argument used have to at least be defined. Idris automatically considers all
+lower case variables in type signatures to be a implicit variable. Since the
+implicit arguments in Idris are elaborated in the Type checker we can not use
+the parser output to reconstruct them. First Idris is translated to `tt_elab`
+and the the type checking and elaboration is run.
+
+Therefore we need to run the elaboration and then extract the implicit
+arguments from the `tt` representation and then translated them to Agda. We are
+going to do this in a preprecessing step before the translation, we translate
+the `tt` back into regular Idris. This makes it possible the then just use the
+normalt `ita` translator. This has the side effect of making that translation
+useful for a Idris automatic refactoring tool. It is often useful to change
+between implicit and explicit arguments when developing a dependently typed
+program.
+
 % Something something about the crazy Idris implementation with a big state
 % monad used everywhere with a huge state. Its almost an imperative program,
 % just written in haskell.
+
+We pull in both Idris and Agda sources as git submodules in our porject
+repository, this makes it possible to record the exact changes we have done to
+the upstream sources. To make it easy to reproduce and extend. It also allows
+use to pull in newer versions of both projets, and the using git rebase, replay
+our changes on top of the newer versions, and make it much easier to maintan
+our tool for future language versions.
+
+
+\subsubsection{Implementation difficulties}
+As expected we ran it to a lot of non project related difficulties when trying
+to reuse existing Agda and Idris sources.
+
+The Idris compiler is quite stateful, most of it uses a state monad with a huge
+state, It is almost like an imparative program, just writen in Haskell. The
+often touted benefits of functional programming goes out of the window, but the
+compiler is still happy. It goes to show that functional programming is not
+a miracle cure for bad programs, that is still up to the programmer.
+
+Just trying to find the internal interface of the Idris parser took a long
+time.
+
+Idris uses a custom build process which was a pain to use with a different
+folder structure. Since we wanted to pull in both Idris and Agda as `git`
+submodules in our repo we needed to change the folder structure and the build
+process. The was maybe not worth the effort.
+
+The next version of Idris is developed from scracht in a new project, and some
+of the reasons for that is the bad implentation. % TODO It's not "bad", or
+% don't write that at least
+
+Trying to reuse the Agda AST as well has many problem. The good thing is that
+Agda is designed to be able to print it's ASt back out in the exact same
+representations as the input. However, this means that the parser, AST and
+pretty print has to keep track of a lot of things, not needed for the sematics
+of the program. This made it hard to reconstruct a valid AST from another
+program, we had to guess what parts of the data structure are meaningful or not
+for our usecase. And many times construct dummy data just to keep the compiler
+happy, while not makeing any difference for the output. We still felt this was
+an ok tradeoff, since constructing a AST and pretty printer from scracth would
+probably be an equal amount of work, but it would be much more work to keep it
+in synch with newwer versions of Agda, so the final tool would be less useful.
 
 
 
