@@ -88,11 +88,16 @@ tl = do (file :: String) <- liftIO $ readSource f
 -- not building Idris in the normal way. I should write something about this in
 -- the report. But it's more about the SE side of things.
 --
+-- I'm trying to run the Idris/Setup.hs script in the new root folder. It may work
+-- I should talk about this, in the report.
+--
 -- It fails in idris/src/IRTS/System.hs
         loadModule f IBC_Building
         -- loadSource False f Nothing
         return ()
-  where f = "Blodwen/src/Core/Primitives.idr"
+  -- where f = "Blodwen/src/Core/Primitives.idr"
+  -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  where f = "Idris-dev/test/basic001/basic001a.idr"
         lidr = False
         mark = Nothing
         res i = evalStateT (parseImports f i) init
