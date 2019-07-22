@@ -17,12 +17,15 @@ import Idris.Docstrings
 import Idris.Unlit
 import Idris.Error (tclift)
 import Idris.IBC
+import Idris.Info (getIdrisLibDir)
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
 
 import Data.List (intersperse)
 import Data.Either (fromLeft, fromRight)
+import Data.Csv as CSV
+import Data.ByteString.Lazy as ByteString (writeFile)
 import qualified Data.Text as Text
 import qualified Data.Map as Map
 import qualified Data.Data as Data
@@ -32,45 +35,58 @@ import Control.Monad.Trans (lift, liftIO)
 
 import System.Environment
 import System.Exit
+import System.FilePath
 
 main :: IO ()
 main = getArgs >>= parseCLIOpts >>= parseIdr
 
-parseCLIOpts :: [String] -> IO (FilePath)
+parseCLIOpts :: [String] -> IO (FilePath, Maybe FilePath)
 parseCLIOpts ["-h"] = usage >> exit
 parseCLIOpts ["-v"] = version >> exit
 parseCLIOpts [] = usage >> exit
-parseCLIOpts [infile] = return infile
+parseCLIOpts [infile] = return (infile, Nothing)
+parseCLIOpts ["-o", outfile, infile] = return (infile, Just outfile)
 
-usage = putStrLn "Usage: stats [-vh] [infile.idr]"
-version = putStrLn "IdrisToAgda Stats tool 0.1"
+usage = putStrLn "Usage: stats [-vh] [-o outfile.csv] [infile.idr]"
+version = putStrLn "IdrisToAgda Statistics tool. Version 0.2"
 exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
-  putStrLn ("Successfuly compiled. Output written to: " ++ outfile) >> exit
+  putStrLn ("Successfuly counted statistics. Output written to: " ++ outfile) >> exit
 error :: FilePath -> ParseError -> IO ()
 error infile err =
   putStrLn ("Error while compiling file: " ++ infile ++ "\n\n" ++
             (prettyError err)) >> Stats.die
 
 
+parseIdr :: (FilePath, Maybe FilePath) -> IO ()
+parseIdr (infile, outfile) = do
+  file <- readSource infile
+  let res = testParse infile file
+  case res of
+      Left err -> putStrLn $ prettyError err
+      Right pd -> case outfile of
+        Just out -> ByteString.writeFile out (statsToCSV $ countD pd) >> success out
+        Nothing -> putStrLn $ showStats $ countD pd
+
+
 
 testParse :: FilePath -> String -> Either ParseError [PDecl]
 testParse filepath file = runparser (prog defaultSyntax) idrisInit filepath file
 
--- testParse' :: FilePath -> String -> Either ParseError [PDecl]
--- testParse' filepath file = parseProg defaultSyntax filepath file Nothing
-
 showErr :: (Show a) => IO (Either TT.Err a) -> IO ()
 showErr a = do q <- a
                case q of
-                 Right q -> putStrLn "Success"
+                 Right q -> return ()
                  Left w -> print w
 
+tk :: (Show a) => Idris a -> IO ()
 tk a = showErr $ runExceptT (evalStateT a idrisInit)
 
+iPrint :: (Show a) => a -> Idris ()
 iPrint a = liftIO $ print a
 
+tl :: Idris ()
 tl = do (file :: String) <- liftIO $ readSource f
   -- case P.parse (runWriterT (evalStateT p i)) inputname s of
         -- let fileR = Regex.subRegex "import.*$" file ""
@@ -84,7 +100,22 @@ tl = do (file :: String) <- liftIO $ readSource f
         -- b <- runExceptT a
         -- let (c, d, e, f) = fromRight undefined b
         -- iPrint c
--- TODO This fails because idrisDataDir env var is not set. Probably since I'm
+
+        -- Show debug info
+        setQuiet False
+        setVerbose 100
+        -- Load StdLib
+        addPkgDir "prelude"
+        addPkgDir "base"
+        loadModule "Builtins" (IBC_REPL False)
+        addAutoImport "Builtins"
+        loadModule "Prelude" (IBC_REPL False)
+        addAutoImport "Prelude"
+        -- TODO START HERE
+        -- I probably need to load the current directory as well. And maybe the
+        -- whole project structure
+
+-- DONE This fails because idrisDataDir env var is not set. Probably since I'm
 -- not building Idris in the normal way. I should write something about this in
 -- the report. But it's more about the SE side of things.
 --
@@ -92,17 +123,28 @@ tl = do (file :: String) <- liftIO $ readSource f
 -- I should talk about this, in the report.
 --
 -- It fails in idris/src/IRTS/System.hs
-        loadModule f IBC_Building
-        -- loadSource False f Nothing
+        loadModule f $ IBC_REPL True
+
+        i <- getIState
+        liftIO $ putStrLn $ showStats $ countD (ast i)
+        -- TODO Also counted which files are imported, spec. std. lib.
+        -- So I know which ones I should shim.
+        -- liftIO $ putStrLn ""
+        -- liftIO (print $ imported i)
         return ()
   -- where f = "Blodwen/src/Core/Primitives.idr"
   -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
   where f = "Idris-dev/test/basic001/basic001a.idr"
+  -- where f = "Idris-dev/test/basic003/test027.idr"
         lidr = False
         mark = Nothing
         res i = evalStateT (parseImports f i) init
         init = idrisInit
         parser = (prog defaultSyntax)
+        addPkgDir :: String -> Idris ()
+        addPkgDir p = do ddir <- runIO getIdrisLibDir
+                         addImportDir (ddir </> p)
+                         addIBC (IBCImportDir (ddir </> p))
   
 -- Test functions while developing
 
@@ -138,15 +180,6 @@ tp = do (file_in :: String) <- readSource f
         lidr = True
 
 
-parseIdr :: FilePath -> IO ()
-parseIdr infile = do
-  file <- readSource infile
-  let res = testParse infile file
-  case res of
-        Left err -> putStrLn $ prettyError err
-        Right pd -> putStrLn $ showStats $ countD pd
-
-
 type Stats = Map.Map String Int
 
 countD decls = foldl (flip countD') Map.empty decls
@@ -156,6 +189,9 @@ addD name stats = Map.insertWith (+) ("PDecl: " ++ name) 1 stats
 
 addT :: String -> Stats -> Stats
 addT name stats = Map.insertWith (+) ("PTerm: " ++ name) 1 stats
+
+addPC :: String -> Stats -> Stats
+addPC name stats = Map.insertWith (+) ("PClause: " ++ name) 1 stats
 
 
 recf :: String -> [PDecl] -> Stats -> Stats
@@ -171,12 +207,13 @@ recpc :: String -> [PClause] -> Stats -> Stats
 recpc name clauses m = (addD name) (foldl (flip pclfn) m clauses)
 
 pclfn :: PClause -> Stats -> Stats
-                                            -- Same as `rect`
-pclfn (PClause _ _ whole withs rhs whr) m = (foldl (flip countT') m' pterms)
+pclfn (PClause _ _ whole withs rhs whr) m = (addPC "PClause") (foldl (flip countT') m' pterms)
+    -- Same as `rect`
   where pterms = whole : rhs : withs
-        -- Same as `recf`
+        m' = foldl (flip countD') m whr -- Same as `recf`
+pclfn (PWith _ name whole withs rhs _ whr) m = (addPC "PWith") (foldl (flip countT') m' pterms)
+  where pterms = whole : rhs : withs
         m' = foldl (flip countD') m whr
-pclfn (PWith _ name whole withs rhs _ wher) m = undefined
 -- Constructors below are within a `with`-statement.
 pclfn (PClauseR _ withs rhs wher) m = undefined
 pclfn (PWithR _ withs rhs _ wher) m = undefined
@@ -332,6 +369,7 @@ countT' (PConstSugar _ term) = rect "PConstSugar" [term]
     --  A desugared constant. The _ is a precise source
     -- location that will be used to highlight it later.
 
+statsToCSV m = CSV.encode $ Map.assocs m
 
 showStats :: Stats -> String
 showStats m = Map.foldlWithKey showRec "" m
@@ -341,9 +379,11 @@ showRec pre constructor count = pre ++ "\n" ++ (padRight constructor) ++ (show c
 
 -- Add amount of tabs to line things up.
 padRight :: String -> String
-padRight s = if (length s) > 8
-  then s ++ "\t\t"
-  else s ++ "\t\t\t"
+padRight s
+  | len >= 16 = s ++ "\t\t"
+  | len >= 8 = s ++ "\t\t\t"
+  | len < 8 = s ++ "\t\t\t\t"
+  where len = length s
 
 -- This function is probably a bad idea. It won't work probably
 -- declToTerm :: PDecl -> Maybe PTerm

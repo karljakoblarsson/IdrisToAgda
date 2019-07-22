@@ -693,6 +693,7 @@ executable sts
                 , vector < 0.13
                 , vector-binary-instances < 0.3
                 , zip-archive > 0.2.3.5 && < 0.5
+                , cassava >= 0.5.1
   build-tools:  happy >= 1.15 && < 2,
                 alex >= 3.0 && < 4
   default-language: Haskell98
