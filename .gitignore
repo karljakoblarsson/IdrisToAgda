@@ -10,7 +10,14 @@
 *.out
 *.fdb_latexmk
 *.fls
+*.toc
+*.lof
+*.tot
+*.bcf
 
 *~
 
 .stack-work/
+
+
+*.projectile
