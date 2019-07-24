@@ -14,10 +14,9 @@
 *.lof
 *.tot
 *.bcf
+halftimereport.run.xml
 
 *~
 
 .stack-work/
 
-
-*.projectile
