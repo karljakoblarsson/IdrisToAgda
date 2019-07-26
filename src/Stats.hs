@@ -18,6 +18,7 @@ import Idris.Unlit
 import Idris.Error (tclift)
 import Idris.IBC
 import Idris.Info (getIdrisLibDir)
+import Idris.ElabDecls (elabPrims)
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
@@ -48,7 +49,7 @@ parseCLIOpts [infile] = return (infile, Nothing)
 parseCLIOpts ["-o", outfile, infile] = return (infile, Just outfile)
 
 usage = putStrLn "Usage: stats [-vh] [-o outfile.csv] [infile.idr]"
-version = putStrLn "IdrisToAgda Statistics tool. Version 0.2"
+version = putStrLn "IdrisToAgda Statistics tool. Version 0.3"
 exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
@@ -59,12 +60,11 @@ error infile err =
             (prettyError err)) >> Stats.die
 
 
-parseIdr :: (FilePath, Maybe FilePath) -> IO ()
+-- parseIdr :: (FilePath, Maybe FilePath) -> IO ()
 parseIdr (infile, outfile) = do
-  file <- readSource infile
-  let res = testParse infile file
-  case res of
-      Left err -> putStrLn $ prettyError err
+  ast <- runIdr $ parseF infile 
+  case ast of
+      Left err -> putStrLn $ show err
       Right pd -> case outfile of
         Just out -> ByteString.writeFile out (statsToCSV $ countD pd) >> success out
         Nothing -> putStrLn $ showStats $ countD pd
@@ -80,31 +80,58 @@ showErr a = do q <- a
                  Right q -> return ()
                  Left w -> print w
 
-tk :: (Show a) => Idris a -> IO ()
+-- runIdr :: Idris [PDecl] -> IO [PDecl]
+runIdr :: Idris a -> IO (Either TT.Err a)
+runIdr a = do runExceptT (evalStateT a idrisInit)
+              -- return (fromRight [] res)
+
+tk :: Show a => Idris a -> IO ()
 tk a = showErr $ runExceptT (evalStateT a idrisInit)
+
 
 iPrint :: (Show a) => a -> Idris ()
 iPrint a = liftIO $ print a
 
+test = do res <- runIdr $ parseF f
+          case res of
+              Right pd -> putStrLn $ showStats $ countD pd
+              Left err -> putStrLn $ show err
+  -- where f = "Blodwen/src/Core/Primitives.idr"
+  -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  -- where f = "Idris-dev/test/basic001/basic001a.idr"
+  -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
+  where f = "Idris-dev/test/basic003/test027.idr"
+  -- where f = "simpleIdris.idr"
+
+parseF :: FilePath -> Idris [PDecl]
+parseF f = do
+        -- Load StdLib
+        elabPrims
+        addPkgDir "prelude"
+        addPkgDir "base"
+        loadModule "Builtins" (IBC_REPL False)
+        addAutoImport "Builtins"
+        loadModule "Prelude" (IBC_REPL False)
+        addAutoImport "Prelude"
+        -- TODO START HERE
+        -- I probably need to load the current directory as well. And maybe the
+        -- whole project structure
+        loadModule f $ IBC_REPL True
+
+        i <- getIState
+        -- liftIO $ putStrLn $ showStats $ countD (ast i)
+        return (ast i)
+  where addPkgDir :: String -> Idris ()
+        addPkgDir p = do ddir <- runIO getIdrisLibDir
+                         addImportDir (ddir </> p)
+                         addIBC (IBCImportDir (ddir </> p))
 tl :: Idris ()
 tl = do (file :: String) <- liftIO $ readSource f
-  -- case P.parse (runWriterT (evalStateT p i)) inputname s of
-        -- let fileR = Regex.subRegex "import.*$" file ""
-
-        -- q <- parseImports f file
-                  -- file <- if lidr then tclift $ unlit f file_in else return file_in
-        -- let (c, d, e, f) = q
-        -- let res = tp
-
-        -- let a = res file
-        -- b <- runExceptT a
-        -- let (c, d, e, f) = fromRight undefined b
-        -- iPrint c
-
         -- Show debug info
         setQuiet False
         setVerbose 100
         -- Load StdLib
+        -- elabPrims
         addPkgDir "prelude"
         addPkgDir "base"
         loadModule "Builtins" (IBC_REPL False)
@@ -126,6 +153,7 @@ tl = do (file :: String) <- liftIO $ readSource f
         loadModule f $ IBC_REPL True
 
         i <- getIState
+        iPrint (ast i)
         liftIO $ putStrLn $ showStats $ countD (ast i)
         -- TODO Also counted which files are imported, spec. std. lib.
         -- So I know which ones I should shim.
@@ -135,7 +163,9 @@ tl = do (file :: String) <- liftIO $ readSource f
   -- where f = "Blodwen/src/Core/Primitives.idr"
   -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
   where f = "Idris-dev/test/basic001/basic001a.idr"
+  -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr"
+  -- where f = "simpleIdris.idr"
         lidr = False
         mark = Nothing
         res i = evalStateT (parseImports f i) init

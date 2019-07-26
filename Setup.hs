@@ -319,8 +319,8 @@ idrisBuild _ flags _ local
 idrisInstall verbosity copy pkg local
    = if (execOnly (configFlags local)) then installRTS
         else do installStdLib
-                installRTS
-                installManPage
+                -- installRTS
+                -- installManPage
    where
       target = datadir $ L.absoluteInstallDirs pkg local copy
 
