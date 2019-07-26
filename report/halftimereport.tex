@@ -295,10 +295,11 @@ are allowed to depend on values, which allows the compiler to check much richer
 properties about the program than Hindley-Milner~\cite{hindley}~\cite{milner}
 style types.
 
-Agda and Idris are two widely used dependently type programming languages. They
-are very similar. The Idris website states that Idris is inspired
+Agda and Idris are two widely used dependently type programming languages.
+The Idris website states that Idris is inspired
 by Agda but with more focus on practical
 programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
+They are similar in features and their type-systems.
 % TODO Refer to the Idris paper instead.
 
 Agda is developed as a research language, with the focus on interactive theorem
@@ -385,7 +386,7 @@ therefore can prove false statements.
 % TODO No headings with a single paragraph
 \subsection{Source-to-Source translation}
 % TODO Write a general introduction about transpilers/source-to-source etc.
-% TODO Find a few relevant articles
+% TODO Find relevant articles
 
 A source-to-source compiler, often called a transcompiler or transpiler, is
 a compiler which translates source code in one programming language into
@@ -583,12 +584,39 @@ as much real-world code as soon as possible. To guide our implementation we
 wrote a tool which parses Idris into its AST and then records which data
 constructors are most often used.
 
-% TODO TODO TODO
-% "Future:"
-% Then we ran this tool on the 'IdrisLibs' Sequantial Decision
-% Problems library. See the results in figure. Right now the transpiler handles
-% XX of YY constructors of the Idris Term language and ZZ of WW constructors of
-% the declaration language.
+% TODO
+Then we ran this tool on the Idris Prelude. See the results in the table below:
+
+
+\begin{center}
+  \begin{tabular}{ c c c }
+    Variable reference     & PTerm: PRef             & 39 \% \\
+    Application            & PDecl: PApp             & 26 \% \\
+    $\rightarrow$          & PDecl: PPi              & 12 \% \\
+    Patten clause          & PDecl: PClauses         & 8 \% \\
+    Constant               & PTerm: PConstant        & 4 \% \\
+    Type declaration       & PDecl: PTy              & 6 \% \\
+                           & PDecl: PImplementation  & 2 \% \\
+    Rewrite rule           & PDecl: PRewrite         & 1 \% \\
+                           & PDecl: PDirective       & 1 \% \\
+                           & PDecl: PPair            & 1 \% \\
+    Data declaration       & PDecl: PData            & 0 \% \\
+    Fixity declaration     & PDecl: PFix             & 0 \% \\
+                           & PTerm: PImpossible      & 0 \% \\
+                           & PDecl: PCase            & 0 \% \\
+                           & PTerm: PType            & 0 \% \\
+                           & PDecl: PInterface       & 0 \% \\
+    With-clause            & PClause: PWith          & 0 \% \\
+                           & PDecl: PAlternative     & 0 \% \\
+                           & PDecl: PConstSugar      & 0 \% \\
+                           & PTerm: Placeholder      & 0 \% \\
+    Let clause             & PDecl: PLet             & 0 \% \\
+    Record declaration     & PDecl: PRecord          & 0 \% \\
+    Lambda function        & PDecl: PLam             & 0 \% \\
+    Namespace declaration  & PDecl: PNamespace       & 0 \% \\
+  \end{tabular}
+\end{center}
+
 
 % We aim to have implementend ?? of the most widely used constructors when this
 % project is done.
@@ -619,7 +647,7 @@ enumerated below:
   semantics.
 \end{enumerate}
 
-% \item The transpiler passes many generated tests.
+% \item The transpiler passes generated tests.
 % \item The transpiler is formally proved to be correct.
 
 However, we need to show that our transpiler works for different programs.
@@ -730,15 +758,14 @@ a dependently typed program.
 % to reuse existing Agda and Idris sources.
 
 % TODO Should this be in the report?
-% TODO remove quite
-% The Idris compiler is quite stateful, most of it uses a state monad with a huge
-% state, It is almost like an imperative program, just written in Haskell. The
+% The Idris compiler implementation uses the state monad a lot.
+% It is almost like an imperative program, just written in Haskell. The
 % often touted benefits of functional programming goes out of the window, but the
 % compiler is still happy. It goes to show that functional programming is not
 % a miracle cure for bad programs, that is still up to the programmer.
 
 % Something something about the crazy Idris implementation with a big state
-% monad used everywhere with a huge state. Its almost an imperative program,
+% monad used everywhere. It is almost an imperative program,
 % just written in Haskell.
 
 % The next version of Idris is developed from scratch in a new project, and some
