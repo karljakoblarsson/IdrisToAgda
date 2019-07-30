@@ -113,7 +113,7 @@ parseF f = do
         addAutoImport "Builtins"
         loadModule "Prelude" (IBC_REPL False)
         addAutoImport "Prelude"
-        -- TODO START HERE
+        -- TODO
         -- I probably need to load the current directory as well. And maybe the
         -- whole project structure
         loadModule f $ IBC_REPL True
@@ -125,6 +125,8 @@ parseF f = do
         addPkgDir p = do ddir <- runIO getIdrisLibDir
                          addImportDir (ddir </> p)
                          addIBC (IBCImportDir (ddir </> p))
+
+-- Function for repl testing. Replaced by `parseF`
 tl :: Idris ()
 tl = do (file :: String) <- liftIO $ readSource f
         -- Show debug info
@@ -138,7 +140,7 @@ tl = do (file :: String) <- liftIO $ readSource f
         addAutoImport "Builtins"
         loadModule "Prelude" (IBC_REPL False)
         addAutoImport "Prelude"
-        -- TODO START HERE
+        -- TOD
         -- I probably need to load the current directory as well. And maybe the
         -- whole project structure
 

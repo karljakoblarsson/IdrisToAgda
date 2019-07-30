@@ -27,6 +27,8 @@ import Control.Monad.Trans (lift, liftIO)
 import System.Environment
 import System.Exit
 
+import Debug.Trace
+
 
 runIdr :: Idris a -> IO (Either TT.Err IState)
 runIdr prog = runExceptT $ execStateT prog idrisInit
@@ -44,11 +46,8 @@ iden n = Ident $ qname n
 lit :: Integer -> Expr
 lit i = Lit $ LitNat NoRange i
 
--- TODO START HERE
 -- Try to handle implict/explict arguments. The whole '{a : Set}' thing.
-
--- TODO Right now the translator throws away names for arguments in type
--- signatures. Don't do that.
+-- It's somewhat done. Probably not correct yet but working
 
 -- The '{a : A}' is a definition of a implicit function space.
 -- To give an implicit argument explicit to a function, enclose it in brackets.
@@ -86,6 +85,7 @@ itaDecl (PData doc names synInfo range types
                  ]
         expr = itaTerm typeconstructor
         typesigs = map itaDC dataconstructors
+-- TODO Preserve arg names.
 itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
   typesig (itaName nameIdr) (itaTerm terms)
 itaDecl (PClauses range fnopts name clauses) = -- Pattern clause
@@ -166,14 +166,42 @@ paren e = Paren NoRange e
 -- it to do correctly?
 -- Right now there is this ugly hack.
 
+createTelescope :: TT.Name -> PTerm -> Telescope
+createTelescope name pterm = [TBind NoRange bargs (itaTerm pterm)]
+  where bargs = [barg]
+        barg = arg (Main.prettyName name) (mkBoundName_ (itaName name))
+
+-- data ArgOpt = AlwaysShow
+--             | HideDisplay
+--             | InaccessibleArg
+--             | UnknownImp
+-- data Static = Static | Dynamic
+-- data RigCount = Rig0 | Rig1 | RigW
+  -- Rig = Quantity?
+itaPi :: Plicity -> TT.Name -> PTerm -> PTerm -> Expr
+itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
+  -- There is something with name...
+  -- trace ((show pargopts) ++ (show name) ++ (show pstatic) ++ (show pparam) ++ (show pcount))
+  if isMN name then
+    Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
+  else
+  case Main.prettyName name of
+    -- TODO For some reason the Idris parser sets the names of some things
+    -- It calls arguments __pi_arg.
+    "__pi_arg" -> Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
+    _ -> Pi (createTelescope name term1) (itaTerm term2)
+  -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
+  -- Pi (createTelescope name term1) (itaTerm term2)
+itaPi (Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
+  -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
+  undefined
+itaPi (Constraint _ _ _) name term1 term2 = undefined
+itaPi (TacImp _ _ _ _) name term1 term2 =  undefined
+
 itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
 itaTerm whole@(PApp range fst args) = itaApp whole 0
-itaTerm (PPi plicity name fc term1 term2) =
-  -- This maybe should be an Agda.Pi istead. Related to argument names thrown
-  -- away.
-  Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
-  where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
+itaTerm (PPi plicity name fc term1 term2) = itaPi plicity name term1 term2
 itaTerm (PConstSugar fc term) = itaTerm term
 itaTerm (PConstant fc const) = Lit (itaConst const)
 itaTerm (PAlternative namePair alttype terms) = case length terms of
@@ -239,12 +267,18 @@ addComment = (++)
   -- There is also AbsStyntaxTree.prettyName but it's harder to use.
 prettyName :: TT.Name -> String
 prettyName (TT.UN name) =  Text.unpack name
-prettyName (TT.NS ns names) = concat $ intersperse "." $
-  (map Text.unpack names) ++ [Main.prettyName ns]
-prettyName (TT.MN id name) = addComment
+-- prettyName (TT.NS ns names) = concat $ intersperse "." $
+--   (map Text.unpack names) ++ [Main.prettyName ns]
+  -- Names similar to "_t_0" are machine generated
+prettyName (TT.MN id name) =  addComment
   ("Machine chosen name with id: " ++ (show id)) $ Text.unpack name
-prettyName (TT.SN sn) = addComment "Decorated function name" $ prettySN sn
-prettyName (TT.SymRef id) = addComment "Reference to IBC" $ show id
+-- prettyName (TT.SN sn) = addComment "Decorated function name" $ prettySN sn
+-- prettyName (TT.SymRef id) = addComment "Reference to IBC" $ show id
+prettyName _ = undefined
+
+isMN :: TT.Name -> Bool
+isMN (TT.MN _ _) = True
+isMN _ = False
 
 prettySN :: TT.SpecialName -> String
 prettySN (TT.WhereN a b c) = "WhereN"
@@ -296,6 +330,9 @@ runITA (infile, outfile) =
          Just outfilename -> writeFile outfilename res >> success outfilename
          Nothing -> putStrLn res
  
+  -- TODO START HERE
+  -- Use `loadSource` and the real Idris impl, to use elaborated terms and so on.
+  
 -- 'itaDecl' is the function which does the translation.
 tryCompile :: String -> FilePath -> Either ParseError String
 tryCompile infile filename =
@@ -309,10 +346,17 @@ tp = do (file :: String) <- readSource f
         let res = testParse file
         case res of
           Left err -> putStrLn $ prettyError err
-          Right pd -> putStrLn $ show $ map itaDecl pd
-          -- Right pd -> putStrLn $ prettyShow $ itaDecl $ head pd
+          Right pd -> do
+            putStrLn "PDecls:"
+            putPDecls pd
+            putStrLn "\nAgda:"
+            (putStrLn $ show $ map itaDecl pd)
+            putStrLn "\nOutput:"
+            putStrLn $ prettyShow $ map itaDecl pd
+          -- Right pd -> putStrLn $ prettyShow $ map itaDecl pd
           -- Right pd -> putPDecls pd
   where f = "patrik.idr"
+  -- where f = "testP.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 te :: IO (Either TT.Err IState)
@@ -347,11 +391,38 @@ te = do (file :: String) <- readSource f
 testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
 
 
+--------------------------------------------------------------------------------
+-- Agda constructors
+
 modality :: Modality
-modality = Modality Relevant Quantity0
+modality = Modality Relevant defaultQuantity
+-- modality = Modality Relevant Quantity0
+-- defaultModality = Modality defaultRelevance defaultQuantity
 
 arg :: String -> a -> NamedArg a
-arg name expr = Arg (ArgInfo NotHidden modality UserWritten UnknownFVs) $
+arg name expr
+  -- TODO Should there be a special case for "__pi_arg"?
+  | name == "__pi_arg" = defaultNamedArg expr
+  | otherwise = Arg (ArgInfo NotHidden modality UserWritten UnknownFVs) $
+  Named (Just (Ranged NoRange name)) expr
+
+-- data ArgInfo = ArgInfo
+--   { argInfoHiding        :: Hiding
+--   , argInfoModality      :: Modality
+--   , argInfoOrigin        :: Origin
+--   , argInfoFreeVariables :: FreeVariables
+--   } deriving (Data, Eq, Ord, Show)
+
+-- defaultArgInfo =  ArgInfo
+--   { argInfoHiding        = NotHidden
+--   , argInfoModality      = defaultModality
+--   , argInfoOrigin        = UserWritten
+--   , argInfoFreeVariables = UnknownFVs
+
+  
+  -- Only hidden arguments can have names in Agda
+hiddenArg :: String -> a -> NamedArg a
+hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
   Named (Just (Ranged NoRange name)) expr
 
 funcExpr :: String -> Expr -> Expr
