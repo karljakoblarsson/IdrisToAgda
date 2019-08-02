@@ -81,6 +81,7 @@ flags:
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
+# - './agda'
 
 ghc-options:
   "$locals": -I=agda/src/full/

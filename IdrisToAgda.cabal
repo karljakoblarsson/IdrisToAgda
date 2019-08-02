@@ -836,6 +836,7 @@ executable sts
                  Util.DynamicLinker
                  Util.ScreenSize
                  Util.System
+                 Idris.Info
 
                 -- Auto Generated
                 , Paths_IdrisToAgda

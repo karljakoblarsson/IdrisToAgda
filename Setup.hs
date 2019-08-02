@@ -295,6 +295,7 @@ idrisPreBuild args flags = do
 #endif
 
 idrisBuild _ flags _ local
+    {- = putStrLn "ATTENTIION: Not running any Idris set-up for a normal ita build" -}
    = if (execOnly (configFlags local)) then buildRTS
         else do buildStdLib
                 buildRTS
@@ -317,10 +318,11 @@ idrisBuild _ flags _ local
 -- Copy/Install
 
 idrisInstall verbosity copy pkg local
+    {- = putStrLn "ATTENTIION: Not running any Idris set-up for a normal ita build" -}
    = if (execOnly (configFlags local)) then installRTS
         else do installStdLib
-                -- installRTS
-                -- installManPage
+                installRTS
+                installManPage
    where
       target = datadir $ L.absoluteInstallDirs pkg local copy
 

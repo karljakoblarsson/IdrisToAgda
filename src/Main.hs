@@ -52,6 +52,8 @@ lit i = Lit $ LitNat NoRange i
 -- The '{a : A}' is a definition of a implicit function space.
 -- To give an implicit argument explicit to a function, enclose it in brackets.
 
+-- TODO Add comments to the Agda concrete syntax
+
 -- There seems to be no information in the Idris AST about implicit
 -- arguments. Which probably is to be expected at this stage before type
 -- checking. Do I need to run elaboration/typechecking before being able to
@@ -211,6 +213,8 @@ itaTerm (PAlternative namePair alttype terms) = case length terms of
 itaTerm (PType fc) = iden "Set"
 itaTerm (PIfThenElse fc ift thent elset) = undefined
 itaTerm (PPair fc fcs puninfo termA termB) = undefined
+  -- This should return a hole.
+itaTerm (PMetavar _ _) = hole
 itaTerm _ = undefined
 
 -- Hack for 'fromInteger'
@@ -355,8 +359,9 @@ tp = do (file :: String) <- readSource f
             putStrLn $ prettyShow $ map itaDecl pd
           -- Right pd -> putStrLn $ prettyShow $ map itaDecl pd
           -- Right pd -> putPDecls pd
-  where f = "patrik.idr"
+  -- where f = "patrik.idr"
   -- where f = "testP.idr"
+  where f = "testF.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
 te :: IO (Either TT.Err IState)
@@ -433,3 +438,6 @@ typesig :: Name -> Expr -> TypeSignature
 typesig name body = TypeSig argInfo name body
   where argInfo = ArgInfo NotHidden modality UserWritten UnknownFVs
         expr = funcExpr "argTest" (iden "FunctionTest")
+
+hole :: Expr
+hole = QuestionMark NoRange Nothing
