@@ -24,6 +24,7 @@ sts: ${csvFiles}
 
 stats.csv: ${csvFiles}
 	./joinStats.py stats.csv ${csvFiles}
+	sort --field-separator=',' --key=4gr -o stats.csv stats.csv
 
 temp: ${csvFiles}
 	cat $(csvFiles) > $(statsDir)/test.csv

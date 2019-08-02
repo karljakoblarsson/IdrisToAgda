@@ -25,5 +25,10 @@ for val in stats.values():
 
 with open(output, 'w') as f:
     for key in stats.keys():
-        f.write("{0},{1},{2:.0%}\n".format(key, stats[key], stats[key]/total))
+        [typ, name] = key.split(' ')
+        freq = stats[key]/total
+        rounded = round(freq, 4)
+        percent = rounded * 100
+        f.write("{0},{1},{2},{3:.4} %\n".format(typ, name, stats[key], percent))
+
 exit()

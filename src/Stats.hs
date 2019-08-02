@@ -49,7 +49,7 @@ parseCLIOpts [infile] = return (infile, Nothing)
 parseCLIOpts ["-o", outfile, infile] = return (infile, Just outfile)
 
 usage = putStrLn "Usage: stats [-vh] [-o outfile.csv] [infile.idr]"
-version = putStrLn "IdrisToAgda Statistics tool. Version 0.3"
+version = putStrLn "IdrisToAgda Statistics tool. Version 0.4"
 exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
@@ -230,13 +230,13 @@ recf :: String -> [PDecl] -> Stats -> Stats
 recf name decls m = (addD name) (foldl (flip countD') m decls)
 
 recdt :: String -> PTerm -> Stats -> Stats
-recdt name term m = (addD name) (countT' term m)
+recdt name term m = (addT name) (countT' term m)
 
 rect :: String -> [PTerm] -> Stats -> Stats
-rect name terms m = (addD name) (foldl (flip countT') m terms)
+rect name terms m = (addT name) (foldl (flip countT') m terms)
 
 recpc :: String -> [PClause] -> Stats -> Stats
-recpc name clauses m = (addD name) (foldl (flip pclfn) m clauses)
+recpc name clauses m = (addPC name) (foldl (flip pclfn) m clauses)
 
 pclfn :: PClause -> Stats -> Stats
 pclfn (PClause _ _ whole withs rhs whr) m = (addPC "PClause") (foldl (flip countT') m' pterms)
@@ -313,7 +313,7 @@ countT' (PPatvar _ _) = addT "PPatvar"
 --  A pattern variable
 countT' (PLam _ _ _ term1 term2) = rect "PLam" [term1, term2]
 --  A lambda abstraction. Second _ is name span.
-countT' (PPi  _ _ _ term1 term2) = rect"PPi" [term1, term2]
+countT' (PPi  _ _ _ term1 term2) = rect "PPi" [term1, term2]
 --  (n : t1) -> t2, where the _ is for the precise location of the variable
 countT' (PLet _ _ _ _ term1 term2 term3) = rect"PLet" [term1, term2, term3]
 --  A let binding (second _ is precise name location)
