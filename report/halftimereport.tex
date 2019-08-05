@@ -215,7 +215,7 @@ system in research.
 Dependently typed programming languages, however, are far from mainstream.
 There are many factors which hinders adoption. One is community fragmentation.
 The functional programming community for example is mainly focused on Haskell.
-The dependently typed community however, is split between several langauges.
+The dependently typed community however, is split between several languages.
 Idris, Agda, ATS, F* and Epigram are some of the most used.
 
 A common obstacle for adoption of a new programming language is the
@@ -224,7 +224,7 @@ many different libraries.  For example, network protocols, parser combinators
 and cryptography.  Implementing all common libraries is a huge task.  There is
 a lot of duplicated effort when every language needs to implement similar
 libraries.  If it would be possible to re-use libraries between languages,
-language implementors could focus on developing their language.
+language implementers could focus on developing their language.
 % instead of writing the same libraries over and over for every new language.
 
 Agda~\cite{agda} and Idris~\cite{idris} are two of the most used dependently
@@ -241,13 +241,13 @@ number of available Agda libraries and increase the audience for every new
 Idris library.
 
 Dependent types allow for all propositions in predicate logic to be encoded as
-types. A program which type-checks is the a proof of the proposition encoded in
+types. A program which type-checks is a proof of the proposition encoded in
 its type signature. A dependently type programming language is also a theorem
 prover. If the transpiler is correct and verified it can be used to increase
 the confidence of theorems. A proof which is valid in both languages is
 stronger than one which is only valid in one language.
 % It will increase the confidence in a proof if it is valid in both languages
-% after tranpiling.  It will increase the confidence of a given proof if it is
+% after transpiling.  It will increase the confidence of a given proof if it is
 % valid in both type systems because it is unlikely that both type-checkers
 % will have the same bug. This is only valid for a verified transpiler however,
 % otherwise there is probably bugs in the transpiler.
@@ -259,12 +259,12 @@ The goal of this project is to construct a transpiler which can translate
 a subset of Idris into valid Agda. The transpiler is intended as an aid to
 a human programmer which adapts and Idris library for use in Agda.  It is not
 intended as a automatic compiler which runs Idris programs using the Agda
-runtime Therfore we will leave untranslatable parts as holes for the user to
+runtime. Therefore we will leave untranslatable parts as holes for the user to
 manually specify. This also means we aim to produce output which is easy for
 the human user to understand.
 
 % Expand
-% Since depedently typed programming is often used for formal proofs it is
+% Since dependently typed programming is often used for formal proofs it is
 % important that the user can understand the program.
 
 % The language features which are
@@ -282,7 +282,6 @@ as possible.
 % inputs.
 
 
-% TODO START HERE
 \subsection{Scope}
 
 It is not feasible to correctly correctly translate between 100\% of the
@@ -297,6 +296,7 @@ unusably slow Agda program. The run-time of a dependently typed program is not
 a well understood subject. And it depends a lot on the internal working of the
 compiler, which can change with every new version.
 
+We will target Idris 1.3.1 and Agda 2.6.0.
 
 \section{Background}
 
@@ -307,47 +307,23 @@ another language, usually of similar level of abstraction. A traditional
 compiler takes a higher level language as input and outputs a lower level
 language, often machine code.  Since Agda and Idris are similar languages we will write a transpiler.
 
-Source-to-source transpiler exists for many language pairs. Most compile
-a percived higher power language into a lower power, similar to most
-conventional compiler which compile from a high-level language to assembly or
-machine code. For example there exists transpilers from Haskell to JavaScript,
-even Idris has a JavaScript backend. Transpiling between languages of similar
-level has less research.
+Source-to-source transpilers exists for many language pairs. Even so, there are
+no published attempts of a transpiler to and from dependently
+typed languages.
 
-A transpiler for dependently typed languages has no published attempt.
-Dependent types make it harder to construct a transpiled program which
-compiles.
+% TODO Should this be here?
+% Dependent type systems are still an active research topic and it is hard
+% to determine if two statements in different systems are equal. This is
+% a big challenge when trying to show that the transpiler works correctly.
 
-% Not useful for the reader.
-% Dependently typed programming is the application of
-% Intuitionistic Type Theory~\cite{martinlof} to practical programming.
-
-% Dependent types goes further and make it possible to specify propositions from
-% predicate logic as types. In theory this allows for the compiler to formally
-% verify a program.
-
-Dependent types are types which depend on values. This allows the compiler to
-check richer properties about programs than a regular strong static type
-system, such as the one in Haskell.
-Agda and Idris are two widely used programming languages with support for dependent types.
-The Idris website states that Idris is inspired
-by Agda but with more focus on practical
-programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
-They are similar in features and in their type-systems.
-
-% TODO Reformulate this paragraph.
-Agda is developed as a research language, with the focus on interactive theorem
-proving.  An automatic translator from Idris to Agda source code could increase
-the usefulness of both languages. The work of implementation of it can give us
-greater knowledge of the differences between the type systems and language
-features.
 
 
 % TODO is this a useful heading? I already talk about this two paragraphs up.
 \subsection{Dependently Typed Programming}
 
-Dependent types can be seen as an extension of an algebraic type system which
-allow types to depend on values.
+Dependent types are types which depend on values.
+This allows the compiler to check richer properties about programs than
+a regular strong static type system, such as the one in Haskell.
 A common example is a vector type which is indexed on the length of
 the vector. This allows the programmer to encode constraints and invariants in
 the type system. For example see the signature for \texttt{head} and
@@ -359,40 +335,9 @@ This mixing of values
 and types goes both ways, types can appear in expression and values can appear
 in type signatures.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO Improve this section. It is maybe unnecessary, and not relay relevant
-% to my thesis.
-
-% Dependent types can be used for proof, see Curry-Howard. But also for providing
-% strong correctness guarantees. Which is useful for safety critical systems.
-
-% Dependent types can be seen as the next step in the progression.
-% \begin{enumerate}
-%   \item Algebraic types
-%   \item Parametric Algebraic types
-%   \item Generalized Algebraic Data Types
-%   \item GADTs
-%   \item Full Dependent Types
-% \end{enumerate}
-
-% Parametric Algebraic types allow for parametric polymorphism, as used in
-% Haskell. This means we can write generic functions like:
-% \begin{lstlisting}[language=Lambda]
-%     forall a => [a] -> [a] -> [a]
-% \end{lstlisting}
-
-% Generalized Algebraic data types allow data constructors whose return values
-% are parametrized diffrently. In Haskell syntax:
-
-% \begin{lstlisting}[language=Haskell]
-% data Expr a where
-%   EBool :: Bool -> Expr Bool
-%   EInt :: Int -> Expr Int
-% \end{lstlisting}
-
-% Compare to Dependent types where the return type is allowed to depend on both
-% the type and the \textit{value} of the type variable.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Dependent types goes further and make it possible to specify propositions from
+% predicate logic as types. In theory this allows for the compiler to formally
+% verify a program.
 
 \begin{lstlisting}[language=Haskell,label={lst:depex},caption={ \textit{n} is a type parameter, in this case it is a natural number.  }]
 data Vector : Type -> Nat -> Type where
@@ -408,36 +353,46 @@ tail : Vector a (Suc n) -> Vector a n
 % It will be useful later, when talking about problems with my implementation.
 % Maybe in the Idris subsection.
 
+% \subsection{Agda and Idris}
+Agda and Idris are two programming languages with support for dependent types.
+They are two of the most widely used dependently typed programming languages.
+The Idris website states that Idris is inspired
+by Agda but with more focus on practical
+programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
+Agda's main focus is on interactive theorem proving, though it is used as
+a general purpose programming language as well.
+% Agda's development started as research in how to implement dependent types.
+% Idris is designed to be similar to Haskell syntactically.
 
-% This part is not necessary I think. It is wrong in several places. And not
-% really relevant to my project. Not as a own subsubsection at least.
-% \subsubsection{Termination}
-% For dependent types to be decidable and consistent every program needs to
-% terminate. Otherwise type-checking may take an infinite time.  Both Agda and
-% Idris requires programs to terminate by default, but the termination check can
-% be bypassed explicitly. This is needed for some programs, especially
-% interactive programs, however, it means that the logic is not consistent and
-% therefore can prove false statements.
+One specific difference between Idris and Agda relevant for this project is
+implicit arguments. In dependently typed programming you often want to have
+some type as a parameter to a function, but the compiler can often infer that
+type, so it is very redundant to specify the type in every call to the function
+if the compiler can infer it itself. Therefore both Agda and Idris allows for
+a type argument to be specified implicit. However the syntax differ, in Agda
+a implicit argument needs to be defined in the function definition. In Idris
+every name in a type signature which starts with a lower case letter is assumed
+to be implicit.
+
+% TODO Talk about holes.
+A feature of both languages is a so called 'hole'. This is not something unique
+to dependently typed languages, but it is more useful with a more advanced
+compiler. A hole is a part of program which is left unimplemented. This is
+represented syntactically with a question mark in both Agda and Idris. It
+is then possible to ask the compiler what the type of the expression in the
+hole should be, as well as what bindings are in scope and theirs types. This
+allows the user to interactively refine the program.
 
 
+\subsection{Verification}\label{sec:veri}
 
-% I should some paper related to transpiling and cite. As well as both Idris and
-% Agda implementation-papers. Maybe the faq about differences between the
-% languages.
-
-Dependent type systems are still an active research topic and it is hard
-to determine if two statements in different systems are equal. This is
-a big challenge when trying to show that the transpiler works correctly.
-% TODO Specify what I mean, or remove this sentence.
-Even if both the source and translated programs type-check, it does not
-necessarily mean the translation is correct.
-
-% How to test and verify to translations? It's not feasible to get a lot
-% of code runnable without manual intervention. Can I even get it to type-check?
-% And what does it mean just that the code is well typed in both languages.
-% Equality is hard, especially with dependent types.
-
-\subsection{Verification}
+We need to verify that the transpiler is correct. The transpiler is correct if
+the transpiled program has the same semantics as the source.
+This is simple to define in theory.
+Let $tr(p)$ be the transpiler.
+Given two functions $s_A$ and $s_I$ which maps an Agda or Idris program
+respectively, into some formal definition of semantics.
+The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
 
 \begin{equation} \label{eq:veri1}
   s_A : A \rightarrow S,
@@ -446,46 +401,15 @@ necessarily mean the translation is correct.
 \begin{equation} \label{eq:veri2}
   \forall p\ \text{if}\  s_I(p) == s_A (tr(p))
 \end{equation}
-% TODO Talk about this equation.
-Where $tr(p)$ is the transpiler applied to the program $p$.
 
-% TODO Write more about this.
-See equation \ref{eq:veri2}
-We don't have either of the functions $s_A$ or $s_I$. They may be possible to
-specify, but doing so is far beyond the scope of this project.
-It is not possible to enumerate all possible programs $p$.
-
-% TODO Grammar
-We need to verify that the transpiler preserves the semantics of the source
-program to the transpiled output. However it is hard to do that in general,
-especially before the transpiler is complete.  Ideally the transpiled programs
-both type-check and runs, then we can compare its outout to that of the source
-program.  However, it is hard enough to get the programs to type check without
-manual intervention. The type systems are similar but not identical. This means
-that even if both the source and translated program type-check we can not be
-sure that they represent the same semantics.  Especially if one of the programs
-contain holes. It is hard to reason about equality in the context of dependent
-types.
-
-\subsection{The Idris programming language}
-% TODO Write about Idris and its major features for the programmer. Especially
-% how it differs from theory and Agda.
-Idris is designed to be similar to Haskell syntactically but with dependent
-types. It is specifically aimed at practical programming, compared to most
-other dependently typed languages (Agda, Coq, Hol/Isabelle) which are designed
-for theorem proving.
-
-% TODO Talk about implicit vs. explicit arguments
-One specific difference from Agda relevant for this project is implicit
-arguments. In dependently typed programming you often want to have some type as
-a parameter to a function, but the compiler can often infer that type, so it is
-very redundant to specify the type in every call to the function if the
-compiler can infer it itself. Therfore both Agda and Idris allows for a type
-argument to be specified implicit. However the syntax differ, in Agda
-a implicit argument needs to be defined in the function definition. In Idris
-every name in a type signatur which starts with a lower case letter is assumed
-to be implicit.
-
+This is hard to show in practice however. Simply defining $s_A$ or $s_I$ for
+a subset of the language is a big project, and way beyond the scope of this
+thesis.
+Further, equation~\ref{eq:veri2} needs to hold for every possible program.
+It is of course impossible to enumerate every possible program in a finite
+time, so we either need to construct a formal proof or test a subset of $p$.
+Developing a formal correctness proof is an extremely huge undertaking, there
+exists only a handful of formally verified compilers published.
 
 
 \section{Methods}
@@ -493,25 +417,6 @@ to be implicit.
 Idris is a large language. We need to build the transpiler in small steps. To
 maximise utility of the transpiler we should prioritize the most used features,
 and leave more obscure features for later.
-% TODO Says who? This should be stated in the introduction
-The first and most important part is
-the expression language, function definitions, application and type
-declarations.
-
-Usability oriented features are often are implemented as syntactic sugar and
-not part of the core language. They are not necessary to implement in a working
-transpiler, but are important for it to be a useful tool. There is a trade-off
-there we need to make. If the transpiler outputs code on the level of
-assembly, just encoded in Agda syntax, even if correct, it would not be a useful
-tool.
-% TODO This should be stated in the introduction.
-Since this is meant to be a tool to assist a human programmer it must
-work on a level where its simple for a human user to understand the generated
-code. It is great if it matches the source closely, but that is not an end in
-itself.
-
-% We will target Idris 1.3.1 and Agda 2.6.0.
-
 
 Therefore we wrote a tool to capture usage statistics of the top level abstract
 syntax tree (AST). The tool show which syntactic constructs are most often
@@ -519,26 +424,63 @@ used, and therefore should be prioritized. It also gives the user the
 incentive to refactor Idris code which uses less-used language features,
 which may result in cleaner and more easily understood code.
 
-The first step is to translate simple declarations of types and functions,
-without dependent types. A subset roughly corresponding to Simply Typed Lambda
-Calculus. Since dependent types are the focus of the project the next step is
-to translate them. Starting with application at the type level, and functions
-definitions. Continuing with indexed data types.
+Usability oriented features are often are implemented as syntactic sugar and
+not part of the core language. They are not necessary to implement in a working
+transpiler, but are important for it to be a useful tool. There is a trade-off
+there we need to make. If the transpiler outputs code on the level of
+assembly, just encoded in Agda syntax, even if correct, it would not be a useful
+tool. Since we specifically aim to develop a tool whose output is easy to
+understand for a human programmer, it is good to transpile some syntactic sugar.
 
 
-\subsection{Holes}
-% Code which is untranslateable
-% should be left as holes, with the source as comments.
-% TODO Merge the two following paragraphs
+% \subsection{Holes}
+
 There may be valid Idris code which is impossible to translate to Agda.  Those
-parts will be left as holes for the user to fill in a reasonable translation in
-that specific case.
+parts will be left as holes for the user to fill in a reasonable translation
+for that case.
+The holes must be constructed so that this is possible. Consider this
+Idris implementation of vector concatenation: %in listing~\ref{lst:hole1}.
 
-Where the translator fails we wish to leave holes for the user to provide the
-correct translation.
-% TODO Have examples for this. Of hole refinement.
-The holes must be constructed so that this is possible
-which is not obvious to do.
+\begin{lstlisting}[language=Idris,label={lst:hole1},caption={}]
+concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat Nil rest = rest
+concat (Cons x rest) y = concat rest (Cons x y)
+\end{lstlisting}
+
+A terribly unhelpful translation is the one below. %in listing~\ref{lst:hole2}.
+Simply replacing the whole program with a hole is not incorrect, but not very
+useful.
+
+\begin{lstlisting}[language=Idris,label={lst:hole2},caption={}]
+concat :: ?
+concat = ?
+\end{lstlisting}
+
+A more useful transpiler translate as big part of the programs as it can. See
+this example: %in~\ref{lst:hole3}.
+
+\begin{lstlisting}[language=Idris,label={lst:hole3},caption={}]
+concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat Nil rest = rest
+concat (Cons x rest) y = ?
+\end{lstlisting}
+
+An even better transpiler would also add more info from the compiler, for
+example as a comment. It could potentially look as in this:
+% listing~\ref{lst:hole4}
+
+\begin{lstlisting}[language=Idris,label={lst:hole4},caption={}]
+concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat Nil rest = rest
+concat (Cons x rest) y = concat rest ?a
+-- The type of hole `?a` is: `Vec g c`
+-- Availible bindings are:
+    -- add : N -> N -> N
+    -- Cons : g -> Vec a n -> Vec a (Suc n)
+    -- x : g
+    -- y : Vec g b
+    -- b : N
+\end{lstlisting}
 
 
 \subsection{Implementation details}
@@ -553,28 +495,12 @@ of the code we need to write is handling the actual translation.
 Both Agda and Idris 1 are written in Haskell.  This allows us to build both as
 a single Cabal project using Stack.  This makes it easy to reuse all parts of
 both languages implementations if needed.  We use Git and import both projects
-as Git submodules. This makes the chages changes we make to the upstream
-implementations explicit.  Until now we have only made minor changes, to use
-the same version of third party libraries in both Agda and Idris. The use of
-Git submodules allows us to easily use newer versions of both languages in the
-future.
-
-% TODO Maybe this paragraph or the one below is better written than the one
-% above.
-
-% Both projects are imported as git submodules in this projects repo, which means
-% all changes we have made, to the official implementations are recorded and
-% possible to apply again, on updated version. However, we took care to keep the
-% modifications minimal to keep the possibility to use the latests versions in
-% the future. But since the code depends on a lot of internal interfaces, it will
-% still be hard to keep up.
-
-% We pull in both Idris and Agda sources as git submodules in our project
-% repository, this makes it possible to record the exact changes we have done to
-% the upstream sources. To make it easy to reproduce and extend. It also allows
-% use to pull in newer versions of both projects, and the using git rebase, replay
-% our changes on top of the newer versions, and make it much easier to maintain
-% our tool for future language versions.
+as Git submodules. This makes the changes we make to the upstream
+implementations explicitly recorded. It is also possible to apply our changes
+on top of new versions of the upstream projects.  We take care to only make
+minor changes to the upstream implementations, this should make it easier to
+use newer versions in the future.  But since our code depends a lot on internal
+interfaces, it will still be hard to keep up with new versions.
 
 % TODO Is there something good in this paragraph?
 % Trying to reuse the Agda AST as well has problems. The good thing is that
@@ -592,28 +518,6 @@ future.
 
 
 
-
-
-% This is wrong most of it.
-% Working step by step, we first translate only simple programs, then adding
-% more and more features. Currently unimplemented features are represented with
-% holes so that it is always possible to translate code. The output becomes more
-% and more complete as the project progresses. The number of holes left for
-% a given project also works as an informal method of verification, less holes
-% corresponds to a better translator.
-
-To test the implementation we will use the Sequential Decision Problem (SDP)
-implementation in
-IdrisLibs\footnote{\url{https://gitlab.pik-potsdam.de/botta/IdrisLibs}} which
-is one of the bigger Idris codebases available. This will guide our
-implementation by first supporting the features used in the core parts of the
-SDP library. And then work to support more and more of the library.
-
-
-
-% Method
-% ------
-
 Ideally we would define a new intermediate language which covers the union of
 Agda and Idris features.  This will make clear in the intermediate AST what
 features we support and which are not implemented. It also makes it possible to
@@ -621,26 +525,19 @@ do bidirectional transpiling in the future.  We could also use QuickCheck to
 generate programs in this intermediate language to test the code generation.
 This is not done yet.
 
-% TODO Knasiga sista meningar. Fixa språket.
-Language features in the source languages which are not supported in the target
-language will either fail the transpiler, as they are not possible to represent
-in the intermediate language, or require to be compiled to simpler
-language feature before being translated to the intermediate. If this is
-done it would be helpful for the target language implementers if they would
-want to implement that feature in the future.
-
 
 \subsection{Statistics tool}
 In the course of the project we needed a way to prioritize languages features
 to implement in the transpiler. Ideally we want the transpiler to handle
 as much real-world code as soon as possible. To guide our implementation we
 wrote a tool which parses Idris into its AST and then records which data
-constructors are most often used.
-
-% TODO
-Then we ran this tool on the Idris Prelude. See the results in the table below:
+constructors are most often used. Then we ran this tool on the Idris Prelude.
+See the results in table~\ref{tbl:stats}.
 
 
+\begin{table}[h]
+  \caption {Usage statistics of constructors in the Idris AST.}
+  \label{tbl:stats}
 \begin{center}
   \begin{tabular}{ l l l r }
     Variable reference       & PTerm:   &    PRef            &    38.72 \% \\
@@ -671,17 +568,26 @@ Then we ran this tool on the Idris Prelude. See the results in the table below:
 
   \end{tabular}
 \end{center}
+\end{table}
 
 
-% We aim to have implementend ?? of the most widely used constructors when this
+% We aim to have implemented ?? of the most widely used constructors when this
 % project is done.
 
 
 \subsection{Verification}
-It is not obvious how to verify the correctness of the transpiler, especially
-while it is a work in progress. It is not feasible to create a 100\% correct
-transpiler in the time of this master`s thesis, so we have to somehow verify an
-unfinished transpiler.
+
+% Ideally the transpiled programs both type-check and runs, then we can compare its output to that of the source program.
+% However, it is hard enough to get the programs to type check without manual intervention.
+% This means that even if both the source and translated program type-check we can not be
+% sure that they represent the same semantics.  Especially if one of the programs
+% contain holes. It is hard to reason about equality in the context of dependent
+% types.
+
+As stated in sub-section~\ref{sec:veri}, it is hard to verify the correctness
+of the transpiler, especially while it is a work in progress. It is not
+feasible to create a 100\% correct transpiler in the time of this master`s
+thesis, so we have to somehow verify an unfinished transpiler.
 
 Even to verify that a single non-trivial program is transpiled correctly is
 hard. Since the two languages have slightly different semantics, even a source
@@ -710,19 +616,11 @@ That rules out some methods which are too manual.  In a perfect world we would
 have test suit with a lot of different programs translated and proven correct in
 both languages. But no such test suite exists for Agda and Idris.
 
-% TODO This paragraph.
+% redo This paragraph.
 % Ideally we would run both the source and translated program with randomized
 % input to automatically test the they return the same result. However, it is
 % probably infeasible to get larger programs to type-check and run without manual
 % intervention.  Therefore we will use weaker forms of validation.
-
-% TODO This paragraph.
-Hopefully we can use the Agda compiler to test if the generated programs
-compiles. We can also use this to guide our transpiler, if the final
-program does not compile it needs to be re-done. Or the transpiler needs to be
-more explicit in that spot. This however require us to keep the source
-positions during the translation. Both the Agda and Idris does this, but the
-transpiler does not.
 
 To formally prove correctness of the translation is the ideal verification, but
 it is far outside the scope of this project, so we will have to settle for less
@@ -730,9 +628,6 @@ rigorous methods. It is the safest way, and what would provide full confidence.
 But hopefully we can still provide some degree of confidence in the
 translation.
 
-
-% TODO Should I includes some general theory about Dependently typed programming? [Not more than typed lambda calculus]
-% TODO Should I write about things which aren't done yet? [as part of an updated plan, yes]
 
 \section{Results}
 
@@ -747,12 +642,6 @@ project.
 
 % We have developed a tool to translate simple Idris programs into Agda. It works
 % for a subset of Idris, namely:
-
-% \begin{enumerate}
-%   \item Data declarations
-%   \item Simple expressions
-%   \item And some more things
-% \end{enumerate}
 
 The problem of building both project with the same version of GHC and
 dependencies took time. It was a manual process of comparing cabal-files and
@@ -771,25 +660,25 @@ We have not yet done any verification beyond manual inspection.  But transpiled
 programs type-checks in Idris. It is one verification step.  But the goal is
 the have a more thorough verification in the end of the project.
 
-% TODO Maybe write something like this.
-% In the beginning the process was to run the translation, then try to load the
-% program in Agda and see if it compiles. Then manually fix it so that it
-% compiles, then changing the transpiler to do the same thing we just did
-% manually.
+The development process in the beginning the process was to run the transpiler , then try to load the program in Agda and see if it compiles.
+Then we would manually fix the program until it compiles.
+After that we changed the transpiler to perform the same change we just did
+manually.
 
 % Implicit arguments are only known and calculated in the elaboration step of
 % Idris compilation. There for it is hard to translate them after only parsing.
 
 % TODO Write this better
-The transpiler does not handle implicit arguments yet. Agda and Idris have
-different type-checkers.
+The transpiler does not handle implicit arguments yet.
+Agda and Idris have different type-checkers.
 Agda requires more explicit definitions, implicit arguments have to be defined.
-Idris automatically considers all lower case
-variables in type signatures to be a implicit variable. Since the implicit
-arguments in Idris are elaborated in the Type-checker we can not use the parser
-output to reconstruct them.  Only after Idris is compiled to the a lower level intermediate
+Idris automatically considers all lower case variables in type signatures to be
+a implicit variable.
+Since the implicit arguments in Idris are elaborated in the Type-checker we can
+not use the parser output to reconstruct them.
+Only after Idris is compiled to a lower level intermediate
 language called \texttt{tt\_elab} the type-checking and elaboration is run.
-% TODO Theese to paragraphs should be fixed and merged and spilt to three maybe
+% TODO These to paragraphs should be fixed and merged and spilt to three maybe
 
 Therefore we need to run the elaboration and then extract the implicit
 arguments from the intermediate representation before translating them to
@@ -800,21 +689,15 @@ making that translation useful for a Idris automatic refactoring tool. It is
 often useful to change between implicit and explicit arguments when developing
 a dependently typed program.
 
-% TODO This is stated above in Method
-% \subsubsection{Statistics tool and its results}
-% We have a tool which loads Idris files and parser them. It then uses the
-% Declaration/Term AST to calculate which languages features are used and how often
-% they are used. See some results from IdrisLibs SDP below.
-
 % This was used to guide and prioritize the implementation of the main tool. For
 % the most part it matches our intuitive guess. But it gives us a better argument
 % for that the transpiler is useful, even though it is unfinished.
 
-% \subsubsection{Implementation difficulties}
+% \subsection{Implementation difficulties}
 % As expected we ran it to a lot of non project related difficulties when trying
 % to reuse existing Agda and Idris sources.
 
-% TODO Should this be in the report?
+% Should this be in the report? No!
 % The Idris compiler implementation uses the state monad a lot.
 % It is almost like an imperative program, just written in Haskell. The
 % often touted benefits of functional programming goes out of the window, but the
@@ -834,6 +717,7 @@ a dependently typed program.
 
 \section{Conclusions}
 
+No conclusions in the halftime report.
 % Nothing right now. Maybe leave this section out for the halftime report.
 
 \newpage
@@ -845,8 +729,8 @@ a dependently typed program.
   \item \textit{\color{gray}}[Past] First runnable Dependent types example.
   \item \textit{\color{gray}}[Past] Decide verification method.
   \item (First week in September) Implementation of Implicit arguments done.
-  \item (Third week of Semptember) Final implementation version.
-  \item (Last week of Semptember) Final verification of the transpiler.
+  \item (Third week of September) Final implementation version.
+  \item (Last week of September) Final verification of the transpiler.
 \end{itemize}
 
 \subsubsection*{Writing}
@@ -884,6 +768,6 @@ a dependently typed program.
 
 \end{document}
 
-% TODO: check possible half-time presentation
+% Not done: check possible half-time presentation
 %   https://lists.chalmers.se/mailman/listinfo/proglog
 %   https://lists.chalmers.se/mailman/listinfo/fp
