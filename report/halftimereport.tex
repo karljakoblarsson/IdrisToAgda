@@ -319,7 +319,7 @@ We will target Idris 1.3.1 and Agda 2.6.0.
 A source-to-source compiler, often called a transcompiler or transpiler, is
 a compiler which translates source code in one programming language into
 another language, usually of similar level of abstraction. A traditional
-compiler takes a higher level language as input and outputs a lower level
+compiler takes a higher level language as input and will output a lower level
 language, often machine code.  Since Agda and Idris are similar languages we will write a transpiler.
 
 Source-to-source transpilers exists for many language pairs. Even so, there are
@@ -413,7 +413,7 @@ allows the user to interactively refine the program.
 We need to verify that the transpiler is correct. The transpiler is correct if
 the transpiled program has the same semantics as the source.
 This is simple to define in theory.
-Let $tr(p)$ be the transpiler.
+Let $tr$ be the transpiler.
 Given two functions $s_A$ and $s_I$ which maps an Agda or Idris program
 respectively, into some formal definition of semantics.
 The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
@@ -429,7 +429,7 @@ The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
   \ tr : I \rightarrow A,
 \end{equation}
 \begin{equation} \label{eq:veri2}
-  \forall p\in I\ \text{if}\  s_I(p) = s_A . tr(p)
+  s_I = s_A\ .\ tr
 \end{equation}
 
 This is hard to show in practice however. Simply defining $s_A$ or $s_I$ for
@@ -459,7 +459,7 @@ which may result in cleaner and more easily understood code.
 Usability oriented features are often are implemented as syntactic sugar and
 not part of the core language. They are not necessary to implement in a working
 transpiler, but are important for it to be a useful tool. There is a trade-off
-there we need to make. If the transpiler outputs code on the level of
+there we need to make. If the transpiler would output code on the level of
 assembly, just encoded in Agda syntax, even if correct, it would not be a useful
 tool. Since we specifically aim to develop a tool whose output is easy to
 understand for a human programmer, it is good to transpile some syntactic sugar.
@@ -489,7 +489,7 @@ useful.
 % A terribly unhelpful translation is the one below. %in listing~\ref{lst:hole2}.
 
 \begin{lstlisting}[language=Idris,label={lst:hole2},caption={}]
-concat :: ?
+concat : ?
 concat = ?
 \end{lstlisting}
 
