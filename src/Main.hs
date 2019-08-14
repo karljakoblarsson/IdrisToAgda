@@ -234,7 +234,7 @@ itaTerm (PType fc) = iden "Set"
 itaTerm (PIfThenElse fc ift thent elset) = undefined
 itaTerm (PPair fc fcs puninfo termA termB) = undefined
   -- This should return a hole.
-itaTerm (PMetavar _ _) = hole
+itaTerm (PMetavar _ _) = hole "Comment"
 itaTerm _ = undefined
 
 -- Hack for 'fromInteger'
@@ -427,15 +427,29 @@ parseF f = do
   -- TODO START HERE
   -- Also return the elaboration info.
         -- liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
+        let t = definitions $ tt_ctxt i
+        let names = Map.keys t
+        let concatName = TT.sUN "concat"
+        let concat = ttLookup concatName t
+        let ty = getDef (Maybe.fromJust concat)
+        iPrint concat
+        let ttty = Maybe.fromJust $ getTTType ty
+        sig <- liftIO (tttExpr ttty)
+        -- liftIO (putStrLn $ show ttty)
+        iPrint ttty
+        liftIO (putStrLn "Agda:")
+        liftIO (agda sig)
+
         return (ast i)
   where addPkgDir :: String -> Idris ()
         addPkgDir p = do ddir <- runIO getIdrisLibDir
                          addImportDir (ddir </> p)
                          addIBC (IBCImportDir (ddir </> p))
 
-
 -- runIdr :: Idris a -> IO (Either TT.Err IState)
 -- runIdr prog = runExceptT $ execStateT prog idrisInit
+iPrint a = liftIO (print a)
+  
 runIdr :: Idris a -> IO (Either TT.Err a)
 runIdr a = runExceptT (evalStateT a idrisInit)
 
@@ -465,35 +479,35 @@ tp = do (file :: String) <- readSource f
 
 -- te :: IO (Either TT.Err IState)
 -- te :: IO ()
-te = do (file :: String) <- readSource f
-        let q = testParse file
-        let w = fromRight [] q
-        e <- elab w
-        -- do w <- elab q
-        --    return w
-        -- w <- elab q
-          -- left err -> putstrln $ prettyerror err
-          -- right pd -> testelab pd
-        let r = fromRight undefined e
-        let t = definitions $ tt_ctxt r
-        let names = Map.keys t
-        let concatName = TT.sUN "concat"
-        let concat = ttLookup concatName t
-        let ty = getDef concat
-        let ttty = Maybe.fromJust $ getTTType ty
-        sig <- tttExpr ttty
-        putStrLn $ show ttty
-        putStrLn "Agda:"
-        agda sig
-        -- return r
-    where f = "simpleIdris.idr"
-          elab pdecl = liftIO (testElab pdecl)
-          parseErr e = putStrLn $ prettyError e
+-- te = do (file :: String) <- readSource f
+--         let q = testParse file
+--         let w = fromRight [] q
+--         e <- elab w
+--         -- do w <- elab q
+--         --    return w
+--         -- w <- elab q
+--           -- left err -> putstrln $ prettyerror err
+--           -- right pd -> testelab pd
+--         let r = fromRight undefined e
+--         let t = definitions $ tt_ctxt r
+--         let names = Map.keys t
+--         let concatName = TT.sUN "concat"
+--         let concat = ttLookup concatName t
+--         let ty = getDef concat
+--         let ttty = Maybe.fromJust $ getTTType ty
+--         sig <- tttExpr ttty
+--         putStrLn $ show ttty
+--         putStrLn "Agda:"
+--         agda sig
+--         -- return r
+--     where f = "simpleIdris.idr"
+--           elab pdecl = liftIO (testElab pdecl)
+--           parseErr e = putStrLn $ prettyError e
   -- tt_ctxt on IState is a good guess
   -- Returns a `Context` which has a field `definitions :: Context -> Ctxt TTDecl`
 
-ttLookup :: TT.Name -> TT.Ctxt TTDecl -> TTDecl
-ttLookup name ctxt = Maybe.fromJust (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
+ttLookup :: TT.Name -> TT.Ctxt TTDecl -> Maybe TTDecl
+ttLookup name ctxt = (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
 
 getDef :: TTDecl -> Def
 getDef (def, _, _, _, _, _)  = def
@@ -550,11 +564,6 @@ tttaBind name b@(TT.Pi rigCount implI ty kind) term =
   where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
 tttaBind _ _ _ = undefined
 
--- type Named_ = Named RString
-  -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
-hiddenArg :: Name -> Expr -> Expr
-hiddenArg n e = HiddenArg NoRange name
-  where name = Named (Just (Ranged NoRange (prettyShow n))) e
 
 testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
 
@@ -584,9 +593,15 @@ arg name expr
   Named (Just (Ranged NoRange name)) expr
 
   -- Only hidden arguments can have names in Agda
-hiddenArg :: TT.Name -> a -> NamedArg a
-hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
-  Named (Just (Ranged NoRange (show name))) expr
+-- hiddenArg :: String -> a -> NamedArg a
+-- hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
+--   Named (Just (Ranged NoRange name)) expr
+
+-- type Named_ = Named RString
+  -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
+hiddenArg :: Name -> Expr -> Expr
+hiddenArg n e = HiddenArg NoRange name
+  where name = Named (Just (Ranged NoRange (prettyShow n))) e
 
 funcExpr :: String -> Expr -> Expr
 funcExpr name body = Fun NoRange (Arg argInfo (iden name)) body
@@ -599,9 +614,6 @@ typesig :: Name -> Expr -> TypeSignature
 typesig name body = TypeSig argInfo name body
   where argInfo = ArgInfo NotHidden modality UserWritten UnknownFVs
         expr = funcExpr "argTest" (iden "FunctionTest")
-
-hole :: Expr
-hole = QuestionMark NoRange Nothing
 
 mkFixity :: Fixity'
 mkFixity = Fixity' f not NoRange
