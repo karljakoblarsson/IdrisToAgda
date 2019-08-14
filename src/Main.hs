@@ -9,7 +9,7 @@ import Agda.Syntax.Literal
 import Agda.Syntax.Common
 import Agda.Syntax.Fixity
 import Agda.Syntax.Notation
-import Idris.Parser
+import Idris.Parser (loadModule, prog)
 import Idris.Parser.Stack
 import Idris.AbsSyntax
 import Idris.Docstrings
@@ -49,8 +49,8 @@ import Debug.Trace
 -- checking. Do I need to run elaboration/typechecking before being able to
 -- generate correct Agda? Agda is much more demanding about these things.
 
--- TODO Handle parameterized Datatypes. 
--- TODO Handle indexed Datatypes. 
+-- TODO Handle parameterized Datatypes.
+-- TODO Handle indexed Datatypes.
 -- The parameters are required to be the same for all constructors, but indices
 -- vary. In 'data Vector (A : Set) : Nat → Set where', 'A' is parameter and
 -- 'Nat' a index. Parameters are bound once for all constructors, indices are
@@ -140,7 +140,7 @@ itaClause (PWithR _ _ _ _ _) = undefined
 itaPattern :: Int -> PTerm -> Pattern
 itaPattern _ (PRef _ _ name) = IdentP $ qname $ Main.prettyName name
 -- With the simple parenthesis hack. This should be done correctly soon.
-itaPattern 0 (PApp range fst args) = 
+itaPattern 0 (PApp range fst args) =
     (RawAppP NoRange ((itaPattern 1 fst) : (map ((itaPattern 1) . itaArgsToTerm) args)))
 itaPattern d (PApp range fst args) = ParenP NoRange
     (RawAppP
@@ -189,10 +189,23 @@ itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
     _ -> Pi (createTelescope name term1) (itaTerm term2)
   -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
   -- Pi (createTelescope name term1) (itaTerm term2)
-itaPi (Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
-  -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
-  undefined
+itaPi q@(Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
+  Pi (createTelescope name term1) (itaTerm term2)
+--  error ("itaPi: Imp problem with " ++ show q)
+
   -- TODO Type classes are implemented very differently in Agda. I probably wont do this.
+{- example of parse of |{n : N} -> test n|
+ Imp { pargopts = [],
+       pstatic = Dynamic,
+       pparam = False,
+       pscoped = Just (Impl { tcimplementation = False,
+                              toplevel_imp = True,
+                              machine_gen = False}),
+       pinsource = True,
+       pcount = RigW
+     }
+-}
+
 itaPi (Constraint _ _ _) name term1 term2 = undefined
 itaPi (TacImp _ _ _ _) name term1 term2 =  undefined
 
@@ -251,9 +264,16 @@ itaAtype (TT.ATInt (TT.ITFixed nt)) = undefined
 itaAtype (TT.ATInt TT.ITNative) = undefined
 itaAtype (TT.ATInt TT.ITBig) = undefined
 -- Char is a builtin type in Idris.
-itaAtype (TT.ATInt TT.ITChar) = undefined
--- itaAtype (TT.ATInt TT.ITChar) = LitQName NoRange
---   (AAbstract.QName (AAbstract.MName []) "Char") 
+-- itaAtype (TT.ATInt TT.ITChar) = undefined
+itaAtype (TT.ATInt TT.ITChar) = LitQName NoRange
+  (AAbstract.QName (AAbstract.MName []) charName)
+  where charName =
+         AAbstract.Name { AAbstract.nameId          = NameId 1 1
+                        , AAbstract.nameConcrete    = Main.mkName "Char"
+                        , AAbstract.nameBindingSite = NoRange
+                        , AAbstract.nameFixity      = mkFixity
+                        , AAbstract.nameIsRecordName = False
+                        }
 itaAtype (TT.ATFloat) = undefined
 
 itaName :: TT.Name -> Name
@@ -328,7 +348,7 @@ errorMsg :: FilePath -> ParseError -> IO ()
 errorMsg infile err =
   putStrLn ("Error while compiling file: " ++ infile ++ "\n\n" ++
             (prettyError err)) >> Main.die
-  
+
 runITA :: (FilePath, Maybe FilePath) -> IO ()
 runITA (infile, outfile) =
   do (file :: String) <- readSource infile
@@ -338,10 +358,10 @@ runITA (infile, outfile) =
        Right res -> case outfile of
          Just outfilename -> writeFile outfilename res >> success outfilename
          Nothing -> putStrLn res
- 
+
 -- parseIdr :: (FilePath, Maybe FilePath) -> IO ()
 -- parseIdr (infile, outfile) = do
---   ast <- runIdr $ parseF infile 
+--   ast <- runIdr $ parseF infile
 --   case ast of
 --       Left err -> putStrLn $ show err
 --       Right pd -> case outfile of
@@ -350,7 +370,7 @@ runITA (infile, outfile) =
 
 -- TODO START HERE
 -- Use `loadSource` and the real Idris impl, to use elaborated terms and so on.
-  
+
 -- 'itaDecl' is the function which does the translation.
 tryCompile :: String -> FilePath -> Either ParseError String
 tryCompile infile filename =
@@ -358,7 +378,7 @@ tryCompile infile filename =
     case parseRes of
   Left err -> Left err
   Right pd -> Right $ prettyShow $ map itaDecl pd
-  
+
 
 --------------------------------------------------------------------------------
 -- Test interface for implementation
@@ -369,10 +389,11 @@ test = do res <- runIdr $ parseF f
               Left err -> putStrLn $ show err
   -- where f = "Blodwen/src/Core/Primitives.idr"
   -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
-  where f = "Idris-dev/test/basic001/basic001a.idr"
+  -- where f = "Idris-dev/test/basic001/basic001a.idr"
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr "
   -- where f = "simpleIdris.idr"
+  where f = "patrik.idr" -- [working 2019-08-15]
 
 getDefinitions c = Map.keys $ definitions c
 
@@ -395,14 +416,14 @@ parseF f = do
         -- liftIO $ putStrLn $ showStats $ countD (ast i)
   -- TODO START HERE
   -- Also return the elaboration info.
-        liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
+        -- liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
         return (ast i)
   where addPkgDir :: String -> Idris ()
         addPkgDir p = do ddir <- runIO getIdrisLibDir
                          addImportDir (ddir </> p)
                          addIBC (IBCImportDir (ddir </> p))
 
-  
+
 -- runIdr :: Idris a -> IO (Either TT.Err IState)
 -- runIdr prog = runExceptT $ execStateT prog idrisInit
 runIdr :: Idris a -> IO (Either TT.Err a)
@@ -502,7 +523,7 @@ arg name expr
 --   , argInfoOrigin        = UserWritten
 --   , argInfoFreeVariables = UnknownFVs
 
-  
+
   -- Only hidden arguments can have names in Agda
 hiddenArg :: String -> a -> NamedArg a
 hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $

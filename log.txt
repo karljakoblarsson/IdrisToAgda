@@ -1,0 +1,11 @@
+2019-08-15: Status
+
+Source -> Binary
+Main  -> ita  (kan testas med funktionen |test|)
+Stats -> sts
+
+De kan hantera Idris base (built-ins) + prelude
+
+
+TODO lös problemet med import av filer i samma projekt
+  ("extern" import fungerar)

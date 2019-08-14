@@ -29,3 +29,10 @@ test (Suc n) = N -> N
 foo : (n : N) -> test n
 foo Zero  = Three
 foo (Suc n) = add n
+
+hej : Char
+hej = 'h'
+
+bar : {n : N} -> test n
+bar Zero  = Three
+bar (Suc n) = add n
