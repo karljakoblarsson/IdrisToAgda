@@ -2,6 +2,7 @@ module Main where
 
 import Agda.Syntax.Concrete
 import Agda.Syntax.Concrete.Pretty
+import qualified Agda.Syntax.Abstract.Name as AAbstract
 import Agda.Utils.Pretty
 import Agda.Syntax.Position
 import Agda.Syntax.Literal
@@ -10,9 +11,11 @@ import Agda.Syntax.Fixity
 import Agda.Syntax.Notation
 import Idris.Parser
 import Idris.Parser.Stack
-import Idris.ElabDecls (elabDecls)
 import Idris.AbsSyntax
 import Idris.Docstrings
+import Idris.IBC
+import Idris.Info (getIdrisLibDir)
+import Idris.ElabDecls (elabPrims, elabDecls)
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
@@ -26,25 +29,10 @@ import Control.Monad.Trans (lift, liftIO)
 
 import System.Environment
 import System.Exit
+import System.FilePath
 
 import Debug.Trace
 
-
-runIdr :: Idris a -> IO (Either TT.Err IState)
-runIdr prog = runExceptT $ execStateT prog idrisInit
-
-testElab decls = runIdr $ elabDecls elabinfo decls
-  where elabinfo = toplevel
-
-mkName :: String -> Name
-mkName n = Name NoRange InScope [(Id n)]
-qname :: String -> QName
-qname n = QName $ Main.mkName n
-
-iden n = Ident $ qname n
-
-lit :: Integer -> Expr
-lit i = Lit $ LitNat NoRange i
 
 -- Try to handle implict/explict arguments. The whole '{a : Set}' thing.
 -- It's somewhat done. Probably not correct yet but working
@@ -74,11 +62,15 @@ lit i = Lit $ LitNat NoRange i
 -- special instance resolution algorithm. Normal implicit arguments are solved
 -- by unification. Instance arguments are similar to Haskell's type class
 -- constraints. They are enclodsed in double brackets '{{ a : Show }}'
-itaDecl :: PDecl -> Declaration
+
+itaDecls :: [PDecl] -> [Declaration]
+itaDecls pd = concat $ map itaDecl pd
+
+itaDecl :: PDecl -> [Declaration]
 -- TODO Add the Agda {a : Set} argument declaration
 itaDecl (PData doc names synInfo range types
           (PDatadecl nameIdr _ typeconstructor dataconstructors)) =
-    Data range induc name lbBind expr typesigs
+    [Data range induc name lbBind expr typesigs]
   where range = NoRange
         induc = Inductive -- Inductive | CoInductive
         name = itaName nameIdr
@@ -89,10 +81,10 @@ itaDecl (PData doc names synInfo range types
         typesigs = map itaDC dataconstructors
 -- TODO Preserve arg names.
 itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
-  typesig (itaName nameIdr) (itaTerm terms)
+  [typesig (itaName nameIdr) (itaTerm terms)]
 itaDecl (PClauses range fnopts name clauses) = -- Pattern clause
   itaClauses clauses
-itaDecl (PFix fc fixIdr strings) = Infix fixAgda (map Main.mkName strings)
+itaDecl (PFix fc fixIdr strings) = [Infix fixAgda (map Main.mkName strings)]
   where fixAgda = itaFixity fixIdr
 itaDecl _ = undefined
 
@@ -113,10 +105,11 @@ itaFixity (Infixr prec) = Fixity NoRange (Related (toInteger prec)) RightAssoc
 itaFixity (InfixN prec) = Fixity NoRange (Related (toInteger prec)) NonAssoc
 itaFixity (PrefixN prec) = undefined -- I don't know that this is.
 
-itaClauses :: [PClause] -> Declaration
-itaClauses clauses = case length clauses of
-  1 -> itaClause $ head clauses -- Safe because of the case stmt.
-  _ -> undefined -- I don't know when this case happen. But it's not common.
+itaClauses :: [PClause] -> [Declaration]
+itaClauses clauses = map itaClause clauses
+  -- case length clauses of
+  -- 1 -> itaClause $ head clauses -- Safe because of the case stmt.
+  -- _ -> error ("PClause " ++ (show clauses)) -- When several pattern clauses
 
 itaClause :: PClause -> Declaration
 itaClause (PClause fc name whole with rhsIdr whrIdr) =
@@ -197,6 +190,7 @@ itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
 itaPi (Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
   -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
   undefined
+  -- TODO Type classes are implemented very differently in Agda. I probably wont do this.
 itaPi (Constraint _ _ _) name term1 term2 = undefined
 itaPi (TacImp _ _ _ _) name term1 term2 =  undefined
 
@@ -240,12 +234,25 @@ itaConst (TT.B8 word8) = undefined
 itaConst (TT.B16 word16) = undefined
 itaConst (TT.B32 word32) = undefined
 itaConst (TT.B64 word64) = undefined
-itaConst (TT.AType arithty) = undefined
+itaConst (TT.AType arithty) = itaAtype arithty
 itaConst TT.StrType = undefined
 itaConst TT.WorldType = undefined
 itaConst TT.TheWorld = undefined
 itaConst TT.VoidType = undefined
 itaConst TT.Forgot = undefined
+
+-- Arithmethic types?
+-- Probably not. More like constants in types?
+-- Or handles builtin types.
+itaAtype :: TT.ArithTy -> Literal
+itaAtype (TT.ATInt (TT.ITFixed nt)) = undefined
+itaAtype (TT.ATInt TT.ITNative) = undefined
+itaAtype (TT.ATInt TT.ITBig) = undefined
+-- Char is a builtin type in Idris.
+itaAtype (TT.ATInt TT.ITChar) = undefined
+-- itaAtype (TT.ATInt TT.ITChar) = LitQName NoRange
+--   (AAbstract.QName (AAbstract.MName []) "Char") 
+itaAtype (TT.ATFloat) = undefined
 
 itaName :: TT.Name -> Name
 -- itaName n = Main.mkName $ Main.prettyName n
@@ -271,11 +278,11 @@ addComment = (++)
   -- There is also AbsStyntaxTree.prettyName but it's harder to use.
 prettyName :: TT.Name -> String
 prettyName (TT.UN name) =  Text.unpack name
--- prettyName (TT.NS ns names) = concat $ intersperse "." $
---   (map Text.unpack names) ++ [Main.prettyName ns]
-  -- Names similar to "_t_0" are machine generated
 prettyName (TT.MN id name) =  addComment
   ("Machine chosen name with id: " ++ (show id)) $ Text.unpack name
+prettyName (TT.NS ns names) = concat $ intersperse "." $
+  (map Text.unpack names) ++ [Main.prettyName ns]
+  -- Names similar to "_t_0" are machine generated
 -- prettyName (TT.SN sn) = addComment "Decorated function name" $ prettySN sn
 -- prettyName (TT.SymRef id) = addComment "Reference to IBC" $ show id
 prettyName _ = undefined
@@ -294,14 +301,10 @@ prettySN (TT.CaseN a b) = "CaseN"
 prettySN (TT.ImplementationCtorN a) = "ImplementationCtorN"
 prettySN (TT.MetaN a b) = "MetaN"
 
-agda d = putStrLn $ prettyShow d
 
-mkFixity :: Fixity'
-mkFixity = Fixity' f not NoRange
-  where f = Fixity NoRange Unrelated NonAssoc
-        rstring = Ranged NoRange "RawName"
-        not = [IdPart rstring]
 
+--------------------------------------------------------------------------------
+-- Command line interface
 
 main :: IO ()
 main = getArgs >>= parse >>= runITA
@@ -319,8 +322,8 @@ exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
   putStrLn ("Successfuly compiled. Output written to: " ++ outfile) >> exit
-error :: FilePath -> ParseError -> IO ()
-error infile err =
+errorMsg :: FilePath -> ParseError -> IO ()
+errorMsg infile err =
   putStrLn ("Error while compiling file: " ++ infile ++ "\n\n" ++
             (prettyError err)) >> Main.die
   
@@ -329,13 +332,22 @@ runITA (infile, outfile) =
   do (file :: String) <- readSource infile
      let out = tryCompile file infile
      case out of
-       Left err -> Main.error infile err
+       Left err -> errorMsg infile err
        Right res -> case outfile of
          Just outfilename -> writeFile outfilename res >> success outfilename
          Nothing -> putStrLn res
  
-  -- TODO START HERE
-  -- Use `loadSource` and the real Idris impl, to use elaborated terms and so on.
+-- parseIdr :: (FilePath, Maybe FilePath) -> IO ()
+-- parseIdr (infile, outfile) = do
+--   ast <- runIdr $ parseF infile 
+--   case ast of
+--       Left err -> putStrLn $ show err
+--       Right pd -> case outfile of
+--         Just out -> writeFile out (statsToCSV $ countD pd) >> success out
+--         Nothing -> putStrLn $ showStats $ countD pd
+
+-- TODO START HERE
+-- Use `loadSource` and the real Idris impl, to use elaborated terms and so on.
   
 -- 'itaDecl' is the function which does the translation.
 tryCompile :: String -> FilePath -> Either ParseError String
@@ -345,6 +357,58 @@ tryCompile infile filename =
   Left err -> Left err
   Right pd -> Right $ prettyShow $ map itaDecl pd
   
+
+--------------------------------------------------------------------------------
+-- Test interface for implementation
+
+test = do res <- runIdr $ parseF f
+          case res of
+              Right pd -> putStrLn $ prettyShow $ map itaDecl pd
+              Left err -> putStrLn $ show err
+  -- where f = "Blodwen/src/Core/Primitives.idr"
+  -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  where f = "Idris-dev/test/basic001/basic001a.idr"
+  -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
+  -- where f = "Idris-dev/test/basic003/test027.idr "
+  -- where f = "simpleIdris.idr"
+
+
+parseF :: FilePath -> Idris [PDecl]
+parseF f = do
+        -- Load StdLib
+        elabPrims
+        addPkgDir "prelude"
+        addPkgDir "base"
+        loadModule "Builtins" (IBC_REPL False)
+        addAutoImport "Builtins"
+        loadModule "Prelude" (IBC_REPL False)
+        addAutoImport "Prelude"
+        -- TODO
+        -- I probably need to load the current directory as well. And maybe the
+        -- whole project structure
+        loadModule f $ IBC_REPL True
+
+        i <- getIState
+        -- liftIO $ putStrLn $ showStats $ countD (ast i)
+  -- TODO START HERE
+  -- Also return the elaboration info.
+        return (ast i)
+  where addPkgDir :: String -> Idris ()
+        addPkgDir p = do ddir <- runIO getIdrisLibDir
+                         addImportDir (ddir </> p)
+                         addIBC (IBCImportDir (ddir </> p))
+
+  
+-- runIdr :: Idris a -> IO (Either TT.Err IState)
+-- runIdr prog = runExceptT $ execStateT prog idrisInit
+runIdr :: Idris a -> IO (Either TT.Err a)
+runIdr a = runExceptT (evalStateT a idrisInit)
+
+testElab decls = runIdr $ elabDecls elabinfo decls
+  where elabinfo = toplevel
+
+agda d = putStrLn $ prettyShow d
+
 -- Test functions while developing
 tp = do (file :: String) <- readSource f
         let res = testParse file
@@ -364,7 +428,7 @@ tp = do (file :: String) <- readSource f
   where f = "testF.idr"
         putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
 
-te :: IO (Either TT.Err IState)
+-- te :: IO (Either TT.Err IState)
 te = do (file :: String) <- readSource f
         let q = testParse file
         let w = fromRight [] q
@@ -398,6 +462,16 @@ testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
 
 --------------------------------------------------------------------------------
 -- Agda constructors
+
+mkName :: String -> Name
+mkName n = Name NoRange InScope [(Id n)]
+qname :: String -> QName
+qname n = QName $ Main.mkName n
+
+iden n = Ident $ qname n
+
+lit :: Integer -> Expr
+lit i = Lit $ LitNat NoRange i
 
 modality :: Modality
 modality = Modality Relevant defaultQuantity
@@ -441,3 +515,9 @@ typesig name body = TypeSig argInfo name body
 
 hole :: Expr
 hole = QuestionMark NoRange Nothing
+
+mkFixity :: Fixity'
+mkFixity = Fixity' f not NoRange
+  where f = Fixity NoRange Unrelated NonAssoc
+        rstring = Ranged NoRange "RawName"
+        not = [IdPart rstring]
