@@ -16,6 +16,7 @@ import Idris.Docstrings
 import Idris.IBC
 import Idris.Info (getIdrisLibDir)
 import Idris.ElabDecls (elabPrims, elabDecls)
+import Idris.Core.Evaluate (definitions)
 import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
@@ -23,6 +24,7 @@ import Util.System (readSource)
 import Data.List (intersperse)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text
+import qualified Data.Map as Map
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
 import Control.Monad.Trans (lift, liftIO)
@@ -372,6 +374,7 @@ test = do res <- runIdr $ parseF f
   -- where f = "Idris-dev/test/basic003/test027.idr "
   -- where f = "simpleIdris.idr"
 
+getDefinitions c = Map.keys $ definitions c
 
 parseF :: FilePath -> Idris [PDecl]
 parseF f = do
@@ -392,6 +395,7 @@ parseF f = do
         -- liftIO $ putStrLn $ showStats $ countD (ast i)
   -- TODO START HERE
   -- Also return the elaboration info.
+        liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
         return (ast i)
   where addPkgDir :: String -> Idris ()
         addPkgDir p = do ddir <- runIO getIdrisLibDir
