@@ -9,3 +9,9 @@ De kan hantera Idris base (built-ins) + prelude
 
 TODO lös problemet med import av filer i samma projekt
   ("extern" import fungerar)
+
+
+2019-08-19:
+  Fixade så att namngivna implicita argument fungerar.
+  Tyvärr introducerade jag en bug i `ita`-kommandot, den pretty-printar inte på
+  rätt sätt.

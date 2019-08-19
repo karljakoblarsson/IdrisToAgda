@@ -30,7 +30,51 @@ FunClause (LHS {lhsOriginalPattern = RawAppP FC [IdentP add,ParenP FC (RawAppP F
 {- data Vec (A : Set) : N -> Set where -}
 {-   Nil : Vec A Z  -}
 {-   _::_ : {n : N} -> A -> Vec A n -> Vec A (suc n) -}
-Data FC,50 Inductive Vec [DomainFull (TBind FC [Arg {argInfo = ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = Named {nameOf = Nothing, namedThing = BName {boundName = A, bnameFixity = Fixity' {theFixity = Fixity {fixityRange = , fixityLevel = Unrelated, fixityAssoc = NonAssoc}, theNotation = [], theNameRange = }}}}] (RawApp FC [Set FC]))] (Fun FC (Arg {argInfo = ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = RawApp FC [Ident N]}) (RawApp FC [Set FC])) [TypeSig (ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}) Nil (Generalized (RawApp FC [Ident Vec,Ident A,Ident Z])),TypeSig (ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}) _::_ (Generalized (Pi [TBind FC [Arg {argInfo = ArgInfo {argInfoHiding = Hidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = Named {nameOf = Nothing, namedThing = BName {boundName = n, bnameFixity = Fixity' {theFixity = Fixity {fixityRange = , fixityLevel = Unrelated, fixityAssoc = NonAssoc}, theNotation = [], theNameRange = }}}}] (RawApp FC [Ident N])] (Fun FC (Arg {argInfo = ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = RawApp FC [Ident A]}) (Fun FC (Arg {argInfo = ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = RawApp FC [Ident Vec,Ident A,Ident n]}) (RawApp FC [Ident Vec,Ident A,Paren FC (RawApp FC [Ident suc,Ident n])])))))]
+Data FC,50 Inductive Vec [DomainFull (TBind FC [Arg {argInfo = ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = Named {nameOf = Nothing, namedThing = BName {boundName = A, bnameFixity = Fixity' {theFixity = Fixity {fixityRange = , fixityLevel = Unrelated, fixityAssoc = NonAssoc}, theNotation = [], theNameRange = }}}}] (RawApp FC [Set FC]))] (Fun FC (Arg {argInfo = ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}, unArg = RawApp FC [Ident N]}) (RawApp FC [Set FC])) [TypeSig (ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}) Nil (Generalized (RawApp FC [Ident Vec,Ident A,Ident Z])),
+  TypeSig (ArgInfo { argInfoHiding = NotHidden,
+                     argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω},
+                     argInfoOrigin = UserWritten,
+                     argInfoFreeVariables = UnknownFVs})
+           _::_ (Generalized
+              (Pi
+                [TBind -- {n : N} -> A
+                  FC
+                  [ Arg {
+                      argInfo = ArgInfo {
+                          argInfoHiding = Hidden,
+                          argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω},
+                          argInfoOrigin = UserWritten,
+                          argInfoFreeVariables = UnknownFVs},
+                      unArg = Named {
+                          nameOf = Nothing,
+                          namedThing = BName {
+                              boundName = n,
+                              bnameFixity = Fixity' {
+                                  theFixity = Fixity {
+                                     fixityRange = ,
+                                     fixityLevel = Unrelated,
+                                     fixityAssoc = NonAssoc},
+                                  theNotation = [],
+                                  theNameRange = } } } }]
+                  (RawApp FC [Ident N]) ]
+                (Fun FC
+                  (Arg {
+                      argInfo = ArgInfo {
+                         argInfoHiding = NotHidden,
+                         argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω},
+                         argInfoOrigin = UserWritten,
+                         argInfoFreeVariables = UnknownFVs},
+                      unArg = RawApp FC [Ident A]})
+                  (Fun FC
+                    (Arg {
+                        argInfo = ArgInfo {
+                            argInfoHiding = NotHidden,
+                            argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω},
+                            argInfoOrigin = UserWritten,
+                            argInfoFreeVariables = UnknownFVs},
+                        unArg = RawApp FC [Ident Vec, Ident A, Ident n]})
+                     (RawApp FC [Ident Vec, Ident A, Paren FC (RawApp FC [Ident suc, Ident n])])
+                  ))))]
 
 {- empt : Vec N Z -}
 TypeSig (ArgInfo {argInfoHiding = NotHidden, argInfoModality = Modality {modRelevance = Relevant, modQuantity = Quantityω}, argInfoOrigin = UserWritten, argInfoFreeVariables = UnknownFVs}) empt (Generalized (RawApp FC [Ident Vec,Ident N,Ident Z]))

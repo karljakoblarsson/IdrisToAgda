@@ -166,7 +166,7 @@ paren e = Paren NoRange e
 createTelescope :: TT.Name -> PTerm -> Telescope
 createTelescope name pterm = [TBind NoRange bargs (itaTerm pterm)]
   where bargs = [barg]
-        barg = arg (Main.prettyName name) (mkBoundName_ (itaName name))
+        barg = hiddenArg name (mkBoundName_ (itaName name))
 
 -- data ArgOpt = AlwaysShow
 --             | HideDisplay
@@ -190,8 +190,12 @@ itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
   -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
   -- Pi (createTelescope name term1) (itaTerm term2)
 itaPi q@(Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
+  -- Fun NoRange (hiddenArg name (itaTerm term1))  (itaTerm term2)
   Pi (createTelescope name term1) (itaTerm term2)
---  error ("itaPi: Imp problem with " ++ show q)
+ -- error ("itaPi: Imp problem with " ++ show name ++ show term1 ++ show term2)
+
+itaPi (Constraint _ _ _) name term1 term2 = undefined
+itaPi (TacImp _ _ _ _) name term1 term2 =  undefined
 
   -- TODO Type classes are implemented very differently in Agda. I probably wont do this.
 {- example of parse of |{n : N} -> test n|
@@ -206,8 +210,14 @@ itaPi q@(Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 
      }
 -}
 
-itaPi (Constraint _ _ _) name term1 term2 = undefined
-itaPi (TacImp _ _ _ _) name term1 term2 =  undefined
+defaultArgInfoHidden :: ArgInfo
+defaultArgInfoHidden =  ArgInfo
+  { argInfoHiding        = Hidden
+  , argInfoModality      = defaultModality
+  , argInfoOrigin        = UserWritten
+  , argInfoFreeVariables = UnknownFVs
+  }
+
 
 itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
@@ -351,10 +361,9 @@ errorMsg infile err =
 
 runITA :: (FilePath, Maybe FilePath) -> IO ()
 runITA (infile, outfile) =
-  do (file :: String) <- readSource infile
-     let out = tryCompile file infile
+  do out <- tryCompile infile
      case out of
-       Left err -> errorMsg infile err
+       Left err -> print err
        Right res -> case outfile of
          Just outfilename -> writeFile outfilename res >> success outfilename
          Nothing -> putStrLn res
@@ -368,16 +377,15 @@ runITA (infile, outfile) =
 --         Just out -> writeFile out (statsToCSV $ countD pd) >> success out
 --         Nothing -> putStrLn $ showStats $ countD pd
 
--- TODO START HERE
 -- Use `loadSource` and the real Idris impl, to use elaborated terms and so on.
 
 -- 'itaDecl' is the function which does the translation.
-tryCompile :: String -> FilePath -> Either ParseError String
-tryCompile infile filename =
-  let parseRes = runparser (prog defaultSyntax) idrisInit filename infile in
-    case parseRes of
-  Left err -> Left err
-  Right pd -> Right $ prettyShow $ map itaDecl pd
+tryCompile :: FilePath -> IO (Either TT.Err String)
+tryCompile filename = do
+  res <- runIdr $ parseF filename
+  case res of
+    Left err -> return $ Left err
+    Right pd -> return $ Right $ prettyShow $ map itaDecl pd
 
 
 --------------------------------------------------------------------------------
@@ -393,7 +401,8 @@ test = do res <- runIdr $ parseF f
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr "
   -- where f = "simpleIdris.idr"
-  where f = "patrik.idr" -- [working 2019-08-15]
+  -- where f = "patrik.idr" -- [working 2019-08-15]
+  where f = "testImp.idr"
 
 getDefinitions c = Map.keys $ definitions c
 
@@ -510,24 +519,10 @@ arg name expr
   | otherwise = Arg (ArgInfo NotHidden modality UserWritten UnknownFVs) $
   Named (Just (Ranged NoRange name)) expr
 
--- data ArgInfo = ArgInfo
---   { argInfoHiding        :: Hiding
---   , argInfoModality      :: Modality
---   , argInfoOrigin        :: Origin
---   , argInfoFreeVariables :: FreeVariables
---   } deriving (Data, Eq, Ord, Show)
-
--- defaultArgInfo =  ArgInfo
---   { argInfoHiding        = NotHidden
---   , argInfoModality      = defaultModality
---   , argInfoOrigin        = UserWritten
---   , argInfoFreeVariables = UnknownFVs
-
-
   -- Only hidden arguments can have names in Agda
-hiddenArg :: String -> a -> NamedArg a
+hiddenArg :: TT.Name -> a -> NamedArg a
 hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
-  Named (Just (Ranged NoRange name)) expr
+  Named (Just (Ranged NoRange (show name))) expr
 
 funcExpr :: String -> Expr -> Expr
 funcExpr name body = Fun NoRange (Arg argInfo (iden name)) body
