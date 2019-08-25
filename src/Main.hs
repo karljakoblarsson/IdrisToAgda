@@ -401,25 +401,36 @@ test = do res <- runIdr $ parseF f
   -- where f = "Idris-dev/test/basic001/basic001a.idr"
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr "
-  -- where f = "simpleIdris.idr"
+  where f = "simpleIdris.idr"
   -- where f = "patrik.idr" -- [working 2019-08-15]
-  where f = "testImp.idr"
 
 getDefinitions c = Map.keys $ definitions c
 
 parseF :: FilePath -> Idris [PDecl]
 parseF f = do
+        -- TODO load user defined libraries in the same package
+        -- This is a Workaround for not importing user defined libraries correctly
+        -- I probably need to load the current directory as well. And maybe the
+        -- whole project structure
+        -- From IBC.hs:149
+            -- -- | Load an entire package from its index file
+            -- loadPkgIndex :: PkgName -> Idris ()
+            -- loadPkgIndex pkg = do ddir <- runIO getIdrisLibDir
+            --                       addImportDir (ddir </> unPkgName pkg)
+            --                       fp <- findPkgIndex pkg
+            --                       loadIBC True IBC_Building fp
+        let pkgdirs = ["../IdrisLibs"]
+        setImportDirs pkgdirs
+
         -- Load StdLib
         elabPrims
-        addPkgDir "prelude"
-        addPkgDir "base"
+        addPkg "prelude"
+        addPkg "base"
         loadModule "Builtins" (IBC_REPL False)
         addAutoImport "Builtins"
         loadModule "Prelude" (IBC_REPL False)
         addAutoImport "Prelude"
-        -- TODO
-        -- I probably need to load the current directory as well. And maybe the
-        -- whole project structure
+
         loadModule f $ IBC_REPL True
 
         i <- getIState
@@ -430,21 +441,28 @@ parseF f = do
         let t = definitions $ tt_ctxt i
         let names = Map.keys t
         let concatName = TT.sUN "concat"
-        let concat = ttLookup concatName t
-        let ty = getDef (Maybe.fromJust concat)
-        iPrint concat
-        let ttty = Maybe.fromJust $ getTTType ty
-        sig <- liftIO (tttExpr ttty)
+
+        let map = Map.lookup concatName t
+        -- iPrint (Map.keys $ Maybe.fromJust map)
+        -- iPrint map
+        let s = udNames (ast i)
+
+        
+        -- let concat = ttLookup concatName t
+        -- let ty = getDef (Maybe.fromJust concat)
+        -- iPrint concat
+        -- let ttty = Maybe.fromJust $ getTTType ty
+        -- iPrint ttty
+        -- sig <- liftIO (tttExpr ttty)
         -- liftIO (putStrLn $ show ttty)
-        iPrint ttty
-        liftIO (putStrLn "Agda:")
-        liftIO (agda sig)
+        -- liftIO (putStrLn "Agda:")
+        -- liftIO (agda sig)
 
         return (ast i)
-  where addPkgDir :: String -> Idris ()
-        addPkgDir p = do ddir <- runIO getIdrisLibDir
-                         addImportDir (ddir </> p)
-                         addIBC (IBCImportDir (ddir </> p))
+  where addPkg :: String -> Idris ()
+        addPkg p = do ddir <- runIO getIdrisLibDir
+                      addImportDir (ddir </> p)
+                      addIBC (IBCImportDir (ddir </> p))
 
 -- runIdr :: Idris a -> IO (Either TT.Err IState)
 -- runIdr prog = runExceptT $ execStateT prog idrisInit
@@ -479,33 +497,52 @@ tp = do (file :: String) <- readSource f
 
 -- te :: IO (Either TT.Err IState)
 -- te :: IO ()
--- te = do (file :: String) <- readSource f
---         let q = testParse file
---         let w = fromRight [] q
---         e <- elab w
---         -- do w <- elab q
---         --    return w
---         -- w <- elab q
---           -- left err -> putstrln $ prettyerror err
---           -- right pd -> testelab pd
---         let r = fromRight undefined e
---         let t = definitions $ tt_ctxt r
---         let names = Map.keys t
---         let concatName = TT.sUN "concat"
---         let concat = ttLookup concatName t
---         let ty = getDef concat
---         let ttty = Maybe.fromJust $ getTTType ty
---         sig <- tttExpr ttty
---         putStrLn $ show ttty
---         putStrLn "Agda:"
---         agda sig
---         -- return r
---     where f = "simpleIdris.idr"
---           elab pdecl = liftIO (testElab pdecl)
---           parseErr e = putStrLn $ prettyError e
+te = do (file :: String) <- readSource f
+        let q = testParse file
+        let w = fromRight [] q
+        -- e <- elab w
+        -- do w <- elab q
+        --    return w
+        -- w <- elab q
+          -- left err -> putstrln $ prettyerror err
+          -- right pd -> testelab pd
+        -- let r = fromRight undefined e
+        -- let t = definitions $ tt_ctxt r
+        -- let names = Map.keys t
+        -- let concatName = TT.sUN "concat"
+        -- let concat = ttLookup concatName t
+        -- let ty = getDef concat
+        -- let ttty = Maybe.fromJust $ getTTType ty
+        -- sig <- tttExpr ttty
+        -- putStrLn $ show ttty
+        -- putStrLn "Agda:"
+        -- agda sig
+        -- return r
+        return ()
+    where f = "simpleIdris.idr"
+          elab pdecl = liftIO (testElab pdecl)
+          parseErr e = putStrLn $ prettyError e
   -- tt_ctxt on IState is a good guess
   -- Returns a `Context` which has a field `definitions :: Context -> Ctxt TTDecl`
 
+-- Find user defined names of type declarations.
+udNames :: [PDecl] -> [TT.Name]
+udNames pd = concat $ map udName pd
+
+-- Only finds names of type declarations and data declarations.
+-- That is all we need to fill in implicit types.
+-- But since ever top level name requires a type in Idris this should be all
+-- top-level user defined names.
+udName :: PDecl -> [TT.Name]
+udName (PData doc names synInfo range types
+          (PDatadecl nameIdr _ typeconstructor dataconstructors)) =
+    [nameIdr]
+udName (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
+  [nameIdr]
+udName _ = []
+
+--------------------------------------------------------------------------------
+-- TT Translation
 ttLookup :: TT.Name -> TT.Ctxt TTDecl -> Maybe TTDecl
 ttLookup name ctxt = (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
 
