@@ -1,19 +1,18 @@
 module Main where
 
 import Agda.Syntax.Concrete
-import Agda.Syntax.Concrete.Pretty
-import qualified Agda.Syntax.Abstract.Name as AAbstract
-import Agda.Utils.Pretty
-import Agda.Syntax.Position
-import Agda.Syntax.Literal
+import Agda.Syntax.Concrete.Pretty ()
 import Agda.Syntax.Common
-import Agda.Syntax.Fixity
-import Agda.Syntax.Notation
-import Idris.Parser (loadModule, prog)
-import Idris.Parser.Stack
+import Agda.Syntax.Fixity 
+import qualified Agda.Syntax.Abstract.Name as AAbstract
+import Agda.Utils.Pretty (prettyShow)
+import Agda.Syntax.Position (Range'(..))
+import Agda.Syntax.Literal (Literal(..))
+import Agda.Syntax.Notation (GenPart(IdPart))
 import Idris.AbsSyntax
-import Idris.Docstrings
-import Idris.IBC
+import Idris.Parser (loadModule, prog)
+import Idris.Docstrings (Docstring)
+import Idris.IBC (IBCPhase(..))
 import Idris.Info (getIdrisLibDir)
 import Idris.ElabDecls (elabPrims, elabDecls)
 import Idris.Core.Evaluate (definitions, TTDecl, Def, Def(..))
@@ -23,18 +22,18 @@ import Util.System (readSource)
 
 import Data.List (intersperse)
 import Data.Either (fromLeft, fromRight)
-import qualified Data.Text as Text
-import qualified Data.Map as Map
-import qualified Data.Maybe as Maybe
+import qualified Data.Text as Text (unpack)
+import qualified Data.Map as Map (lookup, keys)
+import qualified Data.Maybe as Maybe (fromJust)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
 import Control.Monad.Trans (lift, liftIO)
 
-import System.Environment
-import System.Exit
-import System.FilePath
+import System.Environment (getArgs)
+import System.Exit (ExitCode(..), exitWith)
+import System.FilePath ((</>))
 
-import Debug.Trace
+import Debug.Trace (trace)
 
 
 -- Try to handle implict/explict arguments. The whole '{a : Set}' thing.
@@ -355,19 +354,20 @@ exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
   putStrLn ("Successfuly compiled. Output written to: " ++ outfile) >> exit
-errorMsg :: FilePath -> ParseError -> IO ()
+errorMsg :: FilePath -> TT.Err -> IO ()
 errorMsg infile err =
   putStrLn ("Error while compiling file: " ++ infile ++ "\n\n" ++
-            (prettyError err)) >> Main.die
+            (show err)) >> Main.die
 
 runITA :: (FilePath, Maybe FilePath) -> IO ()
 runITA (infile, outfile) =
-  do out <- tryCompile infile
-     case out of
-       Left err -> print err
-       Right res -> case outfile of
-         Just outfilename -> writeFile outfilename res >> success outfilename
-         Nothing -> putStrLn res
+  do idrAST <- runIdr $ parseF infile
+     case idrAST of
+       Left err -> errorMsg infile err
+       Right idr -> let agda = prettyShow $ itaDecls idr in
+         case outfile of
+            Just outfilename -> writeFile outfilename agda >> success outfilename
+            Nothing -> putStrLn agda
 
 -- parseIdr :: (FilePath, Maybe FilePath) -> IO ()
 -- parseIdr (infile, outfile) = do
@@ -377,17 +377,6 @@ runITA (infile, outfile) =
 --       Right pd -> case outfile of
 --         Just out -> writeFile out (statsToCSV $ countD pd) >> success out
 --         Nothing -> putStrLn $ showStats $ countD pd
-
--- Use `loadSource` and the real Idris impl, to use elaborated terms and so on.
-
--- 'itaDecl' is the function which does the translation.
-tryCompile :: FilePath -> IO (Either TT.Err String)
-tryCompile filename = do
-  res <- runIdr $ parseF filename
-  case res of
-    Left err -> return $ Left err
-    Right pd -> return $ Right $ prettyShow $ map itaDecl pd
-
 
 --------------------------------------------------------------------------------
 -- Test interface for implementation
@@ -418,7 +407,8 @@ parseF f = do
             -- loadPkgIndex pkg = do ddir <- runIO getIdrisLibDir
             --                       addImportDir (ddir </> unPkgName pkg)
             --                       fp <- findPkgIndex pkg
-            --                       loadIBC True IBC_Building fp
+            --                      loadIBC True IBC_Building fp
+  
         let pkgdirs = ["../IdrisLibs"]
         setImportDirs pkgdirs
 
@@ -445,7 +435,8 @@ parseF f = do
         let map = Map.lookup concatName t
         -- iPrint (Map.keys $ Maybe.fromJust map)
         -- iPrint map
-        let s = udNames (ast i)
+        let names = udNames (ast i)
+        iPrint names
 
         
         -- let concat = ttLookup concatName t
@@ -456,7 +447,7 @@ parseF f = do
         -- sig <- liftIO (tttExpr ttty)
         -- liftIO (putStrLn $ show ttty)
         -- liftIO (putStrLn "Agda:")
-        -- liftIO (agda sig)
+        -- liftIO (printAgda sig)
 
         return (ast i)
   where addPkg :: String -> Idris ()
@@ -464,76 +455,23 @@ parseF f = do
                       addImportDir (ddir </> p)
                       addIBC (IBCImportDir (ddir </> p))
 
--- runIdr :: Idris a -> IO (Either TT.Err IState)
--- runIdr prog = runExceptT $ execStateT prog idrisInit
 iPrint a = liftIO (print a)
   
 runIdr :: Idris a -> IO (Either TT.Err a)
 runIdr a = runExceptT (evalStateT a idrisInit)
 
-testElab decls = runIdr $ elabDecls elabinfo decls
-  where elabinfo = toplevel
+printAgda d = putStrLn $ prettyShow d
 
-agda d = putStrLn $ prettyShow d
 
--- Test functions while developing
-tp = do (file :: String) <- readSource f
-        let res = testParse file
-        case res of
-          Left err -> putStrLn $ prettyError err
-          Right pd -> do
-            putStrLn "PDecls:"
-            putPDecls pd
-            putStrLn "\nAgda:"
-            (putStrLn $ show $ map itaDecl pd)
-            putStrLn "\nOutput:"
-            putStrLn $ prettyShow $ map itaDecl pd
-          -- Right pd -> putStrLn $ prettyShow $ map itaDecl pd
-          -- Right pd -> putPDecls pd
-  -- where f = "patrik.idr"
-  -- where f = "testP.idr"
-  where f = "testF.idr"
-        putPDecls lst = putStrLn $ concat $ intersperse "\n\n" $ map show lst
-
--- te :: IO (Either TT.Err IState)
--- te :: IO ()
-te = do (file :: String) <- readSource f
-        let q = testParse file
-        let w = fromRight [] q
-        -- e <- elab w
-        -- do w <- elab q
-        --    return w
-        -- w <- elab q
-          -- left err -> putstrln $ prettyerror err
-          -- right pd -> testelab pd
-        -- let r = fromRight undefined e
-        -- let t = definitions $ tt_ctxt r
-        -- let names = Map.keys t
-        -- let concatName = TT.sUN "concat"
-        -- let concat = ttLookup concatName t
-        -- let ty = getDef concat
-        -- let ttty = Maybe.fromJust $ getTTType ty
-        -- sig <- tttExpr ttty
-        -- putStrLn $ show ttty
-        -- putStrLn "Agda:"
-        -- agda sig
-        -- return r
-        return ()
-    where f = "simpleIdris.idr"
-          elab pdecl = liftIO (testElab pdecl)
-          parseErr e = putStrLn $ prettyError e
-  -- tt_ctxt on IState is a good guess
-  -- Returns a `Context` which has a field `definitions :: Context -> Ctxt TTDecl`
+--------------------------------------------------------------------------------
+-- TT Translation
 
 -- Find user defined names of type declarations.
 udNames :: [PDecl] -> [TT.Name]
 udNames pd = concat $ map udName pd
 
--- Only finds names of type declarations and data declarations.
--- That is all we need to fill in implicit types.
--- But since ever top level name requires a type in Idris this should be all
--- top-level user defined names.
 udName :: PDecl -> [TT.Name]
+-- TODO Add the Agda {a : Set} argument declaration
 udName (PData doc names synInfo range types
           (PDatadecl nameIdr _ typeconstructor dataconstructors)) =
     [nameIdr]
@@ -541,8 +479,6 @@ udName (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type de
   [nameIdr]
 udName _ = []
 
---------------------------------------------------------------------------------
--- TT Translation
 ttLookup :: TT.Name -> TT.Ctxt TTDecl -> Maybe TTDecl
 ttLookup name ctxt = (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
 
@@ -600,9 +536,6 @@ tttaBind name b@(TT.Pi rigCount implI ty kind) term =
   -- Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
   where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
 tttaBind _ _ _ = undefined
-
-
-testParse p = runparser (prog defaultSyntax) idrisInit "(test)" p
 
 --------------------------------------------------------------------------------
 -- Agda constructors
