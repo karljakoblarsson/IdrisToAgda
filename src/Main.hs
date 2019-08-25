@@ -55,6 +55,7 @@ import Debug.Trace (trace)
 -- vary. In 'data Vector (A : Set) : Nat → Set where', 'A' is parameter and
 -- 'Nat' a index. Parameters are bound once for all constructors, indices are
 -- bound locally for each constructor. (In Agda)
+-- Agda and Idris handles indices and parameters differently.
 
 -- Idris doesn't syntactically differentiate between indices and parameters,
 -- while Agda does. I wonder when Idris computes that information? Because I
@@ -77,7 +78,7 @@ itaDecl (PData doc names synInfo range types
         induc = Inductive -- Inductive | CoInductive
         name = itaName nameIdr
         lbBind = [
-          DomainFull (TBind NoRange [] (lit 333)) -- TODO This is not correct.
+          -- DomainFull (TBind NoRange [] (lit 333)) -- TODO This is not correct.
                  ]
         expr = itaTerm typeconstructor
         typesigs = map itaDC dataconstructors
@@ -86,7 +87,7 @@ itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type d
   [typesig (itaName nameIdr) (itaTerm terms)]
 itaDecl (PClauses range fnopts name clauses) = -- Pattern clause
   itaClauses clauses
-itaDecl (PFix fc fixIdr strings) = [Infix fixAgda (map Main.mkName strings)]
+itaDecl (PFix fc fixIdr strings) = [Infix fixAgda (map mkName strings)]
   where fixAgda = itaFixity fixIdr
 itaDecl _ = undefined
 
@@ -190,12 +191,8 @@ itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
   -- Fun NoRange (Arg defaultArgInfo (itaTerm term1))  (itaTerm term2)
   -- Pi (createTelescope name term1) (itaTerm term2)
 itaPi q@(Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
-  -- Fun NoRange (hiddenArg name (itaTerm term1))  (itaTerm term2)
-  Pi (createTelescope name term1) (itaTerm term2)
- -- error ("itaPi: Imp problem with " ++ show name ++ show term1 ++ show term2)
-
-itaPi (Constraint _ _ _) name term1 term2 = undefined
-itaPi (TacImp _ _ _ _) name term1 term2 =  undefined
+  Pi (createHiddenTelescope name term1) (itaTerm term2)
+--  error ("itaPi: Imp problem with " ++ show q)
 
   -- TODO Type classes are implemented very differently in Agda. I probably wont do this.
 {- example of parse of |{n : N} -> test n|
@@ -218,6 +215,11 @@ defaultArgInfoHidden =  ArgInfo
   , argInfoFreeVariables = UnknownFVs
   }
 
+
+createHiddenTelescope :: TT.Name -> PTerm -> Telescope
+createHiddenTelescope name pterm = [TBind NoRange bargs (itaTerm pterm)]
+  where bargs = [barg]
+        barg = hArg (itaName name) (mkBoundName_ (itaName name))
 
 itaTerm :: PTerm -> Expr
 itaTerm (PRef range highlightRange name) = iden $ Main.prettyName name
@@ -279,7 +281,7 @@ itaAtype (TT.ATInt TT.ITChar) = LitQName NoRange
   (AAbstract.QName (AAbstract.MName []) charName)
   where charName =
          AAbstract.Name { AAbstract.nameId          = NameId 1 1
-                        , AAbstract.nameConcrete    = Main.mkName "Char"
+                        , AAbstract.nameConcrete    = mkName "Char"
                         , AAbstract.nameBindingSite = NoRange
                         , AAbstract.nameFixity      = mkFixity
                         , AAbstract.nameIsRecordName = False
@@ -287,8 +289,8 @@ itaAtype (TT.ATInt TT.ITChar) = LitQName NoRange
 itaAtype (TT.ATFloat) = undefined
 
 itaName :: TT.Name -> Name
--- itaName n = Main.mkName $ Main.prettyName n
-itaName n = Main.mkName $ show n
+-- itaName n = mkName $ prettyName n
+itaName n = mkName $ show n
 
 -- TODO This is not strictly correct. But for 'RawApp' which only take Exprs as
 -- args it's okay
@@ -381,9 +383,12 @@ runITA (infile, outfile) =
 --------------------------------------------------------------------------------
 -- Test interface for implementation
 
+-- TODO The parser fails when there is an existing .ibc file. The AST is not
+-- saved in the IBC so it will be empty. Either save it properly in the IBC or
+-- detect this case and reload the IBC file.
 test = do res <- runIdr $ parseF f
           case res of
-              Right pd -> putStrLn $ prettyShow $ map itaDecl pd
+              Right pd -> putStrLn $ prettyShow $ itaDecls pd
               Left err -> putStrLn $ show err
   -- where f = "Blodwen/src/Core/Primitives.idr"
   -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
@@ -436,7 +441,7 @@ parseF f = do
         -- iPrint (Map.keys $ Maybe.fromJust map)
         -- iPrint map
         let names = udNames (ast i)
-        iPrint names
+        -- iPrint names
 
         
         -- let concat = ttLookup concatName t
@@ -543,7 +548,7 @@ tttaBind _ _ _ = undefined
 mkName :: String -> Name
 mkName n = Name NoRange InScope [(Id n)]
 qname :: String -> QName
-qname n = QName $ Main.mkName n
+qname n = QName $ mkName n
 
 iden n = Ident $ qname n
 
@@ -561,6 +566,25 @@ arg name expr
   | name == "__pi_arg" = defaultNamedArg expr
   | otherwise = Arg (ArgInfo NotHidden modality UserWritten UnknownFVs) $
   Named (Just (Ranged NoRange name)) expr
+
+-- TODO Fix the mess of several functions called hiddenArg/hArg.
+-- I'm sure I fixed this but it has been lost somehow.
+hArg :: Name -> a -> NamedArg a
+hArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
+  Named (Just (Ranged NoRange (prettyShow name))) expr
+-- data ArgInfo = ArgInfo
+--   { argInfoHiding        :: Hiding
+--   , argInfoModality      :: Modality
+--   , argInfoOrigin        :: Origin
+--   , argInfoFreeVariables :: FreeVariables
+--   } deriving (Data, Eq, Ord, Show)
+
+-- defaultArgInfo =  ArgInfo
+--   { argInfoHiding        = NotHidden
+--   , argInfoModality      = defaultModality
+--   , argInfoOrigin        = UserWritten
+--   , argInfoFreeVariables = UnknownFVs
+
 
   -- Only hidden arguments can have names in Agda
 -- hiddenArg :: String -> a -> NamedArg a
