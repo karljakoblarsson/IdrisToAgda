@@ -9,3 +9,30 @@ De kan hantera Idris base (built-ins) + prelude
 
 TODO lös problemet med import av filer i samma projekt
   ("extern" import fungerar)
+
+2019-08-19:
+Utskrivna Implicita argument översätts nu.
+
+2019-08-20:
+Kopplade in elaborerings resultatet i transpilern.
+
+2019-08-21:
+Jobbade med att koppla ihop funktioner i PDecl-språket (Konkret AST) med de
+i TT. (Lower level AST)
+
+2019-08-22:
+Skrev en omtenta.
+
+2019-08-23:
+
+2019-08-25:
+Förbereder för informell halvtidspresentation. Försöker fixa bugen med att
+impotera egendefinerade moduler.
+
+Idris 1.2.0 tillåter inte variabler att börja med en gemen. Detta bryter
+kompabilitet med IdrisLibs. Alternativet `--allow-capital-variables` krävs.
+Se: https://github.com/idris-lang/Idris-dev/issues/4359
+
+Idris bibliotek behöver byggas med samma version av kompliatorn som de
+importeras av. Det gör att varje gång jag ändrar i Idris källkod måste jag
+kompilera om alla bibliotek.
