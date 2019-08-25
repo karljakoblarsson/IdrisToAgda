@@ -24,15 +24,19 @@ i TT. (Lower level AST)
 Skrev en omtenta.
 
 2019-08-23:
-
-2019-08-25:
 Förbereder för informell halvtidspresentation. Försöker fixa bugen med att
 impotera egendefinerade moduler.
 
-Idris 1.2.0 tillåter inte variabler att börja med en gemen. Detta bryter
-kompabilitet med IdrisLibs. Alternativet `--allow-capital-variables` krävs.
-Se: https://github.com/idris-lang/Idris-dev/issues/4359
+Jag kan explicit definera en mapp att leta efter imports i. Men idris vill inte
+importera filerna.
 
 Idris bibliotek behöver byggas med samma version av kompliatorn som de
 importeras av. Det gör att varje gång jag ändrar i Idris källkod måste jag
 kompilera om alla bibliotek.
+
+Dock vill inte min version av IdrisLibs kompilera.
+
+2019-08-25:
+Idris 1.2.0 tillåter inte variabler att börja med en gemen. Detta bryter
+kompabilitet med IdrisLibs. Alternativet `--allow-capital-variables` krävs.
+Se: https://github.com/idris-lang/Idris-dev/issues/4359
