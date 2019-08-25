@@ -22,9 +22,9 @@ add : N -> N -> N
 add Zero s = s
 add (Suc a) b = add a (Suc b)
 
-data Vec : Type -> N -> Type where
+data Vec : (a : Type) -> N -> Type where
   Nil : Vec a Zero
-  Cons : a -> Vec a n -> Vec a (Suc n)
+  Cons : {n : N} -> a -> Vec a n -> Vec a (Suc n)
 
 empt : Vec N Zero
 empt = Nil
@@ -35,7 +35,7 @@ test = Cons One (Cons Two Nil)
 test2 : Vec N Three
 test2 = Cons Three (Cons Four (Cons Five Nil))
 
-concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
 concat Nil rest = rest
 concat (Cons a rest) b = concat rest (Cons a b)
 

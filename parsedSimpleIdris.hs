@@ -64,33 +64,40 @@ PFix FC infixr 10 ["::"]
 {- data Vec : N -> Type -> Type where -}
 {-   Nil : Vec Z a -}
 {-   (::) : a -> Vec n a -> Vec (Suc n) a -}
-PData (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList [])) [] (Syn {using = [], syn_params = [], syn_namespace = [], no_imp = [], imp_methods = [], decoration = <<fn>>, inPattern = False, implicitAllowed = False, constraintAllowed = False, maxline = Nothing, mut_nesting = 0, dsl_info = DSL {dsl_bind = PRef (builtin) [] >>=, dsl_apply = PRef (builtin) [] <*>, dsl_pure = PRef (builtin) [] pure, dsl_var = Nothing, index_first = Nothing, index_next = Nothing, dsl_lambda = Nothing, dsl_let = Nothing, dsl_pi = Nothing}, syn_in_quasiquote = 0, syn_toplevel = True, withAppAllowed = True}) FC [] (PDatadecl {d_name = Vec, d_name_fc = FC,
+PData
+  (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []))
+  []
+  (Syn {using = [], syn_params = [], syn_namespace = [], no_imp = [], imp_methods = [], decoration = <<fn>>, inPattern = False, implicitAllowed = False, constraintAllowed = False, maxline = Nothing, mut_nesting = 0, dsl_info = DSL {dsl_bind = PRef (builtin) [] >>=, dsl_apply = PRef (builtin) [] <*>, dsl_pure = PRef (builtin) [] pure, dsl_var = Nothing, index_first = Nothing, index_next = Nothing, dsl_lambda = Nothing, dsl_let = Nothing, dsl_pi = Nothing}, syn_in_quasiquote = 0, syn_toplevel = True, withAppAllowed = True})
+  FC
+  []
+  (PDatadecl {
+    d_name = Vec,
+    d_name_fc = FC,
+    d_tcon = PPi
+        (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW})
+        __pi_arg
+        No location
+        (PRef FC [FC] N)
+        (PPi
+          (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW})
+          __pi_arg
+          No location
+          (PType FC)
+          (PType FC)
+        ),
 
-d_tcon = PPi
-    (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW})
-    __pi_arg
-    No location
-    (PRef FC [FC] N)
-    (PPi
-      (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW})
-      __pi_arg
-      No location
-      (PType FC)
-      (PType FC)
-    ),
-
-d_cons = [
-
-(DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList [])
-,[]
-,Nil
-,FC
-,PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] Z},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] a}]
-,FC
-,[]),
-
-(DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []),[],::,FC,PPi (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW}) __pi_arg No location (PRef FC [FC] a) (PPi (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW}) __pi_arg No location (PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] n},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] a}]) (PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PApp FC (PRef FC [FC] Suc) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] n}]},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] a}])),FC,[])
-]})
+    d_cons = [
+      (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList [])
+      ,[]
+      ,Nil
+      ,FC
+      ,PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] Z},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] a}]
+      ,FC
+      ,[]),
+      (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList []),[],::,FC,PPi (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW}) __pi_arg No location (PRef FC [FC] a) (PPi (Exp {pargopts = [], pstatic = Dynamic, pparam = False, pcount = RigW}) __pi_arg No location (PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] n},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] a}]) (PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PApp FC (PRef FC [FC] Suc) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] n}]},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] a}])),FC,[])
+      ]
+    }
+  )
 
 {- empt : Vec Z N -}
 PTy (DocString (Options {sanitize = True, allowRawHtml = False, preserveHardBreaks = True, debug = False}) (fromList [])) [] (Syn {using = [], syn_params = [], syn_namespace = [], no_imp = [], imp_methods = [], decoration = <<fn>>, inPattern = False, implicitAllowed = False, constraintAllowed = False, maxline = Nothing, mut_nesting = 0, dsl_info = DSL {dsl_bind = PRef (builtin) [] >>=, dsl_apply = PRef (builtin) [] <*>, dsl_pure = PRef (builtin) [] pure, dsl_var = Nothing, index_first = Nothing, index_next = Nothing, dsl_lambda = Nothing, dsl_let = Nothing, dsl_pi = Nothing}, syn_in_quasiquote = 0, syn_toplevel = True, withAppAllowed = True}) FC [] empt FC (PApp FC (PRef FC [FC] Vec) [PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] Z},PExp {priority = 1, argopts = [], pname = {arg_0}, getTm = PRef FC [FC] N}])
