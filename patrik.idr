@@ -2,6 +2,8 @@
 
 data N = Zero | Suc N
 
+-- data Q : N -> N -> Type where
+
 addOne : N -> N
 addOne Zero = Suc Zero
 addOne (Suc n) = Suc (Suc n)
@@ -34,5 +36,4 @@ hej : Char
 hej = 'h'
 
 bar : {n : N} -> test n
-bar Zero  = Three
-bar (Suc n) = add n
+bar = ?haj

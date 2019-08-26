@@ -1,0 +1,21 @@
+Extensible Type-Directed Editing (pdf)
+Joomy Korkut, David Christiansen
+In Proc. of the Workshop on Type-Driven Development (TyDe)
+St. Louis, Missouri, USA, September, 2018
+Idris’s interactive editing features are now extensible in Idris itself.
+
+http://www.davidchristiansen.dk/
+
+----------------
+
+Elaborator Reflection: Extending Idris in Idris (pdf, acm, video)
+David Christiansen, Edwin Brady
+In Proc. of 21st International Conference on Functional Programming (ICFP ’16)
+Nara, Japan, September, 2016
+Making the elaboration facilities available for metaprogramming in Idris
+
+----------------
+
+Coding for Types: The Universe Pattern in Idris (video)
+David Christiansen
+Presented at Curry On 2015
