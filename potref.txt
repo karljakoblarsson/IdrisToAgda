@@ -19,3 +19,8 @@ Making the elaboration facilities available for metaprogramming in Idris
 Coding for Types: The Universe Pattern in Idris (video)
 David Christiansen
 Presented at Curry On 2015
+
+----------------------------------------------------------------
+
+related work on type systems / lambda calculus translations [lambda cube, check different prover / systems - Coq, Isabelle/HOL, Lean, ...] https://en.wikipedia.org/wiki/Category:Dependently_typed_languages
+    https://uniformal.github.io/
