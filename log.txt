@@ -40,3 +40,39 @@ Dock vill inte min version av IdrisLibs kompilera.
 Idris 1.2.0 tillåter inte variabler att börja med en gemen. Detta bryter
 kompabilitet med IdrisLibs. Alternativet `--allow-capital-variables` krävs.
 Se: https://github.com/idris-lang/Idris-dev/issues/4359
+
+
+2019-08-26:
+Meeting with Examiner:
+Fokusera på Set-Type levels, för att göra det korrekt.
+
+0 - a
+1 - suc a
+2  suc suc a
+
+Skriv mer på rapporten och hitta bra referenser på andra liknande projekt.
+Kolla Logipedia.
+translating coq HoL/nuprl
+
+
+NADs comments:
+ Några viktiga punkter inför vidare arbete:
+
+* Den nuvarande översättaren är väldigt enkel, det är ingen större
+   skillnad mellan Idriskoden och Agdakoden. Jag vill se något mer
+   avancerat, t ex en bra översättning av Idris Type till Agdas Set:
+
+   * Om Idris internt ger vissa nivåer a, b, c till olika förekomster av
+     Type så kanske Agdakoden kan innehålla nivåerna (a + ℓ), (b + ℓ) och
+     (c + ℓ), där ℓ är en nivåvariabel.
+
+   * Om Idris använder kumulativitet så kan översättaren kanske klaga:
+     "Den här koden kan inte översättas eftersom kumulativitet används".
+
+* I rapporten vill jag se en diskussion av tidigare arbete inom det här
+   området. Det finns en hel del.
+
+   Jag känner inte till hur andra har hanterat skillnader som den mellan
+   Type och Set. Om ingen har gjort det förut så är det intressant, och
+   om andra har gjort det så vill jag veta vad de gjort.
+
