@@ -76,3 +76,44 @@ NADs comments:
    Type och Set. Om ingen har gjort det förut så är det intressant, och
    om andra har gjort det så vill jag veta vad de gjort.
 
+
+2019-08-27
+Fortsatte att försöka entydligt koppla ihop definitioner mellan PDecl-språket
+och TT-språket. Utan några framgångar.
+
+Fixade en temporär lösning på IdrisLibs-buggen.
+
+2019-08-28
+Tentaplugg
+
+2019-08-29
+Tentaplugg
+
+2019-08-30
+Skrev en tenta
+
+2019-09-02
+Började leta efter var Universe-info sparas i Idris.
+
+2019-09-03
+Började leta efter related work igen.
+
+2019-09-04
+Jobbade inte pga sjukdom
+
+2019-09-05
+Jobbade inte pga sjukdom
+
+2019-09-06:
+Fortsatta försök att koppla ihop PDecl och TT
+Fortsatta försök att koppla ihop PDecl och TT
+
+2019-09-09:
+Fortsatte försöka hitta Universe level info i TT definitions.
+
+2019-09-10:
+Gräver mer i TT definitions efter den information jag vill ha. Tyvärr är det
+mycket svårare än jag trott. Jag kanske är tillbaka där jag började, att leta
+i `Idris`-monaden efter info. Det är extremet svårt att arbeta med
+Idris-implementationen, det tar alldeles för mycket tid.
+
