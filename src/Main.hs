@@ -1,5 +1,4 @@
 module Main where
-
 import Agda.Syntax.Concrete
 import Agda.Syntax.Concrete.Pretty ()
 import Agda.Syntax.Common
@@ -23,7 +22,7 @@ import Util.System (readSource)
 import Data.List (intersperse)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text (unpack)
-import qualified Data.Map as Map (lookup, keys)
+import qualified Data.Map as Map (lookup, keys, filterWithKey, elems)
 import qualified Data.Maybe as Maybe (fromJust)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
@@ -433,15 +432,43 @@ parseF f = do
   -- TODO START HERE
   -- Also return the elaboration info.
         -- liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
-        let t = definitions $ tt_ctxt i
-        let names = Map.keys t
-        let concatName = TT.sUN "concat"
 
-        let map = Map.lookup concatName t
-        -- iPrint (Map.keys $ Maybe.fromJust map)
-        -- iPrint map
+        -- What about this?
+        -- , idris_implicits    :: Ctxt [PArg]
+        -- , idris_inmodule               :: S.Set Name                -- ^ Names defined in current module
+
+        -- Below do not work, its empty.
+        -- let n = idris_inmodule i
+        -- iPrint n
+
+        let defs = definitions $ tt_ctxt i
+
+        -- let names = Map.keys defs
+        -- let concatName = TT.sUN "concat"
+
+        -- let map = Map.lookup concatName t
+        -- -- iPrint (Map.keys $ Maybe.fromJust map)
+        -- -- iPrint map
         let names = udNames (ast i)
-        -- iPrint names
+        -- Drop the namespace
+        let names' = map (\n -> (nn n)) names
+        -- iPrint names'
+        -- iPrint (take 20 (drop 1000 (Map.keys defs)))
+
+        let uDefs = Map.filterWithKey (\k v -> elem k names') defs
+        let na = Map.keys uDefs
+        iPrint na
+        let concatM = Maybe.fromJust $ Map.lookup (na !! 9) uDefs
+        -- let concat = Maybe.fromJust $ Map.lookup (na !! 11) concatM
+        let concat = head $ Map.elems concatM
+        -- iPrint (Map.lookup concat uDefs)
+        let (d, rc, inj, ac, tot, meta) = concat
+        iPrint "Def:"
+        a <- getTerm d
+        iPrint a
+        --   uDefs :: Map TT.Name TTDecl
+        -- type TTDecl =
+        --    (Def, RigCount, Injectivity, Accessibility, Totality, MetaInformation)
 
         
         -- let concat = ttLookup concatName t
@@ -459,6 +486,33 @@ parseF f = do
         addPkg p = do ddir <- runIO getIdrisLibDir
                       addImportDir (ddir </> p)
                       addIBC (IBCImportDir (ddir </> p))
+        nn :: TT.Name -> TT.Name
+        nn n@(TT.UN name) = n
+        nn n@(TT.MN id name) = n
+        nn n@(TT.NS ns names) = ns
+        nn _ = undefined
+        getTerm :: Def -> Idris (Either TT.Term TT.Type)
+        getTerm (Function ty term) = return $ Left term
+        getTerm (TyDecl nameTy ty) = return $ Right ty
+        getTerm (Operator _ _ _) = undefined
+        getTerm (CaseOp ci ty arg orig totSimp cd) = do
+          iPrint ty
+          iPrint arg
+          iPrint orig
+          iPrint totSimp
+          return $ Right ty
+-- data Def = Function !Type !Term
+--          | TyDecl NameType !Type
+--          | Operator Type Int ([Value] -> Maybe Value)
+--          | CaseOp CaseInfo
+--                   !Type
+--                   ![(Type, Bool)] -- argument types, whether canonical
+--                   ![Either Term (Term, Term)] -- original definition
+--                   ![([Name], Term, Term)] -- simplified for totality check definition
+--                   !CaseDefs
+-- data CaseDefs = CaseDefs {
+--                   cases_compiletime :: !([Name], SC),
+--                   cases_runtime :: !([Name], SC)
 
 iPrint a = liftIO (print a)
   
