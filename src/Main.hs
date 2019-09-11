@@ -2,7 +2,7 @@ module Main where
 import Agda.Syntax.Concrete
 import Agda.Syntax.Concrete.Pretty ()
 import Agda.Syntax.Common
-import Agda.Syntax.Fixity 
+import Agda.Syntax.Fixity
 import qualified Agda.Syntax.Abstract.Name as AAbstract
 import Agda.Utils.Pretty (prettyShow)
 import Agda.Syntax.Position (Range'(..))
@@ -406,7 +406,7 @@ parseF f = do
             --                       addImportDir (ddir </> unPkgName pkg)
             --                       fp <- findPkgIndex pkg
             --                      loadIBC True IBC_Building fp
-  
+
         let pkgdirs = ["../IdrisLibs"]
         setImportDirs pkgdirs
 
@@ -435,7 +435,7 @@ parseF f = do
         -- let n = idris_inmodule i
         -- iPrint n
 
-        let defs = definitions $ tt_ctxt i
+        let defs = definitions $ tt_ctxt i  -- all definitions in scope including prelude, libraries, etc.
 
         -- let names = Map.keys defs
         -- let concatName = TT.sUN "concat"
@@ -464,7 +464,7 @@ parseF f = do
         -- type TTDecl =
         --    (Def, RigCount, Injectivity, Accessibility, Totality, MetaInformation)
 
-        
+
         -- let concat = ttLookup concatName t
         -- let ty = getDef (Maybe.fromJust concat)
         -- iPrint concat
@@ -509,7 +509,7 @@ parseF f = do
 --                   cases_runtime :: !([Name], SC)
 
 iPrint a = liftIO (print a)
-  
+
 runIdr :: Idris a -> IO (Either TT.Err a)
 runIdr a = runExceptT (evalStateT a idrisInit)
 
@@ -563,7 +563,7 @@ tttExpr (TT.Inferred tt) = undefined
 tttExpr t@(TT.TType uexp) = do putStrLn $ "TType" ++ (show uexp)
                                return (iden $ show uexp)
 tttExpr (TT.UType universe) = undefined
-  
+
 itaTTNameType :: TT.NameType -> Name
 itaTTNameType (TT.Ref) = undefined
 itaTTNameType _ = undefined
