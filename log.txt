@@ -1,3 +1,15 @@
+2019-09-11: to get unstuck:
+
+  Make a map of all datatypes in the front-end of Idris (including the target of elaboration).
+
+  Write 2-3 test programs based on examples where universe levels matter
+
+  Make sure the translator does not crash (but may produce goofy Agda) on these examples
+
+
+
+
+
 2019-08-15: Status
 
 Source -> Binary
@@ -116,4 +128,3 @@ Gräver mer i TT definitions efter den information jag vill ha. Tyvärr är det
 mycket svårare än jag trott. Jag kanske är tillbaka där jag började, att leta
 i `Idris`-monaden efter info. Det är extremet svårt att arbeta med
 Idris-implementationen, det tar alldeles för mycket tid.
-
