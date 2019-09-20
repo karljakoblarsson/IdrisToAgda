@@ -1,6 +1,5 @@
 graph Idris {
       /* Evaluate.hs */
-      EvalState
       Eval -> State
       Eval -> EvalState
       EvalOpt -> Spec
@@ -86,4 +85,150 @@ graph Idris {
       Env -> Name
       WkEnvTT -> EnvTT
       WkEnv -> WkEnvTT
+
+      /* AbsSyntaxTree.hs */
+      ElabInfo -> Ctxt
+      ElabInfo -> PTerm
+      // ElabInfo -> ElabInfo
+      // ElabInfo -> ElabWhat
+      // ElabInfo -> PDecl
+      // ElabInfo -> Name
+      IOption -> LogCat
+      IOption -> CodeGen
+      IOption -> Optimization
+      IState -> Context
+      IState -> ConstrinatFC
+      IState -> FixDecl
+      IState -> PArg
+      IState -> InterfaceInfo
+      IState -> RecordInfo
+      IState -> DSL
+      IState -> OptInfo
+      IState -> TypeInfo
+      IState -> Name
+      IState -> Term
+      IState -> PTerm
+      IState -> FnOpt
+      IState -> CGInfo
+      IState -> Ctxt
+      IState -> TIData
+      IState -> FnInfo
+      IState -> IOption
+      IState -> PTerm
+      IState -> SyntaxRules
+      IState -> PrimFn
+      IState -> Err
+      IState -> Axxessibility
+      IState -> DefaultTotality
+      IState -> IBCWrite
+      IState -> DynamicLib
+      IState -> LanguageExt
+      IState -> InteractiveOpts
+      IState -> PDecl
+      SCGEntry -> SizeChange
+      CGInfo -> UsageReason
+      CGInfo -> Name
+      IBCWrite -> FixDecl
+      IBCWrite -> Syntax
+      IBCWrite -> Codegen
+      IBCWrite -> Accessibility
+      IBCWrite -> MetaInformation
+      IBCWrite -> Totality
+      IBCWrite -> Injectivity
+      IBCWrite -> FnInfo
+      IBCWrite -> Term
+      IBCWrite -> PTerm
+      IBCWrite -> UConstraint
+      Idris -> IState
+      Idris -> Err
+      ElabShellCmd -> PTerm
+      ElabShellCmd -> Const
+      ElabShellCmd -> Name
+      FixDecl -> Fixity
+      Plixity -> Static
+      Plixity -> ImplicitInfo
+      Plixity -> RigCount
+      Plixity -> ArgOpt
+      Plixity -> PTerm
+      FnOpt -> Name
+      FnOpts -> FnOpt
+      ProvideWhat -> PTerm
+      PDecl -> Name
+      PDecl -> Err
+      PDecl -> SyntaxInfo
+      PDecl -> FnOpts
+      PDecl -> PClause
+      PDecl -> DataOpts
+      PDecl -> PData
+      PDecl -> PDecl
+      PDecl -> Plicity
+      PDecl -> Accessibility
+      PDecl -> DSL
+      PDecl -> Syntax
+      PDecl -> Directive
+      PDecl -> ProvideWhat
+      PDecl -> PTerm
+      Directive -> Codegen
+      Directive -> Name
+      Directive -> Accessibility
+      Directive -> DefaultTotality
+      Directive -> LanguageExt
+      RDeclInstructions -> PArg
+      RDeclInstructions -> Type
+      RDeclInstructions -> Term
+      RDeclInstructions -> Name
+      EState -> EState
+      EState -> RDeclInstructions
+      EState -> PDecl
+      EState -> Name
+      ElabD -> EState
+      PClause -> Name
+      PClause -> PDecl
+      PClause -> PTerm
+      PData -> Err
+      PData -> PTerm
+      PTerm -> Raw
+      PTerm -> Name
+      PTerm -> Plicity
+      PTerm -> PTerm
+      PTerm -> PArg
+      PTerm -> ImplicitInfo
+      PTerm -> PunInfo
+      PTerm -> PAltType
+      PTerm -> Universe
+      PTerm -> PDo
+      PTerm -> Const
+      PTerm -> PTactic
+      PTactic -> Name
+      PTactic -> Rewrite
+      PTactic -> PTactic
+      PTactic -> PTerm
+      PTactic -> Const
+      PTactic -> ErrorReportPart
+      PDo -> RigCount
+      PDo -> Name
+      PDo -> PTerm
+      PArg -> ArgOpt
+      PArg -> Name
+      PArg -> PTerm
+      InterfaceInfo -> Name
+      InterfaceInfo -> FnOpts
+      InterfaceInfo -> PTerm
+      InterfaceInfo -> PDecl
+      RecordInfo -> PTerm
+      TIData -> Term
+      OptInfo -> Name
+      DSL -> PTerm
+      Syntax -> Pterm
+      Syntax -> SSymbol
+      Syntax -> SynContext
+      Syntax -> PDecl
+      SSymbol -> Name
+      SyntaxRules -> Syntax
+      Using -> Name
+      Using -> Pterm
+      SyntaxInfo -> PTerm
+      SyntaxInfo -> Name
+      SyntaxInfo -> Using
+      SyntaxInfo -> DSL
 }
