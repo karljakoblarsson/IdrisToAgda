@@ -1,0 +1,89 @@
+graph Idris {
+      /* Evaluate.hs */
+      EvalState
+      Eval -> State
+      Eval -> EvalState
+      EvalOpt -> Spec
+      EvalOpt -> Simplify
+      EvalOpt -> AtREPL
+      EvalOpt -> RunTT
+      EvalOpt -> Unfold
+      
+      Value -> NameType
+      Value -> RigCount
+      Value -> Value
+      Value -> UExp
+      Value -> Universe
+      Value -> Const
+
+      Def -> Type
+      Def -> Term
+      Def -> NameType
+      Def -> Value
+      Def -> CaseInfo
+      Def -> CaseDefs
+
+      CaseDefs -> SC
+      CaseDefs -> Name
+
+      Accessibility
+      Injectivity
+      Totality -> PReason
+
+      PReason -> Name
+
+      MetaInformation
+
+      Context -> Ctxt
+      Context -> TTDecl
+
+      TTDecl -> Def
+      TTDecl -> RigCount
+      TTDecl -> Injectivity
+      TTDecl -> Accessibility
+      TTDecl -> Totality
+      TTDecl -> MetaInformation
+
+      /* Evaluate.hs */
+      Err -> Term
+      TC -> Err
+      Name -> SpecialName
+      Name -> Name
+      SpecialName -> Name
+      Ctxt -> MapMap
+      IntTy -> NativeTy
+      ArithTy -> IntTy
+      Const -> ArithTy
+      Universe
+      Raw -> Raw
+      Raw -> Name
+      Raw -> Universe
+      Raw -> Const
+      Binder -> RigCount
+      Binder -> ImplicitInfo
+      Binder -> Name
+      UExp
+      UConstraint -> UExp
+      UCs -> UConstraint
+      TT -> NameType
+      TT -> Binder
+      TT -> TT
+      TT -> AppStatus
+      TT -> Const
+      TT -> UExp
+      TT -> Universe
+      EnvTT -> RigCount
+      EnvTT -> Binder
+      EnvTT -> TT
+      Datatype -> TT
+      DataOpts -> DataOpt
+      TypeInfo -> DataOpts
+      TypeInfo -> Name
+      Term -> TT
+      Term -> Name
+      Type -> Term
+      Env -> EnvTT
+      Env -> Name
+      WkEnvTT -> EnvTT
+      WkEnv -> WkEnvTT
+}
