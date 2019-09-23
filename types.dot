@@ -1,12 +1,12 @@
-graph Idris {
+digraph Idris {
       /* Evaluate.hs */
-      Eval -> State
-      Eval -> EvalState
-      EvalOpt -> Spec
-      EvalOpt -> Simplify
-      EvalOpt -> AtREPL
-      EvalOpt -> RunTT
-      EvalOpt -> Unfold
+      // Eval -> State
+      // Eval -> EvalState
+      // EvalOpt -> Spec
+      // EvalOpt -> Simplify
+      // EvalOpt -> AtREPL
+      // EvalOpt -> RunTT
+      // EvalOpt -> Unfold
       
       Value -> NameType
       Value -> RigCount
@@ -23,13 +23,13 @@ graph Idris {
       Def -> CaseDefs
 
       CaseDefs -> SC
-      CaseDefs -> Name
+      // CaseDefs -> Name
 
       Accessibility
       Injectivity
       Totality -> PReason
 
-      PReason -> Name
+      // PReason -> Name
 
       MetaInformation
 
@@ -47,7 +47,7 @@ graph Idris {
       Err -> Term
       TC -> Err
       Name -> SpecialName
-      Name -> Name
+      // Name -> Name
       SpecialName -> Name
       Ctxt -> MapMap
       IntTy -> NativeTy
@@ -55,16 +55,16 @@ graph Idris {
       Const -> ArithTy
       Universe
       Raw -> Raw
-      Raw -> Name
+      // Raw -> Name
       Raw -> Universe
       Raw -> Const
       Binder -> RigCount
       Binder -> ImplicitInfo
-      Binder -> Name
+      // Binder -> Name
       UExp
       UConstraint -> UExp
       UCs -> UConstraint
-      TT -> NameType
+      // TT -> NameType
       TT -> Binder
       TT -> TT
       TT -> AppStatus
@@ -77,12 +77,12 @@ graph Idris {
       Datatype -> TT
       DataOpts -> DataOpt
       TypeInfo -> DataOpts
-      TypeInfo -> Name
+      // TypeInfo -> Name
       Term -> TT
-      Term -> Name
+      // Term -> Name
       Type -> Term
       Env -> EnvTT
-      Env -> Name
+      // Env -> Name
       WkEnvTT -> EnvTT
       WkEnv -> WkEnvTT
 
@@ -105,7 +105,7 @@ graph Idris {
       IState -> DSL
       IState -> OptInfo
       IState -> TypeInfo
-      IState -> Name
+      // IState -> Name
       IState -> Term
       IState -> PTerm
       IState -> FnOpt
@@ -127,7 +127,7 @@ graph Idris {
       IState -> PDecl
       SCGEntry -> SizeChange
       CGInfo -> UsageReason
-      CGInfo -> Name
+      // CGInfo -> Name
       IBCWrite -> FixDecl
       IBCWrite -> Syntax
       IBCWrite -> Codegen
@@ -143,17 +143,17 @@ graph Idris {
       Idris -> Err
       ElabShellCmd -> PTerm
       ElabShellCmd -> Const
-      ElabShellCmd -> Name
+      // ElabShellCmd -> Name
       FixDecl -> Fixity
       Plixity -> Static
       Plixity -> ImplicitInfo
       Plixity -> RigCount
       Plixity -> ArgOpt
       Plixity -> PTerm
-      FnOpt -> Name
+      // FnOpt -> Name
       FnOpts -> FnOpt
       ProvideWhat -> PTerm
-      PDecl -> Name
+      // PDecl -> Name
       PDecl -> Err
       PDecl -> SyntaxInfo
       PDecl -> FnOpts
@@ -169,26 +169,26 @@ graph Idris {
       PDecl -> ProvideWhat
       PDecl -> PTerm
       Directive -> Codegen
-      Directive -> Name
+      // Directive -> Name
       Directive -> Accessibility
       Directive -> DefaultTotality
       Directive -> LanguageExt
       RDeclInstructions -> PArg
       RDeclInstructions -> Type
       RDeclInstructions -> Term
-      RDeclInstructions -> Name
+      // RDeclInstructions -> Name
       EState -> EState
       EState -> RDeclInstructions
       EState -> PDecl
-      EState -> Name
+      // EState -> Name
       ElabD -> EState
-      PClause -> Name
+      // PClause -> Name
       PClause -> PDecl
       PClause -> PTerm
       PData -> Err
       PData -> PTerm
       PTerm -> Raw
-      PTerm -> Name
+      // PTerm -> Name
       PTerm -> Plicity
       PTerm -> PTerm
       PTerm -> PArg
@@ -199,36 +199,36 @@ graph Idris {
       PTerm -> PDo
       PTerm -> Const
       PTerm -> PTactic
-      PTactic -> Name
+      // PTactic -> Name
       PTactic -> Rewrite
       PTactic -> PTactic
       PTactic -> PTerm
       PTactic -> Const
       PTactic -> ErrorReportPart
       PDo -> RigCount
-      PDo -> Name
+      // PDo -> Name
       PDo -> PTerm
       PArg -> ArgOpt
-      PArg -> Name
+      // PArg -> Name
       PArg -> PTerm
-      InterfaceInfo -> Name
+      // InterfaceInfo -> Name
       InterfaceInfo -> FnOpts
       InterfaceInfo -> PTerm
       InterfaceInfo -> PDecl
       RecordInfo -> PTerm
       TIData -> Term
-      OptInfo -> Name
+      // OptInfo -> Name
       DSL -> PTerm
       Syntax -> Pterm
       Syntax -> SSymbol
       Syntax -> SynContext
       Syntax -> PDecl
-      SSymbol -> Name
+      // SSymbol -> Name
       SyntaxRules -> Syntax
-      Using -> Name
+      // Using -> Name
       Using -> Pterm
       SyntaxInfo -> PTerm
-      SyntaxInfo -> Name
+      // SyntaxInfo -> Name
       SyntaxInfo -> Using
       SyntaxInfo -> DSL
 }

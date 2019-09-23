@@ -24,3 +24,7 @@ Presented at Curry On 2015
 
 related work on type systems / lambda calculus translations [lambda cube, check different prover / systems - Coq, Isabelle/HOL, Lean, ...] https://en.wikipedia.org/wiki/Category:Dependently_typed_languages
     https://uniformal.github.io/
+
+
+---------------
+6: F Wiedijk - Encoding HOL Light in Coq, Unpublished notes
