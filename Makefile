@@ -36,6 +36,9 @@ clean:
 	rm -rf stats
 	mkdir stats
 
+typesgraph:
+	dot -Tsvg types.dot -o types.svg
+
 print-%: ; @echo $* = $($*)
 
 .PHONY: build fetch-submodules clean stats temp
