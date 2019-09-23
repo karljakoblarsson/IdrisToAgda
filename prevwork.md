@@ -25,3 +25,22 @@ MathWeb [AHJ+00]
 Open Mechanized Reasoning Systems [GPT94]
 Felty and Howe [FH97] - A translation of HOL into Nuprl, they focus on terms
 not on proofs.
+
+
+Importing HOL into Isabelle/HOL
+===============================
+Steven Obua and Sebastian Skalberg
+
+They use a fact of the idea of HOL to reccord each proof step done to
+the HOL-kernel. The proofs steps are then replayed in the target system.
+They need to make sure that thier proof represenatation is space efficient and
+suited to storing.
+
+Most of the time the target and destination system are close enough that the
+translation is straight forward. They handle a few smaller special cases where
+the systems differ.
+
+### Further refs to checkout
+[5,6] from HOL to Coq. Only 5 have a implementation
+5: Ewan Denney - A prototypr proof translator from HOL to Coq
+6: F Wiedijk - Encoding HOL Light in Coq, Unpublished notes
