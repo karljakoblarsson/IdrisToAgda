@@ -42,5 +42,25 @@ the systems differ.
 
 ### Further refs to checkout
 [5,6] from HOL to Coq. Only 5 have a implementation
-5: Ewan Denney - A prototypr proof translator from HOL to Coq
+5: Ewan Denney - A prototype proof translator from HOL to Coq
 6: F Wiedijk - Encoding HOL Light in Coq, Unpublished notes
+
+
+Hybrid Interactive Theorem Proving using Nuprl and HOL
+======================================================
+Amy P. Felty and Douglas J. Howe
+
+They formalize a substansial mathematical problem using parts of Nuprl and
+libraries from HOL together.
+
+According to the authors this is the first case where two different systems are
+used together. However there are many previous cases where systems are linked,
+a problem of a specific form is imported into another system.  See: [13] [15]
+
+Both Nuprl and HOL uses tactics derived from LCF[6]. Both systems use really
+similar reasoning. Some parts where HOL uses special purpose tactixs needed to
+be reimplemented in Nuprl.
+
+### Further refs to check out
+[13]
+[15]
