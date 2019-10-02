@@ -56,3 +56,47 @@ IdrisLibs\footnote{\url{https://gitlab.pik-potsdam.de/botta/IdrisLibs}} which
 is one of the bigger Idris codebases available. This will guide our
 implementation by first supporting the features used in the core parts of the
 SDP library. And then work to support more and more of the library.
+
+
+% About the Types Graph
+Re-using an exisiting major codebase is hard. Production ready code is usually
+filled with special cases, performance considerations and other "works for
+now"-code. The made this project harder than anticipated. While trying to
+understand the Idris code base we produced a dependency graph for the types
+used in the front end. This is one advantaged of strictly typed programming
+that the types, their dependicies tells us a lot about the code and how it
+works. And compared to writte documentation, the compiler guarantees that this
+information is up to date.
+
+\newcommand{\pterm}{\textit{PTerm}}
+\newcommand{\pdecel}{\textit{PDecl}}
+\newcommand{\term}{\textit{Term}}
+\newcommand{\tti}{\textit{TT}}
+
+% TODO which
+This graph of type dependencies can be found in appendix X. By looking at the
+graph it is easy to see which types are central in the implementation and which
+are only used peripherally. In figure~\ref{fig:types-crop} we see part of the
+graph centered on \textit{Term}.
+
+In the graph we cna clearly see that two of the most central data types are
+\textit{PTerm} and \textit{Term}. \textit{PTerm} is the main data type of the
+conrete syntax, i.e. what the parser produces. A program is a collection of
+declarations \textit{PDecl} which are constructed out of \pterm. \pterm
+contains everything which is known at parse-time. This is not enough for the
+purpose of our transpiler.
+
+The next step of compilation is elaboration and translation to \tti. \term is
+the main data type of the \tti language.
+
+% Idris internals again
+The Idris compilator works in a few big passes. The big passes are themself
+compromised of many smaller step. On a high-level the compilator goes through
+the following stages: Parsing to PDecl-lang. Elaboration and translation to
+\textit{TT}. Type checking. Further compilation to smaller languages. Then
+lastly translation to the target, i.e. C or JS usually.
+
+\textit{TT} is dependtly typed lambda-calculus augmented with algebraic data
+types and pattern matching. \textit{TT} is full explicitly typed.~\cite{idris}
+\textit{TT} is delibratly kept small to be sure it is correct. It is consisted
+of well known parts.
