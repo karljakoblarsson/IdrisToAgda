@@ -86,17 +86,19 @@ declarations \textit{PDecl} which are constructed out of \pterm. \pterm
 contains everything which is known at parse-time. This is not enough for the
 purpose of our transpiler.
 
-The next step of compilation is elaboration and translation to \tti. \term is
-the main data type of the \tti language.
-
 % Idris internals again
-The Idris compilator works in a few big passes. The big passes are themself
-compromised of many smaller step. On a high-level the compilator goes through
-the following stages: Parsing to PDecl-lang. Elaboration and translation to
-\textit{TT}. Type checking. Further compilation to smaller languages. Then
-lastly translation to the target, i.e. C or JS usually.
+The next step of compilation is elaboration and translation to \tti. \term is
+the main data type of the \tti language. \tti has fully explicit types. It
+contains all the information which is necessary for type-checking. A lot of
+useful information is generated in the elaboration.
 
 \textit{TT} is dependtly typed lambda-calculus augmented with algebraic data
 types and pattern matching. \textit{TT} is full explicitly typed.~\cite{idris}
 \textit{TT} is delibratly kept small to be sure it is correct. It is consisted
 of well known parts.
+
+The Idris compilator works in a few big passes. The big passes are themself
+compromised of many smaller step. On a high-level the compilator goes through
+the following stages: Parsing to PDecl-lang. Elaboration and translation to
+\textit{TT}. Type checking. Further compilation to smaller languages. Then
+lastly translation to the target, i.e. C or JS usually.

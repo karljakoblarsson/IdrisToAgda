@@ -64,3 +64,45 @@ be reimplemented in Nuprl.
 ### Further refs to check out
 [13]
 [15]
+
+Translating HOL to Dedukti
+==========================
+A. Assaf, G. Burel
+
+Dedukti is a logic framwork where it seems to be possible to embedd a large
+part of used logic systems. Proof systems are increasingly important today.
+Therefore interoperabillity will become more important, both for increased
+confidence and to build larger proofs. Lambda-Pi-calculus, known prev. as LF
+(Logic framfwork) is a dependently typed lambda-calculus.
+
+The introduction of this paper is really basic and starts by describing
+Curry-Howard. That seems odd, everyone who would be interested in the should
+already know about it and at least one proof system.
+
+Similar to another paper, one problem of HOL in this context is that the proof
+steps are not recorded. Therefore proof step recording is added to make it easy
+to share proofs.
+
+According to the authors,
+6: F Wiedijk - Encoding HOL Light in Coq, Unpublished notes,
+Importing HOL into Isabelle/HOL and
+Naumov - The HOL/NuPRL translator
+all suffer scalability problems. While their implementation do not.
+
+They have developed a tool, Holide, which translates HOL proofs in the
+OpenTheory format into Dedukti. The successfully translate the OpenTheory
+standard libary.
+
+The last sentence above is huge. Successfully a complete standard library
+(given that the std.lib. of OpenTheory is substansial) is much further than
+most other attempts here.
+
+Section 4 describes the translator
+Section 5 show correctness
+
+### Further refs to check out
+[2]
+[26]
+[28]
+[7] A translatorn of Coq to Dedukti - G. Burel CoqInE - Translating...
+
