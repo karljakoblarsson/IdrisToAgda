@@ -2,6 +2,20 @@ Try to complete 3 tasks per day until thursday 3/10. The you will evaluate and
 proceed to four a day only if it works fine. Otherwise continue for one more
 week. Four tasks per day should be a good tempo to finish.
 
+Admin / examination requirements
+============
+[ ] Find a project for opposition
+[ ] Schedule opposition
+[ ] Prepare opposition (read report, make questions)
+[ ] Carry out opposition.
+[ ] Find 2 projects for presence
+[ ] Schedule the 2 projects for presence
+[ ] Be present proj 1!
+[ ] Be present proj 2!
+[ ] Writing seminar I (2019-10-??)
+[ ] Writing seminar II ?
+
+
 Transpiler implementation
 =========================
 [x] Make map of Evaluate.hs
@@ -107,4 +121,3 @@ Software engineering problems
 [ ] Read through the file where ipkg files are read
 [ ] Find where userdefined libraries are loaded
 [ ] Add to my implementation the userdefined libraries are read
-

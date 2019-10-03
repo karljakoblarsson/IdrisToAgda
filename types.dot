@@ -7,7 +7,9 @@ digraph Idris {
       // EvalOpt -> AtREPL
       // EvalOpt -> RunTT
       // EvalOpt -> Unfold
-      
+
+//      subgraph { PDecl, PTerm }
+
       Value -> NameType
       Value -> RigCount
       Value -> Value
@@ -44,8 +46,8 @@ digraph Idris {
       TTDecl -> MetaInformation
 
       /* Evaluate.hs */
-      Err -> Term
-      TC -> Err
+//      Err -> Term
+//      TC -> Err
       Name -> SpecialName
       // Name -> Name
       SpecialName -> Name
@@ -96,35 +98,35 @@ digraph Idris {
       IOption -> LogCat
       IOption -> CodeGen
       IOption -> Optimization
-      IState -> Context
-      IState -> ConstrinatFC
-      IState -> FixDecl
-      IState -> PArg
-      IState -> InterfaceInfo
-      IState -> RecordInfo
-      IState -> DSL
-      IState -> OptInfo
-      IState -> TypeInfo
-      // IState -> Name
-      IState -> Term
-      IState -> PTerm
-      IState -> FnOpt
-      IState -> CGInfo
-      IState -> Ctxt
-      IState -> TIData
-      IState -> FnInfo
-      IState -> IOption
-      IState -> PTerm
-      IState -> SyntaxRules
-      IState -> PrimFn
-      IState -> Err
-      IState -> Axxessibility
-      IState -> DefaultTotality
-      IState -> IBCWrite
-      IState -> DynamicLib
-      IState -> LanguageExt
-      IState -> InteractiveOpts
-      IState -> PDecl
+//      IState -> Context
+//      IState -> ConstrinatFC
+//      IState -> FixDecl
+//      IState -> PArg
+//      IState -> InterfaceInfo
+//      IState -> RecordInfo
+//      IState -> DSL
+//      IState -> OptInfo
+//      IState -> TypeInfo
+//      // IState -> Name
+//      IState -> Term
+//      IState -> PTerm
+//      IState -> FnOpt
+//      IState -> CGInfo
+//      IState -> Ctxt
+//      IState -> TIData
+//      IState -> FnInfo
+//      IState -> IOption
+//      IState -> PTerm
+//      IState -> SyntaxRules
+//      IState -> PrimFn
+////      IState -> Err
+//      IState -> Axxessibility
+//      IState -> DefaultTotality
+//      IState -> IBCWrite
+//      IState -> DynamicLib
+//      IState -> LanguageExt
+//      IState -> InteractiveOpts
+//      IState -> PDecl
       SCGEntry -> SizeChange
       CGInfo -> UsageReason
       // CGInfo -> Name
@@ -140,7 +142,7 @@ digraph Idris {
       IBCWrite -> PTerm
       IBCWrite -> UConstraint
       Idris -> IState
-      Idris -> Err
+//      Idris -> Err
       ElabShellCmd -> PTerm
       ElabShellCmd -> Const
       // ElabShellCmd -> Name
@@ -154,7 +156,7 @@ digraph Idris {
       FnOpts -> FnOpt
       ProvideWhat -> PTerm
       // PDecl -> Name
-      PDecl -> Err
+//      PDecl -> Err
       PDecl -> SyntaxInfo
       PDecl -> FnOpts
       PDecl -> PClause
@@ -185,7 +187,7 @@ digraph Idris {
       // PClause -> Name
       PClause -> PDecl
       PClause -> PTerm
-      PData -> Err
+//      PData -> Err
       PData -> PTerm
       PTerm -> Raw
       // PTerm -> Name
@@ -219,14 +221,14 @@ digraph Idris {
       TIData -> Term
       // OptInfo -> Name
       DSL -> PTerm
-      Syntax -> Pterm
+      Syntax -> PTerm
       Syntax -> SSymbol
       Syntax -> SynContext
       Syntax -> PDecl
       // SSymbol -> Name
       SyntaxRules -> Syntax
       // Using -> Name
-      Using -> Pterm
+      Using -> PTerm
       SyntaxInfo -> PTerm
       // SyntaxInfo -> Name
       SyntaxInfo -> Using

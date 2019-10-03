@@ -1,3 +1,18 @@
+* Notes 2019-10-10
+
+TODO schedule meetings in Nov.
+
+* Notes 2019-10-03
+The graph shows that
+  PDecl + PTerm (+ friends) are the first AST
+  TTDecl + Type + Term (+ friends) are the elaborated AST
+
+RDeclInstructions finns i
+  [[file:Idris-dev/src/Idris/AbsSyntaxTree.hs::data%20RDeclInstructions%20=%20RTyDeclInstrs%20Name%20FC%20%5BPArg%5D%20Type][file 1]]
+  [[file:Idris-dev/src/Idris/AbsSyntaxTree.hs::data%20RDeclInstructions%20=%20RTyDeclInstrs%20Name%20FC%20%5BPArg%5D%20Type][file 2]]
+
+Patrik är borta 2019-10-25 till 2019-11-04.
+
 * Notes 2019-06-27
 + diskuterar halvtidsrapportens frågor
 + söker buggar i sts och ita (lovand ingångar funna)
@@ -39,32 +54,30 @@ Agda:
 id : {A : Set} -> A -> A
 id {A} x = x
 
-
 * Time plan
 (from the planning report + later additions)
 ** DONE 2019-04-18; WR; Planning report.
 ** DONE 2019-04-26; A;  Book supervision meetings
 ** DONE 2019-04-29; TW; First runnable implementation of STLC.
-** TODO 2019-05-05; TW; First runnable Dependent types example. (without hidden arg.)
+** DONE 2019-05-05; TW; First runnable Dependent types example. (without hidden arg.)
 ** DONE 2019-05-10; CE; Industry and career advancement seminar
-** TODO 2019-06-01; TW; Decide verification method.
+** DONE 2019-06-01; TW; Decide verification method.
 ** DONE 2019-05-19; WR; Incorporate planning report suggestions into half-time report
-** TODO 2019-06-10; WR; Half-time presentation.
-** TODO 2019-06-19; WR; Content complete draft of half-time report.
-** TODO 2019-06-22; WR; Final draft of half-time report to supervisor.
-** TODO 2019-06-30; WR; Half-time report done.
-** TODO 2019-09-08; TW; Implementation of Implicit arguments done.
-** TODO 2019-09-08; WR; Content complete draft of Background in Final report.
-** TODO 2019-09-22; TW; Final implementation version.
-** TODO 2019-09-29; TW; Final verification.
-** TODO 2019-09-29; WR; Content complete draft of Final report.
-** TODO 2019-09-??; CE; Opposition.
-** TODO 2019-09-??; CE; Writing seminar I
-** TODO 2019-09-??; CE; Writing seminar II
+** DONE 2019-06-10; WR; Half-time presentation.
+** DONE 2019-06-19; WR; Content complete draft of half-time report.
+** DONE 2019-06-22; WR; Final draft of half-time report to supervisor.
+** DONE 2019-06-30; WR; Half-time report done.
+** TODO 2019-10-??; TW; Implementation of Implicit arguments done.
+** TODO 2019-10-??; WR; Content complete draft of Background in Final report.
+** TODO 2019-10-22; TW; Final implementation version.
+** TODO 2019-10-29; TW; Final verification.
+** TODO 2019-10-29; WR; Content complete draft of Final report.
+** TODO 2019-10-??; CE; Opposition.
+** TODO 2019-10-??; CE; Writing seminar I
+** TODO 2019-10-??; CE; Writing seminar II
 ** TODO 2019-10-06; WR; Complete draft of Final report to supervisor
 ** TODO 2019-10-20; WR; Final report.
 ** TODO 2019-10-??; CE; Presentation.
-
 * Time plan notation
 From the planning report
 + TW = 6.1 Technical work
