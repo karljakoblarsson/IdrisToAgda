@@ -52,7 +52,7 @@ References
 [ ] Read KeYmaera: A hybrid prover for hybrid systems
 [x]   Add bibtex
 [ ]   Write summary
-[ ] Read Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
+[x] Read Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [x]   Add bibtex entry of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [ ]   Write summary of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [ ] Read MMT: A Foundation-Independent Approaxh to Formal Knowledge
@@ -112,9 +112,9 @@ Writing
 Software engineering problems
 =============================
 [x] Merge in Patriks recent comments
-[ ] Read through IBC.hs
-[ ] Find where the Idris monad is saved to an .ibc-file
-[ ] Find where the Idris monad is read fron an .ibc-file
+[x] Read through IBC.hs
+[x] Find where the Idris monad is saved to an .ibc-file
+[x] Find where the Idris monad is read fron an .ibc-file
 [ ] Save the ast to the .ibc-file
 [ ] Read the ast from the .ibc-file
 [ ] Find where ipkg files are read
