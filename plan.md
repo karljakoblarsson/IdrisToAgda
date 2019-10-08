@@ -54,7 +54,7 @@ References
 [ ]   Write summary
 [x] Read Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [x]   Add bibtex entry of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
-[ ]   Write summary of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
+[x]   Write summary of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [ ] Read MMT: A Foundation-Independent Approaxh to Formal Knowledge
 [ ]   Add bibtex entry of MMT: A Foundation-Independent Approaxh to Formal Knowledge
 [ ]   Write summary of MMT: A Foundation-Independent Approaxh to Formal Knowledge

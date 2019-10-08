@@ -106,3 +106,20 @@ Section 5 show correctness
 [28]
 [7] A translatorn of Coq to Dedukti - G. Burel CoqInE - Translating...
 
+
+Dedukti
+=======
+Dedukti-team
+
+Dedukti is again a framework based on lambda-pi-modulo calculs. In which it is
+possible to embedd sveral other logic systems. The authors sees the possibility
+to use Dedukti as a framework for all of logic and prrof systems. The have
+implemented translation from several systems to Dedukti, in some degree at
+least.
+
+Interestingly for us they present translations from both simply type lambda
+calculus and a subset of ML. That is very related to our project. However, it
+is still on a very theoretical level, and not a general purpose transpiler.
+
+In section 8.3 they talk about universe. That is probably interesting for me.
+But not much is said.
