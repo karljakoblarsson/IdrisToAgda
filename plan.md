@@ -8,8 +8,8 @@ Admin / examination requirements
 [ ] Schedule opposition
 [ ] Prepare opposition (read report, make questions)
 [ ] Carry out opposition.
-[ ] Find 2 projects for presence
-[ ] Schedule the 2 projects for presence
+[x] Find 2 projects for presence
+[x] Schedule the 2 projects for presence
 [ ] Be present proj 1!
 [ ] Be present proj 2!
 [ ] Writing seminar I (2019-10-??)
@@ -86,8 +86,8 @@ Writing
 [ ] Write one paragraph about the crop
 [ ] Rewrite the section about the types graph and Idris internals
 
-[ ] Look upp when the writing seminars are
-[ ] Apply to one writing seminar
+[x] Look upp when the writing seminars are
+[x] Apply to one writing seminar
 [ ] Apply to the second writing seminar
 
 [ ] Write one draft paragraph about related works
