@@ -46,15 +46,15 @@ digraph Idris {
       TTDecl -> MetaInformation
 
       /* Evaluate.hs */
-//      Err -> Term
-//      TC -> Err
-      Name -> SpecialName
+      // Err -> Term
+      // TC -> Err
+      // Name -> SpecialName
       // Name -> Name
-      SpecialName -> Name
-      Ctxt -> MapMap
-      IntTy -> NativeTy
-      ArithTy -> IntTy
-      Const -> ArithTy
+      // SpecialName -> Name
+      Ctxt -> Map
+      // IntTy -> NativeTy
+      // ArithTy -> IntTy
+      // Const -> ArithTy
       Universe
       Raw -> Raw
       // Raw -> Name
@@ -95,54 +95,56 @@ digraph Idris {
       // ElabInfo -> ElabWhat
       // ElabInfo -> PDecl
       // ElabInfo -> Name
-      IOption -> LogCat
-      IOption -> CodeGen
-      IOption -> Optimization
-//      IState -> Context
-//      IState -> ConstrinatFC
-//      IState -> FixDecl
-//      IState -> PArg
-//      IState -> InterfaceInfo
-//      IState -> RecordInfo
-//      IState -> DSL
-//      IState -> OptInfo
-//      IState -> TypeInfo
-//      // IState -> Name
-//      IState -> Term
-//      IState -> PTerm
-//      IState -> FnOpt
-//      IState -> CGInfo
-//      IState -> Ctxt
-//      IState -> TIData
-//      IState -> FnInfo
-//      IState -> IOption
-//      IState -> PTerm
-//      IState -> SyntaxRules
-//      IState -> PrimFn
-////      IState -> Err
-//      IState -> Axxessibility
-//      IState -> DefaultTotality
-//      IState -> IBCWrite
-//      IState -> DynamicLib
-//      IState -> LanguageExt
-//      IState -> InteractiveOpts
-//      IState -> PDecl
-      SCGEntry -> SizeChange
-      CGInfo -> UsageReason
+      // IOption -> LogCat
+      // IOption -> CodeGen
+      // IOption -> Optimization
+      // IState -> Context
+      // IState -> ConstrinatFC
+      // IState -> FixDecl
+      // IState -> PArg
+      // IState -> InterfaceInfo
+      // IState -> RecordInfo
+      // IState -> DSL
+      // IState -> OptInfo
+      // IState -> TypeInfo
+      // IState -> Name
+      // IState -> Term
+      // IState -> PTerm
+      // IState -> FnOpt
+      // IState -> CGInfo
+      // IState -> Ctxt
+      // IState -> TIData
+      // IState -> FnInfo
+      // IState -> IOption
+      // IState -> PTerm
+      // IState -> SyntaxRules
+      // IState -> PrimFn
+      // IState -> Err
+      // IState -> Axxessibility
+      // IState -> DefaultTotality
+      // IState -> IBCWrite
+      // IState -> DynamicLib
+      // IState -> LanguageExt
+      // IState -> InteractiveOpts
+      // IState -> PDecl
+      // SCGEntry -> SizeChange
+      // CGInfo -> UsageReason
       // CGInfo -> Name
-      IBCWrite -> FixDecl
-      IBCWrite -> Syntax
-      IBCWrite -> Codegen
-      IBCWrite -> Accessibility
-      IBCWrite -> MetaInformation
-      IBCWrite -> Totality
-      IBCWrite -> Injectivity
-      IBCWrite -> FnInfo
-      IBCWrite -> Term
-      IBCWrite -> PTerm
-      IBCWrite -> UConstraint
-      Idris -> IState
-//      Idris -> Err
+
+      // IBCWrite -> FixDecl
+      // IBCWrite -> Syntax
+      // IBCWrite -> Codegen
+      // IBCWrite -> Accessibility
+      // IBCWrite -> MetaInformation
+      // IBCWrite -> Totality
+      // IBCWrite -> Injectivity
+      // IBCWrite -> FnInfo
+      // IBCWrite -> Term
+      // IBCWrite -> PTerm
+      // IBCWrite -> UConstraint
+
+      // Idris -> IState
+      // Idris -> Err
       ElabShellCmd -> PTerm
       ElabShellCmd -> Const
       // ElabShellCmd -> Name
