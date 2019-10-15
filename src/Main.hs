@@ -394,7 +394,8 @@ test = do res <- runIdr $ parseF f
   -- where f = "Idris-dev/test/basic001/basic001a.idr"
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr "
-  where f = "simpleIdris.idr"
+  -- where f = "simpleIdris.idr"
+  where f = "simpleIdrisImpl.idr"
   -- where f = "patrik.idr" -- [working 2019-08-15]
 
 getDefinitions c = Map.keys $ definitions c
@@ -429,7 +430,7 @@ parseF f = do
 
         i <- getIState
         -- liftIO $ putStrLn $ showStats $ countD (ast i)
-  -- TODO START HERE
+  -- TODO
   -- Also return the elaboration info.
         -- liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
 
@@ -465,7 +466,27 @@ parseF f = do
         let (d, rc, inj, ac, tot, meta) = concat
         iPrint "Def:"
         a <- getTerm d
+  -- TODO 
+  -- Maybe concat clashes with the prelude and I'm printing the
+  -- std. lib. implementation here instead of mine. Since it references foldable
+  -- and so on. But it seems I can see the implicit arguments.
+
+  -- The explicit signature in Idris is:
+    cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
+
+-- The implicit signature in Idris is:
+    cc :  Vec g a -> Vec g b -> Vec g (add a b)
+
+-- The extracted signature from Term/Def/TT is: (When run on the implicit variant)
+    {b : Main.N} -> {a : Main.N} -> {g : Type ./simpleIdrisImpl.idr.h4} -> Main.Vec g a -> Main.Vec g b -> Main.Vec g (Main.add a b)
+-- Cleanly that is:
+    {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
+-- Which is exactly correct! It is everything I need!
+-- TODO START HERE
+-- So now I only need to map the names in the module (user-defined) one-to-one
+-- to the names in `defs`
         iPrint a
+        iPrint "------- End of things ------"
         --   uDefs :: Map TT.Name TTDecl
         -- type TTDecl =
         --    (Def, RigCount, Injectivity, Accessibility, Totality, MetaInformation)
@@ -534,7 +555,7 @@ parseF f = do
 --                             -- Marks a term as being inferred by the machine, rather than
 --                             -- given by the programmer
 --           | TType UExp -- ^ the type of types at some level
-  -- TODO START HERE below
+  -- TODO START with universe here!
 --           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
 --   deriving (Ord, Functor, Data, Generic, Typeable)
 

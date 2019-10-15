@@ -22,6 +22,11 @@ Transpiler implementation
 [x] Make map of TT.hs
 [x] Make map of AbsSyntaxTree.hs
 [x] Make a dot-graph of the constructors
+[x] Work one pass on implicit arguments
+[ ] Work another pass on implicit arguments
+[ ] Look up which people are possible to ask about Idris internals
+[ ] Write a draft email to send to Idris implementors
+[ ] Finalize and send that email.
 [ ] Write a Agda test program where universe levels matter
 [ ] Translate it manually to Idris
 [ ] Write a Idris test program where universe levels matter
