@@ -407,7 +407,6 @@ parseF f = do
             --                       addImportDir (ddir </> unPkgName pkg)
             --                       fp <- findPkgIndex pkg
             --                      loadIBC True IBC_Building fp
-
         let pkgdirs = ["../IdrisLibs"]
         setImportDirs pkgdirs
 
@@ -423,7 +422,6 @@ parseF f = do
         loadModule f $ IBC_REPL True
 
         i <- getIState
-        -- liftIO $ putStrLn $ showStats $ countD (ast i)
   -- TODO
   -- Also return the elaboration info.
         -- liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
@@ -466,15 +464,15 @@ parseF f = do
   -- and so on. But it seems I can see the implicit arguments.
 
   -- The explicit signature in Idris is:
-    cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
+    -- cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
 
 -- The implicit signature in Idris is:
-    cc :  Vec g a -> Vec g b -> Vec g (add a b)
+    -- cc :  Vec g a -> Vec g b -> Vec g (add a b)
 
 -- The extracted signature from Term/Def/TT is: (When run on the implicit variant)
-    {b : Main.N} -> {a : Main.N} -> {g : Type ./simpleIdrisImpl.idr.h4} -> Main.Vec g a -> Main.Vec g b -> Main.Vec g (Main.add a b)
+    -- {b : Main.N} -> {a : Main.N} -> {g : Type ./simpleIdrisImpl.idr.h4} -> Main.Vec g a -> Main.Vec g b -> Main.Vec g (Main.add a b)
 -- Cleanly that is:
-    {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
+    -- {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
 -- Which is exactly correct! It is everything I need!
 -- TODO START HERE
 -- So now I only need to map the names in the module (user-defined) one-to-one
