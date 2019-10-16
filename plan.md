@@ -120,8 +120,8 @@ Software engineering problems
 [x] Read through IBC.hs
 [x] Find where the Idris monad is saved to an .ibc-file
 [x] Find where the Idris monad is read fron an .ibc-file
-[ ] Save the ast to the .ibc-file
-[ ] Read the ast from the .ibc-file
+[x] Save the ast to the .ibc-file
+[x] Read the ast from the .ibc-file
 [ ] Find where ipkg files are read
 [ ] Read through the file where ipkg files are read
 [ ] Find where userdefined libraries are loaded
