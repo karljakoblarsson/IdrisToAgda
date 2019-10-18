@@ -22,7 +22,7 @@ import Util.System (readSource)
 import Data.List (intersperse)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text (unpack)
-import qualified Data.Map as Map (lookup, keys, filterWithKey, elems)
+import qualified Data.Map as Map (lookup, keys, filterWithKey, elems, Map)
 import qualified Data.Maybe as Maybe (fromJust)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
@@ -33,7 +33,6 @@ import System.Exit (ExitCode(..), exitWith)
 import System.FilePath ((</>))
 
 import Debug.Trace (trace)
-
 
 -- Try to handle implict/explict arguments. The whole '{a : Set}' thing.
 -- It's somewhat done. Probably not correct yet but working
@@ -364,21 +363,16 @@ runITA (infile, outfile) =
             Just outfilename -> writeFile outfilename agda >> success outfilename
             Nothing -> putStrLn agda
 
--- parseIdr :: (FilePath, Maybe FilePath) -> IO ()
--- parseIdr (infile, outfile) = do
---   ast <- runIdr $ parseF infile
---   case ast of
---       Left err -> putStrLn $ show err
---       Right pd -> case outfile of
---         Just out -> writeFile out (statsToCSV $ countD pd) >> success out
---         Nothing -> putStrLn $ showStats $ countD pd
-
 --------------------------------------------------------------------------------
 -- Test interface for implementation
 
--- TODO The parser fails when there is an existing .ibc file. The AST is not
--- saved in the IBC so it will be empty. Either save it properly in the IBC or
--- detect this case and reload the IBC file.
+iPrint a = liftIO (print a)
+
+runIdr :: Idris a -> IO (Either TT.Err a)
+runIdr a = runExceptT (evalStateT a idrisInit)
+
+printAgda d = putStrLn $ prettyShow d
+
 test = do res <- runIdr $ parseF f
           case res of
               Right pd -> putStrLn $ prettyShow $ itaDecls pd
@@ -424,37 +418,22 @@ parseF f = do
         i <- getIState
   -- TODO
   -- Also return the elaboration info.
-        -- liftIO (putStrLn $ show $ getDefinitions $ tt_ctxt i)
 
-        -- What about this?
-        -- , idris_implicits    :: Ctxt [PArg]
-        -- , idris_inmodule               :: S.Set Name                -- ^ Names defined in current module
+        -- all definitions in scope including prelude, libraries, etc.
+        let defs = definitions $ tt_ctxt i
 
-        -- Below do not work, its empty.
-        -- let n = idris_inmodule i
-        -- iPrint n
-
-        let defs = definitions $ tt_ctxt i  -- all definitions in scope including prelude, libraries, etc.
-
-        -- let names = Map.keys defs
-        -- let concatName = TT.sUN "concat"
-
-        -- let map = Map.lookup concatName t
-        -- -- iPrint (Map.keys $ Maybe.fromJust map)
-        -- -- iPrint map
         let names = udNames (ast i)
         -- Drop the namespace
         let names' = map (\n -> (nn n)) names
-        -- iPrint names'
-        -- iPrint (take 20 (drop 1000 (Map.keys defs)))
 
         let uDefs = Map.filterWithKey (\k v -> elem k names') defs
         let na = Map.keys uDefs
-        iPrint na
+
+        iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
+        iPrint ("Length PDecl: " ++ (show $ length (ast i)))
         let concatM = Maybe.fromJust $ Map.lookup (na !! 9) uDefs
-        -- let concat = Maybe.fromJust $ Map.lookup (na !! 11) concatM
         let concat = head $ Map.elems concatM
-        -- iPrint (Map.lookup concat uDefs)
+
         let (d, rc, inj, ac, tot, meta) = concat
         iPrint "Def:"
         a <- getTerm d
@@ -462,6 +441,7 @@ parseF f = do
   -- Maybe concat clashes with the prelude and I'm printing the
   -- std. lib. implementation here instead of mine. Since it references foldable
   -- and so on. But it seems I can see the implicit arguments.
+  -- This was correct.
 
   -- The explicit signature in Idris is:
     -- cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
@@ -474,25 +454,12 @@ parseF f = do
 -- Cleanly that is:
     -- {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
 -- Which is exactly correct! It is everything I need!
--- TODO START HERE
+
 -- So now I only need to map the names in the module (user-defined) one-to-one
 -- to the names in `defs`
+        iPrint "a: -------"
         iPrint a
         iPrint "------- End of things ------"
-        --   uDefs :: Map TT.Name TTDecl
-        -- type TTDecl =
-        --    (Def, RigCount, Injectivity, Accessibility, Totality, MetaInformation)
-
-
-        -- let concat = ttLookup concatName t
-        -- let ty = getDef (Maybe.fromJust concat)
-        -- iPrint concat
-        -- let ttty = Maybe.fromJust $ getTTType ty
-        -- iPrint ttty
-        -- sig <- liftIO (tttExpr ttty)
-        -- liftIO (putStrLn $ show ttty)
-        -- liftIO (putStrLn "Agda:")
-        -- liftIO (printAgda sig)
 
         return (ast i)
   where addPkg :: String -> Idris ()
@@ -505,62 +472,61 @@ parseF f = do
         nn n@(TT.NS ns names) = ns
         nn _ = undefined
         getTerm :: Def -> Idris (Either TT.Term TT.Type)
-        getTerm (Function ty term) = return $ Left term
+        getTerm (Function ty term) = do
+          iPrint "getTerm ------- Function"
+          iPrint ty
+          return $ Left term
         getTerm (TyDecl nameTy ty) = return $ Right ty
         getTerm (Operator _ _ _) = undefined
         getTerm (CaseOp ci ty arg orig totSimp cd) = do
+          iPrint "getTerm ------- CaseOp"
           iPrint ty
           iPrint arg
           iPrint orig
           iPrint totSimp
           return $ Right ty
--- data Def = Function !Type !Term
---          | TyDecl NameType !Type
---          | Operator Type Int ([Value] -> Maybe Value)
---          | CaseOp CaseInfo
---                   !Type
---                   ![(Type, Bool)] -- argument types, whether canonical
---                   ![Either Term (Term, Term)] -- original definition
---                   ![([Name], Term, Term)] -- simplified for totality check definition
---                   !CaseDefs
--- data CaseDefs = CaseDefs {
---                   cases_compiletime :: !([Name], SC),
---                   cases_runtime :: !([Name], SC)
-
--- type Term = TT Name
--- type Type = Term
--- -- | Terms in the core language. The type parameter is the type of
--- -- identifiers used for bindings and explicit named references;
--- -- usually we use @TT 'Name'@.
--- data TT n = P NameType n (TT n) -- ^ named references with type
---             -- (P for "Parameter", motivated by McKinna and Pollack's
---             -- Pure Type Systems Formalized)
---           | V !Int -- ^ a resolved de Bruijn-indexed variable
---           | Bind n !(Binder (TT n)) (TT n) -- ^ a binding
---           | App (AppStatus n) !(TT n) (TT n) -- ^ function, function type, arg
---           | Constant Const -- ^ constant
---           | Proj (TT n) !Int -- ^ argument projection; runtime only
---                              -- (-1) is a special case for 'subtract one from BI'
---           | Erased -- ^ an erased term
---           | Impossible -- ^ special case for totality checking
---           | Inferred (TT n) -- ^ For building case trees when coverage checkimg only.
---                             -- Marks a term as being inferred by the machine, rather than
---                             -- given by the programmer
---           | TType UExp -- ^ the type of types at some level
-  -- TODO START with universe here!
---           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
---   deriving (Ord, Functor, Data, Generic, Typeable)
-
-iPrint a = liftIO (print a)
-
-runIdr :: Idris a -> IO (Either TT.Err a)
-runIdr a = runExceptT (evalStateT a idrisInit)
-
-printAgda d = putStrLn $ prettyShow d
-
 
 --------------------------------------------------------------------------------
 -- TT Translation
+
+-- Maybe I need to cut up the [PDecl] ast into several, one for each definition.
+-- Then I can match thoose to TT defs, refactor and then splice them together to
+-- one AST again.
+
+-- The plan is to do exactly that. Right now I'm working on splitting.
+
+type AST = [PDecl]
+
+splitAST :: AST -> [AST]
+splitAST pdecls = undefined
+  where names = map getDeclName pdecls
+        test = zip names pdecls 
+        headfst lst = fst $ head lst
+        q = headfst test
+        first = takeWhile (\x -> q == fst x) test
+  -- TODO START HERE
+  -- Solve this. It requires using some good old fashioned recuresion.
+
+getDeclName :: PDecl -> Maybe TT.Name
+getDeclName (PData doc names synInfo range types
+          (PDatadecl nameIdr _ typeconstructor dataconstructors)) = Just nameIdr
+getDeclName (PTy doc names synInfo range fnopts nameIdr rangeName terms) = Just nameIdr
+getDeclName (PClauses range fnopts name clauses) = Just name
+getDeclName (PFix fc fixIdr strings) = Nothing
+getDeclName _ = undefined
+
+-- Match definitions in TT with the statements in PDecl
+matchPDeclTT :: [PDecl] -> Map.Map TT.Name (Map.Map TT.Name TTDecl) -> ([PDecl], TTDecl)
+matchPDeclTT pdecls defs = undefined
+
+-- In PDecl the type and each pattern clause is a different statement
+-- When in TT it is one statement
+-- So I need to map every statement in TT to several PDecls
+
+implEcplRefactor :: ([PDecl], TTDecl) -> PDecl
+implEcplRefactor (pdecls, ttdecl) = undefined
+  where def = getDef ttdecl
+
 
 -- Find user defined names of type declarations.
 udNames :: [PDecl] -> [TT.Name]
@@ -632,6 +598,44 @@ tttaBind name b@(TT.Pi rigCount implI ty kind) term =
   -- Fun NoRange (Arg argInfo (itaTerm term1)) (itaTerm term2)
   where argInfo = (ArgInfo NotHidden defaultModality UserWritten UnknownFVs)
 tttaBind _ _ _ = undefined
+
+-- data TT n = P NameType n (TT n) -- ^ named references with type
+--             -- (P for "Parameter", motivated by McKinna and Pollack's
+--             -- Pure Type Systems Formalized)
+--           | V !Int -- ^ a resolved de Bruijn-indexed variable
+--           | Bind n !(Binder (TT n)) (TT n) -- ^ a binding
+--           | App (AppStatus n) !(TT n) (TT n) -- ^ function, function type, arg
+--           | Constant Const -- ^ constant
+--           | Proj (TT n) !Int -- ^ argument projection; runtime only
+--                              -- (-1) is a special case for 'subtract one from BI'
+--           | Erased -- ^ an erased term
+--           | Impossible -- ^ special case for totality checking
+--           | Inferred (TT n) -- ^ For building case trees when coverage checkimg only.
+--                             -- Marks a term as being inferred by the machine, rather than
+--                             -- given by the programmer
+--           | TType UExp -- ^ the type of types at some level
+  -- TODO START with universe here!
+--           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
+--   deriving (Ord, Functor, Data, Generic, Typeable)
+
+-- data Def = Function !Type !Term
+--          | TyDecl NameType !Type
+--          | Operator Type Int ([Value] -> Maybe Value)
+--          | CaseOp CaseInfo
+--                   !Type
+--                   ![(Type, Bool)] -- argument types, whether canonical
+--                   ![Either Term (Term, Term)] -- original definition
+--                   ![([Name], Term, Term)] -- simplified for totality check definition
+--                   !CaseDefs
+-- data CaseDefs = CaseDefs {
+--                   cases_compiletime :: !([Name], SC),
+--                   cases_runtime :: !([Name], SC)
+
+-- type Term = TT Name
+-- type Type = Term
+-- -- | Terms in the core language. The type parameter is the type of
+-- -- identifiers used for bindings and explicit named references;
+-- -- usually we use @TT 'Name'@.
 
 --------------------------------------------------------------------------------
 -- Agda constructors
