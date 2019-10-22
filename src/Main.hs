@@ -19,11 +19,11 @@ import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
 
-import Data.List (intersperse)
+import Data.List (intersperse, nub)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text (unpack)
 import qualified Data.Map as Map (lookup, keys, filterWithKey, elems, Map)
-import qualified Data.Maybe as Maybe (fromJust)
+import qualified Data.Maybe as Maybe (fromJust, catMaybes)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
 import Control.Monad.Trans (lift, liftIO)
@@ -429,13 +429,23 @@ parseF f = do
         let uDefs = Map.filterWithKey (\k v -> elem k names') defs
         let na = Map.keys uDefs
 
+        let sp = splitAST (ast i)
+        -- iPrint sp
+
         iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
         iPrint ("Length PDecl: " ++ (show $ length (ast i)))
+  -- TODO START HERE
+  -- This seem to work okay for now.
+  -- Now I only need to map each item in `uDefs` to each in `sp`
+  -- They should match one-to-one
+        iPrint ("Length splitAST: " ++ (show $ length sp))
+        iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
         let concatM = Maybe.fromJust $ Map.lookup (na !! 9) uDefs
         let concat = head $ Map.elems concatM
 
+
         let (d, rc, inj, ac, tot, meta) = concat
-        iPrint "Def:"
+        -- iPrint "Def:"
         a <- getTerm d
   -- TODO 
   -- Maybe concat clashes with the prelude and I'm printing the
@@ -497,15 +507,16 @@ parseF f = do
 
 type AST = [PDecl]
 
+-- TODO This does not retain statements which do not have a name. It also does
+-- not preserve the order of statements, but that is not important. The first
+-- point is however.
 splitAST :: AST -> [AST]
-splitAST pdecls = undefined
-  where names = map getDeclName pdecls
-        test = zip names pdecls 
-        headfst lst = fst $ head lst
-        q = headfst test
-        first = takeWhile (\x -> q == fst x) test
-  -- TODO START HERE
-  -- Solve this. It requires using some good old fashioned recuresion.
+splitAST pdecls = map (getStmts pdecls) names
+  where names = nub $ Maybe.catMaybes $ map getDeclName pdecls
+
+-- Returns all statments with the specified name
+getStmts :: AST -> TT.Name -> AST
+getStmts ast name = filter (\e -> getDeclName e == Just name) ast
 
 getDeclName :: PDecl -> Maybe TT.Name
 getDeclName (PData doc names synInfo range types
