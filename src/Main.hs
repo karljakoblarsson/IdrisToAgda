@@ -22,7 +22,8 @@ import Util.System (readSource)
 import Data.List (intersperse, nub)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text (unpack)
-import qualified Data.Map as Map (lookup, keys, filterWithKey, elems, Map)
+import qualified Data.Map as Map
+  (lookup, keys, filterWithKey, elems, Map, empty, union, insert, intersectionWith)
 import qualified Data.Maybe as Maybe (fromJust, catMaybes)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
@@ -430,8 +431,14 @@ parseF f = do
         let na = Map.keys uDefs
 
         let sp = splitAST (ast i)
-        -- iPrint sp
+        -- I don't know if this is a good idea, probably not. We are loosing the
+        -- order of the source.
+        let spm = splitASTMap (ast i)
 
+        let uDefs' = flattenMap uDefs
+
+        let ptt = Map.intersectionWith (\a b -> (a, b)) spm uDefs'
+        
         iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
         iPrint ("Length PDecl: " ++ (show $ length (ast i)))
   -- TODO START HERE
@@ -467,9 +474,9 @@ parseF f = do
 
 -- So now I only need to map the names in the module (user-defined) one-to-one
 -- to the names in `defs`
-        iPrint "a: -------"
-        iPrint a
-        iPrint "------- End of things ------"
+        -- iPrint "a: -------"
+        -- iPrint a
+        -- iPrint "------- End of things ------"
 
         return (ast i)
   where addPkg :: String -> Idris ()
@@ -495,6 +502,8 @@ parseF f = do
           iPrint orig
           iPrint totSimp
           return $ Right ty
+        flattenMap :: Map.Map TT.Name (Map.Map TT.Name TTDecl) -> Map.Map TT.Name TTDecl
+        flattenMap map = foldr (\e m -> Map.union e m) Map.empty map
 
 --------------------------------------------------------------------------------
 -- TT Translation
@@ -507,11 +516,29 @@ parseF f = do
 
 type AST = [PDecl]
 
+
+joinASTtoTT :: [AST] -> [TTDecl] -> [(AST,TTDecl)]
+joinASTtoTT asts tts = undefined
+
+-- Again, doing this with maps does not preserve the source order. But it is
+-- maybe the sane way of doing it. I may need to keep track of the source
+-- position of each statement and restore it after transformation.
+joinASTtoTTMap :: (Map.Map TT.Name AST) -> (Map.Map TT.Name TTDecl) ->
+                  Map.Map TT.Name (AST, TTDecl)
+joinASTtoTTMap ast tt = Map.intersectionWith (\a b -> (a, b)) ast tt
+
 -- TODO This does not retain statements which do not have a name. It also does
 -- not preserve the order of statements, but that is not important. The first
 -- point is however.
 splitAST :: AST -> [AST]
 splitAST pdecls = map (getStmts pdecls) names
+  where names = nub $ Maybe.catMaybes $ map getDeclName pdecls
+
+splitASTMap :: AST -> Map.Map TT.Name AST
+splitASTMap pdecls = foldr
+                   (\name m -> Map.insert name (getStmts pdecls name) m)
+                   Map.empty
+                   names
   where names = nub $ Maybe.catMaybes $ map getDeclName pdecls
 
 -- Returns all statments with the specified name
