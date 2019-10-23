@@ -19,11 +19,11 @@ import qualified Idris.Core.TT as TT
 
 import Util.System (readSource)
 
-import Data.List (intersperse, nub)
+import Data.List (intersperse, nub, find)
 import Data.Either (fromLeft, fromRight)
 import qualified Data.Text as Text (unpack)
 import qualified Data.Map as Map
-  (lookup, keys, filterWithKey, elems, Map, empty, union, insert, intersectionWith)
+  (lookup, keys, filterWithKey, elems, Map, empty, union, insert, intersectionWith, toList)
 import qualified Data.Maybe as Maybe (fromJust, catMaybes)
 import Control.Monad.Trans.Except (runExceptT)
 import Control.Monad.Trans.State.Strict (evalStateT, execStateT, runStateT)
@@ -420,15 +420,18 @@ parseF f = do
   -- TODO
   -- Also return the elaboration info.
 
+  -- TODO
+  -- Split `parseF` here. Separate .idr loading from processing
+
         -- all definitions in scope including prelude, libraries, etc.
         let defs = definitions $ tt_ctxt i
 
+        -- Find the user defined names
         let names = udNames (ast i)
         -- Drop the namespace
-        let names' = map (\n -> (nn n)) names
+        let names' = map nn names
 
         let uDefs = Map.filterWithKey (\k v -> elem k names') defs
-        let na = Map.keys uDefs
 
         let sp = splitAST (ast i)
         -- I don't know if this is a good idea, probably not. We are loosing the
@@ -447,36 +450,24 @@ parseF f = do
   -- They should match one-to-one
         iPrint ("Length splitAST: " ++ (show $ length sp))
         iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
+
+        let na = Map.keys uDefs
         let concatM = Maybe.fromJust $ Map.lookup (na !! 9) uDefs
         let concat = head $ Map.elems concatM
-
 
         let (d, rc, inj, ac, tot, meta) = concat
         -- iPrint "Def:"
         a <- getTerm d
-  -- TODO 
-  -- Maybe concat clashes with the prelude and I'm printing the
-  -- std. lib. implementation here instead of mine. Since it references foldable
-  -- and so on. But it seems I can see the implicit arguments.
-  -- This was correct.
 
-  -- The explicit signature in Idris is:
+-- The explicit signature in Idris is:
     -- cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
-
 -- The implicit signature in Idris is:
     -- cc :  Vec g a -> Vec g b -> Vec g (add a b)
-
 -- The extracted signature from Term/Def/TT is: (When run on the implicit variant)
     -- {b : Main.N} -> {a : Main.N} -> {g : Type ./simpleIdrisImpl.idr.h4} -> Main.Vec g a -> Main.Vec g b -> Main.Vec g (Main.add a b)
 -- Cleanly that is:
     -- {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
--- Which is exactly correct! It is everything I need!
 
--- So now I only need to map the names in the module (user-defined) one-to-one
--- to the names in `defs`
-        -- iPrint "a: -------"
-        -- iPrint a
-        -- iPrint "------- End of things ------"
 
         return (ast i)
   where addPkg :: String -> Idris ()
@@ -516,6 +507,42 @@ parseF f = do
 
 type AST = [PDecl]
 
+implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
+implEcplRefactor defs = concat $ map snd $ Map.toList $ implEcplRefactor' defs
+
+implEcplRefactor' :: Map.Map TT.Name (AST, TTDecl) -> Map.Map TT.Name AST
+-- implEcplRefactor :: (AST, TTDecl) -> PDecl
+implEcplRefactor' defs = fmap ttTypeInPDecl defs
+
+
+ttTypeInPDecl :: (AST, TTDecl) -> AST
+ttTypeInPDecl (ast, tt) = maybe ast (replaceTypeSig ast) trans
+  where def = getDef tt
+        ty = getTTType def
+        trans = fmap tttPDecl ty
+
+replaceTypeSig :: AST -> PDecl -> AST
+replaceTypeSig ast = maybe ast fn pty
+  where (pty, rest) = findPTy ast
+        fn = (\t -> t : rest)
+        
+
+findPTy :: AST -> (Maybe PDecl, AST)
+findPTy ast = (pty, filter (not . isPTy) ast)
+  where pty = find isPTy ast
+        isPTy (PTy _ _ _ _ _ _ _ _) = True
+        isPTy _ = False
+
+-- itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
+
+-- getDef :: TTDecl -> Def
+-- getTTType :: Def -> Maybe TT.Type
+-- tttPDecl :: TT.Type -> PDecl
+
+-- Match definitions in TT with the statements in PDecl
+-- matchPDeclTT :: AST -> Map.Map TT.Name (Map.Map TT.Name TTDecl) -> (AST, TTDecl)
+-- matchPDeclTT pdecls defs = undefined
+
 
 joinASTtoTT :: [AST] -> [TTDecl] -> [(AST,TTDecl)]
 joinASTtoTT asts tts = undefined
@@ -553,17 +580,6 @@ getDeclName (PClauses range fnopts name clauses) = Just name
 getDeclName (PFix fc fixIdr strings) = Nothing
 getDeclName _ = undefined
 
--- Match definitions in TT with the statements in PDecl
-matchPDeclTT :: [PDecl] -> Map.Map TT.Name (Map.Map TT.Name TTDecl) -> ([PDecl], TTDecl)
-matchPDeclTT pdecls defs = undefined
-
--- In PDecl the type and each pattern clause is a different statement
--- When in TT it is one statement
--- So I need to map every statement in TT to several PDecls
-
-implEcplRefactor :: ([PDecl], TTDecl) -> PDecl
-implEcplRefactor (pdecls, ttdecl) = undefined
-  where def = getDef ttdecl
 
 
 -- Find user defined names of type declarations.
@@ -579,6 +595,10 @@ udName (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type de
   [nameIdr]
 udName _ = []
 
+-------------------------------------------------------------------------------
+-- TT to PDecl translation
+
+-- TODO This should never be used anymore.
 ttLookup :: TT.Name -> TT.Ctxt TTDecl -> Maybe TTDecl
 ttLookup name ctxt = (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
 
@@ -588,6 +608,9 @@ getDef (def, _, _, _, _, _)  = def
 getTTType :: Def -> Maybe TT.Type
 getTTType (TyDecl nametype ty) = Just ty
 getTTType _ = Nothing
+
+tttPDecl :: TT.Type -> PDecl
+tttPDecl = undefined
 
 tttExpr :: TT.Type -> IO Expr
 tttExpr (TT.P nametype n tt) = do putStrLn $ "P " ++ show n
