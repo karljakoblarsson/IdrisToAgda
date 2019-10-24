@@ -441,7 +441,7 @@ parseF f = do
         let uDefs' = flattenMap uDefs
 
         let ptt = Map.intersectionWith (\a b -> (a, b)) spm uDefs'
-        
+
         iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
         iPrint ("Length PDecl: " ++ (show $ length (ast i)))
   -- TODO START HERE
@@ -521,11 +521,14 @@ ttTypeInPDecl (ast, tt) = maybe ast (replaceTypeSig ast) trans
         ty = getTTType def
         trans = fmap tttPDecl ty
 
-replaceTypeSig :: AST -> PDecl -> AST
-replaceTypeSig ast = maybe ast fn pty
+-- 1st arg: list of declarations (probably patterns in a fundecl) from parsing
+-- 2nd arg: transformed type signature (with added explicit implicit arguments)
+-- result:  list of refactored declarations
+replaceTypeSig :: AST -> PDecl -> AST  -- AST = [PDecl]
+replaceTypeSig ast newTySig = maybe ast fn pty
   where (pty, rest) = findPTy ast
-        fn = (\t -> t : rest)
-        
+        fn = (\_oldtysig -> newTySig : rest)
+
 
 findPTy :: AST -> (Maybe PDecl, AST)
 findPTy ast = (pty, filter (not . isPTy) ast)
