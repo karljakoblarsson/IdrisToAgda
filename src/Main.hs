@@ -591,6 +591,15 @@ parseF impex = do
         let uDefs' = flattenMap uDefs
         let ptt = Map.intersectionWith (\a b -> (a, b)) spm uDefs'
 
+        iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
+        iPrint ("Length PDecl: " ++ (show $ length (ast i)))
+  -- TODO START HERE
+  -- This seem to work okay for now.
+  -- Now I only need to map each item in `uDefs` to each in `sp`
+  -- They should match one-to-one
+        iPrint ("Length splitAST: " ++ (show $ length sp))
+        iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
+
         -- implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
         let reAST = implEcplRefactor ptt
 
@@ -642,11 +651,14 @@ ttTypeInPDecl (ast, tt) = maybe ast (replaceTypeSig ast) trans
         ty = getTTType def
         trans = ty >>= tttPDecl
 
-replaceTypeSig :: AST -> PDecl -> AST
-replaceTypeSig ast newTy = maybe ast fn pty
+-- 1st arg: list of declarations (probably patterns in a fundecl) from parsing
+-- 2nd arg: transformed type signature (with added explicit implicit arguments)
+-- result:  list of refactored declarations
+replaceTypeSig :: AST -> PDecl -> AST  -- AST = [PDecl]
+replaceTypeSig ast newTySig = maybe ast fn pty
   where (pty, rest) = findPTy ast
-        fn = (\t -> newTy : rest)
-        
+        fn = (\_oldtysig -> newTySig : rest)
+
 
 findPTy :: AST -> (Maybe PDecl, AST)
 findPTy ast = (pty, filter (not . isPTy) ast)
