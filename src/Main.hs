@@ -444,20 +444,14 @@ parseF f = do
         
         iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
         iPrint ("Length PDecl: " ++ (show $ length (ast i)))
-  -- TODO START HERE
   -- This seem to work okay for now.
   -- Now I only need to map each item in `uDefs` to each in `sp`
   -- They should match one-to-one
         iPrint ("Length splitAST: " ++ (show $ length sp))
         iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
 
-        let na = Map.keys uDefs
-        let concatM = Maybe.fromJust $ Map.lookup (na !! 9) uDefs
-        let concat = head $ Map.elems concatM
-
-        let (d, rc, inj, ac, tot, meta) = concat
-        -- iPrint "Def:"
-        a <- getTerm d
+-- implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
+        let reAST = implEcplRefactor ptt
 
 -- The explicit signature in Idris is:
     -- cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
@@ -469,7 +463,7 @@ parseF f = do
     -- {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
 
 
-        return (ast i)
+        return reAST
   where addPkg :: String -> Idris ()
         addPkg p = do ddir <- runIO getIdrisLibDir
                       addImportDir (ddir </> p)
@@ -507,31 +501,35 @@ parseF f = do
 
 type AST = [PDecl]
 
+-- implEcplRefactor :: (AST, TTDecl) -> PDecl
 implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
 implEcplRefactor defs = concat $ map snd $ Map.toList $ implEcplRefactor' defs
 
 implEcplRefactor' :: Map.Map TT.Name (AST, TTDecl) -> Map.Map TT.Name AST
--- implEcplRefactor :: (AST, TTDecl) -> PDecl
 implEcplRefactor' defs = fmap ttTypeInPDecl defs
 
 
+-- There is probably a bug in here. Or the translations don't work somehow.
+-- Probably trans is never Just
 ttTypeInPDecl :: (AST, TTDecl) -> AST
 ttTypeInPDecl (ast, tt) = maybe ast (replaceTypeSig ast) trans
   where def = getDef tt
         ty = getTTType def
-        trans = fmap tttPDecl ty
+        trans = ty >>= tttPDecl
 
 replaceTypeSig :: AST -> PDecl -> AST
-replaceTypeSig ast = maybe ast fn pty
+replaceTypeSig ast newTy = maybe ast fn pty
   where (pty, rest) = findPTy ast
-        fn = (\t -> t : rest)
+        fn = (\t -> newTy : rest)
         
 
 findPTy :: AST -> (Maybe PDecl, AST)
 findPTy ast = (pty, filter (not . isPTy) ast)
   where pty = find isPTy ast
         isPTy (PTy _ _ _ _ _ _ _ _) = True
-        isPTy _ = False
+        isPTy (PData _ _ _ _ types
+          (PDatadecl nameIdr _ typeconstructor dataconstructors)) = False
+        isPTy _ = undefined
 
 -- itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
 
@@ -605,13 +603,63 @@ ttLookup name ctxt = (Map.lookup name (Maybe.fromJust (Map.lookup name ctxt)))
 getDef :: TTDecl -> Def
 getDef (def, _, _, _, _, _)  = def
 
+-- This never returns Just
 getTTType :: Def -> Maybe TT.Type
 getTTType (TyDecl nametype ty) = Just ty
-getTTType _ = Nothing
+getTTType (Function ty te) = Just ty
+getTTType (Operator _ _ _) = undefined
+  -- TODO Find out what I should return here
+getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) = Just ty
 
-tttPDecl :: TT.Type -> PDecl
-tttPDecl = undefined
+-- | Terms in the core language. The type parameter is the type of
+-- identifiers used for bindings and explicit named references;
+-- usually we use @TT 'Name'@.
+-- data TT n = P NameType n (TT n) -- ^ named references with type
+--             -- (P for "Parameter", motivated by McKinna and Pollack's
+--             -- Pure Type Systems Formalized)
+--           | V !Int -- ^ a resolved de Bruijn-indexed variable
+--           | Bind n !(Binder (TT n)) (TT n) -- ^ a binding
+--           | App (AppStatus n) !(TT n) (TT n) -- ^ function, function type, arg
+--           | Constant Const -- ^ constant
+--           | Proj (TT n) !Int -- ^ argument projection; runtime only
+--                              -- (-1) is a special case for 'subtract one from BI'
+--           | Erased -- ^ an erased term
+--           | Impossible -- ^ special case for totality checking
+--           | Inferred (TT n) -- ^ For building case trees when coverage checkimg only.
+--                             -- Marks a term as being inferred by the machine, rather than
+--                             -- given by the programmer
+--           | TType UExp -- ^ the type of types at some level
+--           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
 
+  -- TODO START HERE
+tttPDecl :: TT.Type -> Maybe PDecl
+tttPDecl (TT.P nametype n tt) = tttPDecl tt
+tttPDecl (TT.V i) = undefined
+tttPDecl (TT.Bind n binder tt) = Just $ tttPBind n binder tt
+tttPDecl (TT.App appstatus tt1 tt2) = undefined
+tttPDecl (TT.Constant const) = undefined
+tttPDecl (TT.Proj tt i) = undefined
+tttPDecl (TT.Erased) = Nothing
+tttPDecl (TT.Impossible) = undefined
+tttPDecl (TT.Inferred tt) = undefined
+tttPDecl (TT.TType uexp) = Nothing -- TODO Translate universe levels here!
+tttPDecl (TT.UType universe) = undefined
+
+  -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
+tttPBind :: TT.Name -> TT.Binder (TT.Term) -> TT.Term -> PDecl
+tttPBind name b@(TT.Pi rigCount implI ty kind) term = undefined
+-- itaPi :: Plicity -> TT.Name -> PTerm -> PTerm -> Expr
+-- itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
+-- itaPi q@(Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
+  where t = tttPDecl ty
+        ter = tttPDecl term
+        plic = case implI of
+            Just _ -> (Imp undefined undefined undefined undefined undefined)
+            Nothing -> (Exp undefined undefined undefined)
+
+tttPBind _ _ _ = undefined
+
+-- This below converts to Agda, which is not what I want.
 tttExpr :: TT.Type -> IO Expr
 tttExpr (TT.P nametype n tt) = do putStrLn $ "P " ++ show n
                                   tttExpr tt
@@ -619,7 +667,7 @@ tttExpr (TT.V i) = do putStrLn $ "V " ++ (show i)
                       return (lit $ fromIntegral i)
 tttExpr (TT.Bind n binder tt) = do putStrLn $ "Bind " ++ show n
                                    tttaBind n binder tt
-                                   -- tttExpr tt
+                                   -- tttPDecl tt
 tttExpr (TT.App appstatus tt1 tt2) = do putStrLn "App"
                                         a <- tttExpr tt1
                                         b <- tttExpr tt2
