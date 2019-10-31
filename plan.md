@@ -10,10 +10,10 @@ Admin / examination requirements
 [ ] Carry out opposition.
 [x] Find 2 projects for presence
 [x] Schedule the 2 projects for presence
-[ ] Be present proj 1!
-[ ] Be present proj 2!
-[ ] Writing seminar I (2019-10-??)
-[ ] Writing seminar II ?
+[x] Be present proj 1!
+[x] Be present proj 2!
+[ ] Writing seminar I (2019-11-13)
+[ ] Writing seminar II (2019-11-28)
 
 
 Transpiler implementation
@@ -23,7 +23,7 @@ Transpiler implementation
 [x] Make map of AbsSyntaxTree.hs
 [x] Make a dot-graph of the constructors
 [x] Work one pass on implicit arguments
-[ ] Work another pass on implicit arguments
+[x] Work another pass on implicit arguments
 [ ] Look up which people are possible to ask about Idris internals
 [ ] Write a draft email to send to Idris implementors
 [ ] Finalize and send that email.
@@ -35,6 +35,9 @@ Transpiler implementation
 [ ] Make sure the translator does not crash on test program 2
 [ ] Explore the local information available to "itaUniverse" or similar
 [ ] Look through the type graph for possible points of info
+
+[ ] Add application to `tttPTerm`
+[ ] Fix bug in where a -> b becomes b -> b
 
 ### Index / parameter subproject:
 Goal: a working itaData - but this may be a too big challenge.
