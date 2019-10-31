@@ -10,7 +10,7 @@ import Agda.Syntax.Literal (Literal(..))
 import Agda.Syntax.Notation (GenPart(IdPart))
 import Idris.AbsSyntax
 import Idris.Parser (loadModule, prog)
-import Idris.Docstrings (Docstring)
+import Idris.Docstrings (Docstring, emptyDocstring)
 import Idris.IBC (IBCPhase(..))
 import Idris.Info (getIdrisLibDir)
 import Idris.ElabDecls (elabPrims, elabDecls)
@@ -243,6 +243,10 @@ itaApp (PApp range fst@(PRef _ _ name) args) depth =
   else case depth of
     0 -> RawApp NoRange ((itaTerm fst) : (map (itaArgs 1) args))
     d -> paren $ RawApp NoRange ((itaTerm fst) : (map (itaArgs d) args))
+  -- This is a fix for an issue which occured when developing tttPTerm.
+  -- Previously I assumed that this case never happend.
+itaApp (PApp range fst args) depth =
+    RawApp NoRange ((itaTerm fst) : (map (itaArgs 1) args))
 
 itaConst :: TT.Const -> Literal
 itaConst (TT.I int) = LitNat NoRange (toInteger int)
@@ -384,7 +388,8 @@ test = do res <- runIdr $ parseF f
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr "
   -- where f = "simpleIdris.idr"
-  where f = "simpleIdrisImpl.idr"
+  -- where f = "simpleIdrisImpl.idr"
+  where f = "exImpIdr.idr"
   -- where f = "patrik.idr" -- [working 2019-08-15]
 
 getDefinitions c = Map.keys $ definitions c
@@ -441,14 +446,21 @@ parseF f = do
         let uDefs' = flattenMap uDefs
 
         let ptt = Map.intersectionWith (\a b -> (a, b)) spm uDefs'
-        
-        iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
-        iPrint ("Length PDecl: " ++ (show $ length (ast i)))
+
+        -- iPrint "TT --------"
+        -- iPrint (uDefs')
+        -- iPrint "TT --------"
+        -- iPrint "AST --------"
+        -- iPrint (ast i)
+        -- iPrint "AST --------"
+
+        -- iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
+        -- iPrint ("Length PDecl: " ++ (show $ length (ast i)))
   -- This seem to work okay for now.
   -- Now I only need to map each item in `uDefs` to each in `sp`
   -- They should match one-to-one
-        iPrint ("Length splitAST: " ++ (show $ length sp))
-        iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
+        -- iPrint ("Length splitAST: " ++ (show $ length sp))
+        -- iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
 
 -- implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
         let reAST = implEcplRefactor ptt
@@ -529,7 +541,7 @@ findPTy ast = (pty, filter (not . isPTy) ast)
         isPTy (PTy _ _ _ _ _ _ _ _) = True
         isPTy (PData _ _ _ _ types
           (PDatadecl nameIdr _ typeconstructor dataconstructors)) = False
-        isPTy _ = undefined
+        isPTy _ = False
 
 -- itaDecl (PTy doc names synInfo range fnopts nameIdr rangeName terms) = -- Type declaration
 
@@ -604,8 +616,12 @@ getDef :: TTDecl -> Def
 getDef (def, _, _, _, _, _)  = def
 
 -- This never returns Just
+-- Maybe this should be:
+-- getTTType :: Def -> Maybe PDecl
 getTTType :: Def -> Maybe TT.Type
-getTTType (TyDecl nametype ty) = Just ty
+  -- Use `vToP` to translate all de Bruijn-indicies into the name the reference.
+  -- TODO It should be threaded in some where else.
+getTTType (TyDecl nametype ty) = Just (TT.vToP ty)
 getTTType (Function ty te) = Just ty
 getTTType (Operator _ _ _) = undefined
   -- TODO Find out what I should return here
@@ -631,11 +647,11 @@ getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) = Just ty
 --           | TType UExp -- ^ the type of types at some level
 --           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
 
-  -- TODO START HERE
 tttPDecl :: TT.Type -> Maybe PDecl
 tttPDecl (TT.P nametype n tt) = tttPDecl tt
 tttPDecl (TT.V i) = undefined
-tttPDecl (TT.Bind n binder tt) = Just $ tttPBind n binder tt
+tttPDecl (TT.Bind n binder tt) = Just
+  (PTy emptyDocstring [] defaultSyntax TT.NoFC [] n TT.NoFC (tttPBind n binder tt))
 tttPDecl (TT.App appstatus tt1 tt2) = undefined
 tttPDecl (TT.Constant const) = undefined
 tttPDecl (TT.Proj tt i) = undefined
@@ -645,19 +661,76 @@ tttPDecl (TT.Inferred tt) = undefined
 tttPDecl (TT.TType uexp) = Nothing -- TODO Translate universe levels here!
 tttPDecl (TT.UType universe) = undefined
 
+tttPTerm :: TT.Type -> PTerm
+  -- P is a named reference with type. NameType can be Bound, Ref, DCon for data
+  -- constructor or TCon for type constructor
+tttPTerm (TT.P nametype n tt) = PRef TT.NoFC [] n
+  -- A resolved de Bruijn-indexed variable
+tttPTerm (TT.V i) = undefined -- TODO Here I need to look up the name in some cxt
+  -- A binding
+tttPTerm (TT.Bind n binder tt) = tttPBind n binder tt
+  -- Application : function, function type and arg
+  -- Right now this causes a crash in `ita`. I assumed that the first term in
+  -- application was always a `ref`. This is of course wrong. Maybe it should be
+  -- fixed in `itaApp`?
+tttPTerm (TT.App appstatus tt1 tt2) = PApp TT.NoFC (tttPTerm tt1) [tttPArg tt2]
+tttPTerm (TT.Constant const) = undefined
+tttPTerm (TT.Proj tt i) = undefined
+tttPTerm (TT.Erased) = undefined
+tttPTerm (TT.Impossible) = undefined
+tttPTerm (TT.Inferred tt) = undefined
+  -- The type of types at some level `u`
+  -- TODO Translate universe levels here!
+  -- TODO This is it!
+  -- u : UExp is eiter an explicit level or a variable with source file
+tttPTerm (TT.TType u) = tttU u
+tttPTerm (TT.UType universe) = undefined
+
+
+  -- TODO There is a bug where i put things in the wrong order.
+  -- `add : N -> N -> N`
+  -- becomes `__pi_arg : Main.N -> (__pi_arg : Main.N) -> Main.N`
+  
+-- In parsed Idris this is alway `PExp` for function application. Which is the
+-- case here. This is not a general Type -> PArg. It only works for function app
+tttPArg :: TT.Type -> PArg
+tttPArg (TT.P nametype name term) = 
+    PExp { priority = 1 , argopts = [] , pname = name , getTm = tttPTerm term }
+  -- How to transform de Bruijn-indices back to names?
+  -- I need more context.
+  -- Look at the function `vToP` in TT.hs:120
+  -- It should work now I think with `vToP`
+tttPArg (TT.V v) = undefined
+tttPArg (TT.Bind name binder term) = 
+    PExp { priority = 1 , argopts = [] , pname = name , getTm = tttPTerm term }
+  -- TODO START HERE
+tttPArg (TT.App appstatus tt1 tt2) = PApp TT.NoFC (tttPTerm tt1) [tttPArg tt2]
+tttPArg (TT.Constant const) = undefined
+tttPArg (TT.Proj tt i) = undefined
+tttPArg (TT.Erased) = undefined
+tttPArg (TT.Impossible) = undefined
+tttPArg (TT.Inferred tt) = undefined
+tttPArg (TT.TType u) = undefined
+tttPArg (TT.UType universe) = undefined
+
+tttU :: TT.UExp -> PTerm
+tttU _ = PType TT.NoFC
+
   -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
-tttPBind :: TT.Name -> TT.Binder (TT.Term) -> TT.Term -> PDecl
-tttPBind name b@(TT.Pi rigCount implI ty kind) term = undefined
+tttPBind :: TT.Name -> TT.Binder (TT.Term) -> TT.Term -> PTerm
+  -- PPi _ n fc t1 t2 = (n : t1) -> t2
+tttPBind name b@(TT.Pi rigCount implI ty kind) term = PPi plicity name TT.NoFC t1 t2
 -- itaPi :: Plicity -> TT.Name -> PTerm -> PTerm -> Expr
 -- itaPi (Exp pargopts pstatic pparam pcount) name term1 term2 =
 -- itaPi q@(Imp pargopts pstatic pparam pscoped pinsource pcount) name term1 term2 =
-  where t = tttPDecl ty
-        ter = tttPDecl term
-        plic = case implI of
-            Just _ -> (Imp undefined undefined undefined undefined undefined)
-            Nothing -> (Exp undefined undefined undefined)
-
+  where plicity :: Plicity
+        plicity = case implI of
+            Just _ -> (Imp undefined undefined undefined undefined undefined undefined)
+            Nothing -> (Exp undefined undefined undefined undefined)
+        t1 = tttPTerm ty
+        t2 = tttPTerm term
 tttPBind _ _ _ = undefined
+
 
 -- This below converts to Agda, which is not what I want.
 tttExpr :: TT.Type -> IO Expr
