@@ -653,11 +653,24 @@ getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) = Just ty
 --           | TType UExp -- ^ the type of types at some level
 --           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
 
+tName :: TT.Name
+tName = TT.UN "TESTNAME"
+  
 tttPDecl :: TT.Type -> Maybe PDecl
 tttPDecl (TT.P nametype n tt) = tttPDecl tt
 tttPDecl (TT.V i) = undefined
-tttPDecl (TT.Bind n binder tt) = Just
-  (PTy emptyDocstring [] defaultSyntax TT.NoFC [] n TT.NoFC (tttPBind n binder tt))
+tttPDecl b@(TT.Bind n binder tt) = trace (show b) $ Just
+  -- TODO START HERE
+  -- `n` is not the right name in the first position.
+  -- Possibly the correct name is not here on this level. Correct. 
+  -- This is everything that comes after `test :`
+  -- But PTy is on a higher level
+  -- The name is not contained here at all. It is stored in the context/map a
+  -- lot above. TT and PDecl is very different levels
+  -- I need to do something completly different.
+  -- It is really stupid of me to stop here. There is a big task ahead, not a
+  -- small one. Just do it! Jump right in!
+  (PTy emptyDocstring [] defaultSyntax TT.NoFC [] tName TT.NoFC (tttPBind n binder tt))
 tttPDecl (TT.App appstatus tt1 tt2) = undefined
 tttPDecl (TT.Constant const) = undefined
 tttPDecl (TT.Proj tt i) = undefined
@@ -697,7 +710,7 @@ tttPTerm (TT.UType universe) = undefined
   -- `add : N -> N -> N`
   -- becomes `__pi_arg : Main.N -> (__pi_arg : Main.N) -> Main.N`
   
--- In parsed Idris this is alway `PExp` for function application. Which is the
+-- In parsed Idris this is always `PExp` for function application. Which is the
 -- case here. This is not a general Type -> PArg. It only works for function app
 tttPArg :: TT.Type -> PArg
 tttPArg (TT.P nametype name term) = 
@@ -709,8 +722,18 @@ tttPArg (TT.P nametype name term) =
 tttPArg (TT.V v) = undefined
 tttPArg (TT.Bind name binder term) = 
     PExp { priority = 1 , argopts = [] , pname = name , getTm = tttPTerm term }
-  -- TODO START HERE
-tttPArg (TT.App appstatus tt1 tt2) = PApp TT.NoFC (tttPTerm tt1) [tttPArg tt2]
+  -- TODO
+  -- This wont work. In TT The bound/implicit/explicit arg definition is
+  -- separate from the function application. In PTerm they are connected.
+  -- I probably need to do something else. Just looking a bit in to TT when
+  -- transforming tydecls.
+tttPArg (TT.App appstatus tt1 tt2) = PExp
+  { priority = 1
+  , argopts = []
+  , pname = undefined -- This is probably a machinegenerated name
+                      -- It seems to not be used.
+  , getTm = PApp TT.NoFC (tttPTerm tt1) [tttPArg tt2]
+  }
 tttPArg (TT.Constant const) = undefined
 tttPArg (TT.Proj tt i) = undefined
 tttPArg (TT.Erased) = undefined
@@ -802,7 +825,7 @@ tttaBind _ _ _ = undefined
 --                             -- Marks a term as being inferred by the machine, rather than
 --                             -- given by the programmer
 --           | TType UExp -- ^ the type of types at some level
-  -- TODO START with universe here!
+  -- TODO start with universe here!
 --           | UType Universe -- ^ Uniqueness type universe (disjoint from TType)
 --   deriving (Ord, Functor, Data, Generic, Typeable)
 
