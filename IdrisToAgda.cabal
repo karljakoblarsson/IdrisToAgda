@@ -633,6 +633,7 @@ executable ita
                  Idris.Termination
                  Idris.Transforms
                  Idris.Unlit
+                 Idris.Info
                  Util.DynamicLinker
                  Util.ScreenSize
                  Util.System
@@ -834,10 +835,10 @@ executable sts
                  Idris.Termination
                  Idris.Transforms
                  Idris.Unlit
+                 Idris.Info
                  Util.DynamicLinker
                  Util.ScreenSize
                  Util.System
-                 Idris.Info
 
                 -- Auto Generated
                 , Paths_IdrisToAgda
