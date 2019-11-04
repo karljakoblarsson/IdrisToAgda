@@ -17,6 +17,8 @@ import Idris.ElabDecls (elabPrims, elabDecls)
 import Idris.Core.Evaluate (definitions, TTDecl, Def, Def(..))
 import qualified Idris.Core.TT as TT
 
+import Version_IdrisToAgda (gitHash)
+
 import Util.System (readSource)
 
 import Data.List (intersperse, nub, find)
@@ -492,7 +494,7 @@ parse [infile] = return (infile, Nothing, False)
 parse ["-f", infile] = return (infile, Nothing, True)
 
 usage = putStrLn "Usage: ita [-vhf] [-o outfile.agda] [infile.idr]\n  -f Runs Impl to Excpl"
-version = putStrLn "IdrisToAgda 0.2"
+version = putStrLn ("IdrisToAgda 0.2-" ++ gitHash)
 exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =

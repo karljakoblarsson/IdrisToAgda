@@ -117,7 +117,7 @@ idrisClean _ flags _ _ = cleanStdLib
 -- Configure
 
 gitHash :: IO String
-gitHash = do h <- Control.Exception.catch (readProcess "git" ["rev-parse", "--short", "HEAD"] "")
+gitHash = do h <- Control.Exception.catch (readProcess "git" ["describe", "--always", "--dirty"] "")
                   (\e -> let e' = (e :: SomeException) in return "PRE")
              return $ takeWhile (/= '\n') h
 
