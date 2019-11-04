@@ -88,7 +88,37 @@ itaDecl (PClauses range fnopts name clauses) = -- Pattern clause
   itaClauses clauses
 itaDecl (PFix fc fixIdr strings) = [Infix fixAgda (map mkName strings)]
   where fixAgda = itaFixity fixIdr
-itaDecl _ = undefined
+itaDecl (PPostulate isExternal doc synInfo fc fcName fnopts name term) = [res]
+  -- TODO Fix this
+  -- undefined
+  where res :: Declaration
+        res = Postulate NoRange tysigs
+        tysigs :: [TypeSignatureOrInstanceBlock]
+        tysigs = [tysig]
+        -- tysig :: TypeSignatureOrInstanceBlock
+        tysig :: Declaration
+        tysig = TypeSig argInfo (itaName name) (itaTerm term)
+        argInfo = ArgInfo NotHidden modality UserWritten UnknownFVs
+        expr = funcExpr "argTest" (iden "FunctionTest")
+itaDecl (PCAF _ name _) = undefined
+itaDecl (PParams _ _ _) = undefined
+itaDecl (PNamespace _ _ _) = undefined
+itaDecl (PRecord _ _ _ _ name _ _ _ _ _ _ _) = undefined
+itaDecl (PInterface _ _ _ _ name _ _ _ _ _ _ _) = undefined
+itaDecl (PImplementation _ _ _ _ _ _ _ _ _ _ _ _ _ name _) = undefined
+itaDecl (PDSL name _) = undefined
+itaDecl (PSyntax _ _) = undefined
+  -- TODO Will not do.
+itaDecl (PMutual fc terms) = [Mutual NoRange decls]
+  -- hole "Mutual declarations will not be supported in this version of ita"
+  where decls = concat dOfD
+        dOfD = (map itaDecl terms)
+itaDecl (PDirective _) = [] -- TODO This is wrong. But directives are
+    -- implemention dependent som they are not applicable to Agda
+  -- Some could be translate to Agda pragmas but not in general
+itaDecl (PProvider _ _ _ _ _ name) = undefined
+itaDecl (PTransform _ _ _ _) = undefined
+itaDecl (PRunElabDecl _ _ _) = undefined
 
 -- | Translate Data Constructors
 itaDC :: ( Docstring (Either TT.Err PTerm)
@@ -118,7 +148,9 @@ itaClause (PClause fc name whole with rhsIdr whrIdr) =
     FunClause lhs rhs whr bool
   where lhs = LHS ptn rewriteExpr withExpr
         rhs = RHS rhsexp -- Can also be 'AbsurdRHS'
-        whr = NoWhere -- Can also be 'AnyWhere [Decls]'
+        -- whr = NoWhere -- Can also be 'AnyWhere [Decls]'
+        -- TODO Join where expression together
+        whr = AnyWhere (concat (map itaDecl whrIdr))
         bool = False
         rhsexp = itaTerm rhsIdr
   -- TODO Research Problem
@@ -147,9 +179,54 @@ itaPattern d (PApp range fst args) = ParenP NoRange
       NoRange
       ((itaPattern (d + 1) fst) : (map ((itaPattern (d + 1)) . itaArgsToTerm) args)))
 
+itaPattern _ (PPi plicity name fc term1 term2) = undefined
+itaPattern _ (PConstSugar fc term) = undefined
+itaPattern _ (PConstant fc const) = undefined
+itaPattern _ (PAlternative namePair alttype terms) = undefined
+itaPattern _ (PType fc) = undefined
+itaPattern _ (PIfThenElse fc ift thent elset) = undefined
+itaPattern _ (PPair fc fcs puninfo termA termB) = undefined
+itaPattern _ (PMetavar _ _) = undefined
+itaPattern _ (PQuote raw) = undefined
+itaPattern _ (PInferRef fc fcs name) = undefined
+itaPattern _ (PPatvar fc name) = undefined
+itaPattern _ (PLam fc name fc2 term1 term2) = undefined
+itaPattern _ (PLet fc rigcount name fc2 term1 term2 term3) = undefined
+itaPattern _ (PTyped pterm1 pterm2) = undefined
+itaPattern _ (PWithApp fc pterm1 pterm2) = undefined
+itaPattern _ (PAppImpl pterm implicitinfo) = undefined
+itaPattern _ (PAppBind fc pterm pargs) = undefined
+itaPattern _ (PMatchApp fc name) = undefined
+itaPattern _ (PCase fc pterm1 pterm2) = undefined
+itaPattern _ (PTrue fc puninfo) = undefined
+itaPattern _ (PResolveTC fc) = undefined
+itaPattern _ (PRewrite fc mname pterm1 pterm2 mpterm) = undefined
+itaPattern _ (PDPair fc fcs puninfo term1 term3 term2) = undefined
+itaPattern _ (PAs fc name term) = undefined
+itaPattern _ (PHidden term) = undefined
+itaPattern _ (PUniverse fc universe) = undefined
+itaPattern _ (PGoal fc term name pterm) = undefined
+itaPattern _ (Idris.AbsSyntax.Placeholder) = WildP NoRange
+itaPattern _ (PDoBlock pdo) = undefined
+itaPattern _ (PIdiom fc term) = undefined
+itaPattern _ (PProof ptactics) = undefined
+itaPattern _ (PTactics ptactics) = undefined
+itaPattern _ (PElabError err) = undefined
+itaPattern _ (PImpossible) = undefined
+itaPattern _ (PCoerced term) = undefined
+itaPattern _ (PDisamb strings term) = undefined
+itaPattern _ (PUnifyLog term) = undefined
+itaPattern _ (PNoImplicits term) = undefined
+itaPattern _ (PQuasiquote term mpterm) = undefined
+itaPattern _ (PUnquote term) = undefined
+itaPattern _ (PQuoteName name bool fc) = undefined
+itaPattern _ (PRunElab fc term strings) = undefined
+
 itaArgsToTerm :: PArg -> PTerm
-itaArgsToTerm (PExp prio argopts pname getTm) = getTm
-itaArgsToTerm _ = undefined
+itaArgsToTerm (PExp priority argopts pname getTm) = getTm
+itaArgsToTerm (PImp priority machine_info argopts pname getTm) = getTm
+itaArgsToTerm (PConstraint priority argopts pnam getTm) = getTm
+itaArgsToTerm (PTacImplicit priority argopts pname getScript getTm) = getTm
 
 application :: Expr -> [Expr] -> Expr
 application head args = RawApp NoRange (head : args)
@@ -230,12 +307,60 @@ itaTerm (PAlternative namePair alttype terms) = case length terms of
   1 -> itaTerm $ head terms -- Safe because of case stmt.
   0 -> undefined
   _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
-itaTerm (PType fc) = iden "Set"
+itaTerm (PType fc) = iden "Set" -- TODO Here I need to specify the universe levels
 itaTerm (PIfThenElse fc ift thent elset) = undefined
-itaTerm (PPair fc fcs puninfo termA termB) = undefined
+  -- TODO Pairs are not native in Agda. But are defined in StdLib
+  -- TODO The hole comment is not used yet.
+itaTerm (PPair fc fcs puninfo termA termB) = hole "Pairs are not defined in Agda"
   -- This should return a hole.
 itaTerm (PMetavar _ _) = hole "Comment"
-itaTerm _ = undefined
+itaTerm (PQuote raw) = undefined
+itaTerm (PInferRef fc fcs name) = undefined
+itaTerm (PPatvar fc name) = undefined
+itaTerm (PLam fc name fc2 term1 term2) = Lam NoRange lams expr
+  -- TODO DomainFull
+  -- TODO This is most likely wrong
+  where lams = [DomainFree (args)]
+        args = hArg (itaName name) (mkBoundName_ (itaName name))
+        expr = itaTerm term2
+  -- Agda  ex: @\\x {y} -> e@ or @\\(x:A){y:B} -> e@
+  -- Idris A lambda abstraction. Second FC is name span.
+itaTerm (PLet fc rigcount name fc2 term1 term2 term3) = hole "Let-bindings are not supported yet"
+  -- Let Range [Declaration] (Maybe Expr)
+  -- ex: @let Ds in e@, missing body when parsing do-notation let
+
+  -- A Typed expression has no representation in Agda
+  -- I Could translate it into a let/where binding.
+  -- TODO
+itaTerm (PTyped pterm1 pterm2) = hole "Typed bindings are not defined in Agda"
+itaTerm (PWithApp fc pterm1 pterm2) = undefined
+itaTerm (PAppImpl pterm implicitinfo) = undefined
+itaTerm (PAppBind fc pterm pargs) = undefined
+itaTerm (PMatchApp fc name) = undefined
+itaTerm (PCase fc pterm1 pterm2) = undefined
+itaTerm (PTrue fc puninfo) = undefined
+itaTerm (PResolveTC fc) = undefined
+itaTerm (PRewrite fc mname pterm1 pterm2 mpterm) = undefined
+itaTerm (PDPair fc fcs puninfo term1 term3 term2) = undefined
+itaTerm (PAs fc name term) = undefined
+itaTerm (PHidden term) = undefined
+itaTerm (PUniverse fc universe) = undefined
+itaTerm (PGoal fc term name pterm) = undefined
+itaTerm (Idris.AbsSyntax.Placeholder) = undefined
+itaTerm (PDoBlock pdo) = undefined
+itaTerm (PIdiom fc term) = undefined
+itaTerm (PProof ptactics) = undefined
+itaTerm (PTactics ptactics) = undefined
+itaTerm (PElabError err) = undefined
+itaTerm (PImpossible) = undefined
+itaTerm (PCoerced term) = undefined
+itaTerm (PDisamb strings term) = undefined
+itaTerm (PUnifyLog term) = undefined
+itaTerm (PNoImplicits term) = undefined
+itaTerm (PQuasiquote term mpterm) = undefined
+itaTerm (PUnquote term) = undefined
+itaTerm (PQuoteName name bool fc) = undefined
+itaTerm (PRunElab fc term strings) = undefined
 
 -- Hack for 'fromInteger'
 -- Deep pattern matching is bad form. But this is a ugly hack any way.
@@ -305,7 +430,18 @@ itaArgs depth (PExp prio argopts pname getTm) =
   if (isPApp getTm)
      then itaApp getTm depth
      else itaTerm getTm
-itaArgs _ _ = undefined
+itaArgs depth (PImp priority machine_info argopts pname getTm) = 
+  if (isPApp getTm)
+     then itaApp getTm depth
+     else itaTerm getTm
+itaArgs depth (PConstraint priority argopts pnam getTm) = 
+  if (isPApp getTm)
+     then itaApp getTm depth
+     else itaTerm getTm
+itaArgs depth (PTacImplicit priority argopts pname getScript getTm) = 
+  if (isPApp getTm)
+     then itaApp getTm depth
+     else itaTerm getTm
 
 isPApp :: PTerm -> Bool
 isPApp (PApp _ _ _) = True
@@ -346,15 +482,17 @@ prettySN (TT.MetaN a b) = "MetaN"
 main :: IO ()
 main = getArgs >>= parse >>= runITA
 
-parse :: [String] -> IO (FilePath, Maybe FilePath)
+  -- Bool if to run implToExcpl TODO
+parse :: [String] -> IO (FilePath, Maybe FilePath, Bool)
 parse ["-h"] = usage >> exit
 parse ["-v"] = version >> exit
 parse [] = usage >> exit
-parse ["-o", outfile, infile] = return (infile, Just outfile)
-parse [infile] = return (infile, Nothing)
+parse ["-o", outfile, infile] = return (infile, Just outfile, False)
+parse [infile] = return (infile, Nothing, False)
+parse ["-f", infile] = return (infile, Nothing, True)
 
-usage = putStrLn "Usage: ita [-vh] [-o outfile.agda] [infile.idr]"
-version = putStrLn "IdrisToAgda 0.1"
+usage = putStrLn "Usage: ita [-vhf] [-o outfile.agda] [infile.idr]\n  -f Runs Impl to Excpl"
+version = putStrLn "IdrisToAgda 0.2"
 exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
@@ -364,9 +502,9 @@ errorMsg infile err =
   putStrLn ("Error while compiling file: " ++ infile ++ "\n\n" ++
             (show err)) >> Main.die
 
-runITA :: (FilePath, Maybe FilePath) -> IO ()
-runITA (infile, outfile) =
-  do idrAST <- runIdr $ parseF infile
+runITA :: (FilePath, Maybe FilePath, Bool) -> IO ()
+runITA (infile, outfile, impl) =
+  do idrAST <- runIdr $ loadIdr infile >> parseF impl
      case idrAST of
        Left err -> errorMsg infile err
        Right idr -> let agda = prettyShow $ itaDecls idr in
@@ -384,24 +522,27 @@ runIdr a = runExceptT (evalStateT a idrisInit)
 
 printAgda d = putStrLn $ prettyShow d
 
-test = do res <- runIdr $ parseF f
+-- test = do res <- runIdr $ loadIdr f >> parseF True
+test = do res <- runIdr $ loadIdr f >> parseF False
           case res of
               Right pd -> putStrLn $ prettyShow $ itaDecls pd
               Left err -> putStrLn $ show err
   -- where f = "Blodwen/src/Core/Primitives.idr"
-  -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  -- where f = "../IdrisLibs/SequentialDecisionProblems/FullTheory.lidr"
   -- where f = "Idris-dev/test/basic001/basic001a.idr"
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
   -- where f = "Idris-dev/test/basic003/test027.idr "
+  -- where f = "patrik.idr" -- [working 2019-08-15]
   -- where f = "simpleIdris.idr"
   -- where f = "simpleIdrisImpl.idr"
-  where f = "exImpIdr.idr"
-  -- where f = "patrik.idr" -- [working 2019-08-15]
+  -- where f = "exImpIdr.idr"
 
 getDefinitions c = Map.keys $ definitions c
 
-parseF :: FilePath -> Idris [PDecl]
-parseF f = do
+loadIdr :: FilePath -> Idris ()
+loadIdr f = do
+        -- TODO START HERE
         -- TODO load user defined libraries in the same package
         -- This is a Workaround for not importing user defined libraries correctly
         -- I probably need to load the current directory as well. And maybe the
@@ -426,50 +567,43 @@ parseF f = do
         addAutoImport "Prelude"
 
         loadModule f $ IBC_REPL True
+        return ()
+  where addPkg :: String -> Idris ()
+        addPkg p = do ddir <- runIO getIdrisLibDir
+                      addImportDir (ddir </> p)
+                      addIBC (IBCImportDir (ddir </> p))
 
+  -- Bool arg is if to run implToExcpl
+parseF :: Bool -> Idris [PDecl]
+parseF impex = do
         i <- getIState
-  -- TODO
-  -- Also return the elaboration info.
-
-  -- TODO
-  -- Split `parseF` here. Separate .idr loading from processing
-
         -- all definitions in scope including prelude, libraries, etc.
         let defs = definitions $ tt_ctxt i
-
         -- Find the user defined names
         let names = udNames (ast i)
         -- Drop the namespace
         let names' = map nn names
 
         let uDefs = Map.filterWithKey (\k v -> elem k names') defs
-
-        let sp = splitAST (ast i)
         -- I don't know if this is a good idea, probably not. We are loosing the
         -- order of the source.
         let spm = splitASTMap (ast i)
-
         let uDefs' = flattenMap uDefs
-
         let ptt = Map.intersectionWith (\a b -> (a, b)) spm uDefs'
 
-        -- iPrint "TT --------"
-        -- iPrint (uDefs')
-        -- iPrint "TT --------"
-        -- iPrint "AST --------"
-        -- iPrint (ast i)
-        -- iPrint "AST --------"
-
-        -- iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
-        -- iPrint ("Length PDecl: " ++ (show $ length (ast i)))
-  -- This seem to work okay for now.
-  -- Now I only need to map each item in `uDefs` to each in `sp`
-  -- They should match one-to-one
-        -- iPrint ("Length splitAST: " ++ (show $ length sp))
-        -- iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
-
--- implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
+        -- implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
         let reAST = implEcplRefactor ptt
+
+        case impex of
+          True -> return reAST
+          False -> return (ast i)
+  where nn :: TT.Name -> TT.Name
+        nn n@(TT.UN name) = n
+        nn n@(TT.MN id name) = n
+        nn n@(TT.NS ns names) = ns
+        nn _ = undefined
+        flattenMap :: Map.Map TT.Name (Map.Map TT.Name TTDecl) -> Map.Map TT.Name TTDecl
+        flattenMap map = foldr (\e m -> Map.union e m) Map.empty map
 
 -- The explicit signature in Idris is:
     -- cc : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
@@ -480,33 +614,6 @@ parseF f = do
 -- Cleanly that is:
     -- {b : N} -> {a : N} -> {g : Type} -> Vec g a -> Vec g b -> Vec g (add a b)
 
-
-        return reAST
-  where addPkg :: String -> Idris ()
-        addPkg p = do ddir <- runIO getIdrisLibDir
-                      addImportDir (ddir </> p)
-                      addIBC (IBCImportDir (ddir </> p))
-        nn :: TT.Name -> TT.Name
-        nn n@(TT.UN name) = n
-        nn n@(TT.MN id name) = n
-        nn n@(TT.NS ns names) = ns
-        nn _ = undefined
-        getTerm :: Def -> Idris (Either TT.Term TT.Type)
-        getTerm (Function ty term) = do
-          iPrint "getTerm ------- Function"
-          iPrint ty
-          return $ Left term
-        getTerm (TyDecl nameTy ty) = return $ Right ty
-        getTerm (Operator _ _ _) = undefined
-        getTerm (CaseOp ci ty arg orig totSimp cd) = do
-          iPrint "getTerm ------- CaseOp"
-          iPrint ty
-          iPrint arg
-          iPrint orig
-          iPrint totSimp
-          return $ Right ty
-        flattenMap :: Map.Map TT.Name (Map.Map TT.Name TTDecl) -> Map.Map TT.Name TTDecl
-        flattenMap map = foldr (\e m -> Map.union e m) Map.empty map
 
 --------------------------------------------------------------------------------
 -- TT Translation
@@ -594,7 +701,20 @@ getDeclName (PData doc names synInfo range types
 getDeclName (PTy doc names synInfo range fnopts nameIdr rangeName terms) = Just nameIdr
 getDeclName (PClauses range fnopts name clauses) = Just name
 getDeclName (PFix fc fixIdr strings) = Nothing
-getDeclName _ = undefined
+getDeclName (PPostulate _ _ _ _ _ _ name _) = Just name
+getDeclName (PCAF _ name _) = Just name
+getDeclName (PParams _ _ _) = Nothing
+getDeclName (PNamespace _ _ _) = Nothing
+getDeclName (PRecord _ _ _ _ name _ _ _ _ _ _ _) = Just name
+getDeclName (PInterface _ _ _ _ name _ _ _ _ _ _ _) = Just name
+getDeclName (PImplementation _ _ _ _ _ _ _ _ _ _ _ _ _ name _) = name
+getDeclName (PDSL name _) = Just name
+getDeclName (PSyntax _ _) = Nothing
+getDeclName (PMutual _ _) = Nothing
+getDeclName (PDirective _) = Nothing
+getDeclName (PProvider _ _ _ _ _ name) = Just name
+getDeclName (PTransform _ _ _ _) = Nothing
+getDeclName (PRunElabDecl _ _ _) = Nothing
 
 
 
@@ -628,10 +748,11 @@ getTTType :: Def -> Maybe TT.Type
   -- Use `vToP` to translate all de Bruijn-indicies into the name the reference.
   -- TODO It should be threaded in some where else.
 getTTType (TyDecl nametype ty) = Just (TT.vToP ty)
-getTTType (Function ty te) = Just ty
+getTTType (Function ty te) = Just (TT.vToP ty)
 getTTType (Operator _ _ _) = undefined
   -- TODO Find out what I should return here
-getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) = Just ty
+getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) =
+  Just (TT.vToP ty)
 
 -- | Terms in the core language. The type parameter is the type of
 -- identifiers used for bindings and explicit named references;
@@ -659,7 +780,7 @@ tName = TT.UN "TESTNAME"
 tttPDecl :: TT.Type -> Maybe PDecl
 tttPDecl (TT.P nametype n tt) = tttPDecl tt
 tttPDecl (TT.V i) = undefined
-tttPDecl b@(TT.Bind n binder tt) = trace (show b) $ Just
+tttPDecl b@(TT.Bind n binder tt) = Just
   -- TODO START HERE
   -- `n` is not the right name in the first position.
   -- Possibly the correct name is not here on this level. Correct. 
