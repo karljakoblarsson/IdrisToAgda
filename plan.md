@@ -24,7 +24,7 @@ Transpiler implementation
 [x] Make a dot-graph of the constructors
 [x] Work one pass on implicit arguments
 [x] Work another pass on implicit arguments
-[ ] Look up which people are possible to ask about Idris internals
+[x] Look up which people are possible to ask about Idris internals
 [ ] Write a draft email to send to Idris implementors
 [ ] Finalize and send that email.
 [ ] Write a Agda test program where universe levels matter
@@ -33,10 +33,10 @@ Transpiler implementation
 [ ] Translate it manually to Agda
 [ ] Make sure the translator does not crash on test program 1
 [ ] Make sure the translator does not crash on test program 2
-[ ] Explore the local information available to "itaUniverse" or similar
-[ ] Look through the type graph for possible points of info
+[x] Explore the local information available to "itaUniverse" or similar
+[x] Look through the type graph for possible points of info
 
-[ ] Add application to `tttPTerm`
+[x] Add application to `tttPTerm`
 [ ] Fix bug in where a -> b becomes b -> b
 
 ### Index / parameter subproject:
@@ -63,10 +63,10 @@ References
 [x] Read Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [x]   Add bibtex entry of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
 [x]   Write summary of Dedukti: A Logical Framework based on the λΠ-Calculus Modulo Theory
-[ ] Read MMT: A Foundation-Independent Approaxh to Formal Knowledge
-[ ]   Add bibtex entry of MMT: A Foundation-Independent Approaxh to Formal Knowledge
-[ ]   Write summary of MMT: A Foundation-Independent Approaxh to Formal Knowledge
-[ ] Look at the work the author has done i the last two years, which should be
+[ ] Read MMT: A Foundation-Independent Approach to Formal Knowledge
+[ ]   Add bibtex entry of MMT: A Foundation-Independent Approach to Formal Knowledge
+[ ]   Write summary of MMT: A Foundation-Independent Approach to Formal Knowledge
+[x] Look at the work the author has done in the last two years, which should be
     more focused on languages and implementation.
 [x] Read Importing HOL into Isabelle/HOL
 [x]   Add bibtex entry of Importing HOL into Isabelle/HOL
@@ -90,13 +90,13 @@ Writing
 [x] Write a second paragraph about Idris internals
 [ ] Write a third paragraph about the types graph
 [ ] Write a third paragraph about Idris internals
-[ ] Crop a relevant part of the types graphs to include in the report
+[x] Crop a relevant part of the types graphs to include in the report
 [ ] Write one paragraph about the crop
 [ ] Rewrite the section about the types graph and Idris internals
 
 [x] Look upp when the writing seminars are
 [x] Apply to one writing seminar
-[ ] Apply to the second writing seminar
+[x] Apply to the second writing seminar
 
 [ ] Write one draft paragraph about related works
 [ ] Write a second draft paragraph about related works
@@ -125,7 +125,7 @@ Software engineering problems
 [x] Find where the Idris monad is read fron an .ibc-file
 [x] Save the ast to the .ibc-file
 [x] Read the ast from the .ibc-file
-[ ] Find where ipkg files are read
-[ ] Read through the file where ipkg files are read
-[ ] Find where userdefined libraries are loaded
+[x] Find where ipkg files are read
+[x] Read through the file where ipkg files are read
+[x] Find where userdefined libraries are loaded
 [ ] Add to my implementation the userdefined libraries are read

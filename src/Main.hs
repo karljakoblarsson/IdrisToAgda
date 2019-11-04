@@ -638,9 +638,11 @@ ttTypeInPDecl (ast, tt) = maybe ast (replaceTypeSig ast) trans
 
 replaceTypeSig :: AST -> PDecl -> AST
 replaceTypeSig ast newTy = maybe ast fn pty
+-- 1st arg: list of declarations (probably patterns in a fundecl) from parsing
+-- 2nd arg: transformed type signature (with added explicit implicit arguments)
+-- result:  list of refactored declarations
   where (pty, rest) = findPTy ast
-        fn = (\t -> newTy : rest)
-        
+        fn = (\_oldtysig -> newTy : rest)
 
 findPTy :: AST -> (Maybe PDecl, AST)
 findPTy ast = (pty, filter (not . isPTy) ast)
