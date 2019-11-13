@@ -12,4 +12,5 @@ data Vec : (a : Type) -> N -> Type where
 
 
 ccExp : {g : Type} -> {a : N} -> {b : N} -> Vec g a -> Vec g b -> Vec g (add a b)
+
 ccImp : Vec g a -> Vec g b -> Vec g (add a b)

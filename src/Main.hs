@@ -152,6 +152,7 @@ itaClause (PClause fc name whole with rhsIdr whrIdr) =
         rhs = RHS rhsexp -- Can also be 'AbsurdRHS'
         -- whr = NoWhere -- Can also be 'AnyWhere [Decls]'
         -- TODO Join where expression together
+        -- TODO Only emit `where` if there should be one.
         whr = AnyWhere (concat (map itaDecl whrIdr))
         bool = False
         rhsexp = itaTerm rhsIdr
@@ -309,7 +310,16 @@ itaTerm (PAlternative namePair alttype terms) = case length terms of
   1 -> itaTerm $ head terms -- Safe because of case stmt.
   0 -> undefined
   _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
-itaTerm (PType fc) = iden "Set" -- TODO Here I need to specify the universe levels
+  -- TODO START HERE
+  -- TODO Here I need to specify the universe levels
+  -- I need info which is not present in the Idris AST.
+  -- Should I modify it or provide that info in another way?
+  -- Would be possible to re-define `PType fc` as
+  -- `PType fc (Maybe (Either Int Iden))` or similar.
+itaTerm (PType fc) = Set NoRange -- Simple `Set`
+-- itaTerm (PType fc) = SetN NoRange n -- Specific level of `Set_n`
+                     -- where n = 2
+-- itaTerm (PType fc) = RawApp NoRange [Set NoRange, iden "level" ] -- Level var
 itaTerm (PIfThenElse fc ift thent elset) = undefined
   -- TODO Pairs are not native in Agda. But are defined in StdLib
   -- TODO The hole comment is not used yet.
@@ -525,12 +535,12 @@ runIdr a = runExceptT (evalStateT a idrisInit)
 printAgda d = putStrLn $ prettyShow d
 
 -- test = do res <- runIdr $ loadIdr f >> parseF True
-test = do res <- runIdr $ loadIdr f >> parseF False
+test = do res <- runIdr $ loadIdr f >> parseF True
           case res of
               Right pd -> putStrLn $ prettyShow $ itaDecls pd
               Left err -> putStrLn $ show err
   -- where f = "Blodwen/src/Core/Primitives.idr"
-  where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
+  -- where f = "../IdrisLibs/SequentialDecisionProblems/CoreTheory.lidr"
   -- where f = "../IdrisLibs/SequentialDecisionProblems/FullTheory.lidr"
   -- where f = "Idris-dev/test/basic001/basic001a.idr"
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
@@ -538,14 +548,15 @@ test = do res <- runIdr $ loadIdr f >> parseF False
   -- where f = "patrik.idr" -- [working 2019-08-15]
   -- where f = "simpleIdris.idr"
   -- where f = "simpleIdrisImpl.idr"
-  -- where f = "exImpIdr.idr"
+  where f = "exImpIdr.idr"
 
 getDefinitions c = Map.keys $ definitions c
 
 loadIdr :: FilePath -> Idris ()
 loadIdr f = do
-        -- TODO START HERE
         -- TODO load user defined libraries in the same package
+        -- Will I ever do this really?
+  
         -- This is a Workaround for not importing user defined libraries correctly
         -- I probably need to load the current directory as well. And maybe the
         -- whole project structure
@@ -632,11 +643,21 @@ parseF impex = do
 -- Maybe I need to cut up the [PDecl] ast into several, one for each definition.
 -- Then I can match thoose to TT defs, refactor and then splice them together to
 -- one AST again.
-
--- The plan is to do exactly that. Right now I'm working on splitting.
+-- The plan is to do exactly that.
 
 type AST = [PDecl]
 
+-- TODO START HERE
+-- I should do this differently. I should traverse the `AST` and when needed (an
+-- argument, or `Type`) I should get the Info I need for the transform from the
+-- TT.
+
+-- TODO This is what I want to do.
+implEcplRefactor2 :: AST -> Map.Map TT.Name TTDecl -> AST
+implEcplRefactor2 ast tt = undefined
+  -- Somehow traverse the AST untill I find an argument.
+
+  
 -- implEcplRefactor :: (AST, TTDecl) -> PDecl
 implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
 implEcplRefactor defs = concat $ map snd $ Map.toList $ implEcplRefactor' defs
@@ -791,11 +812,15 @@ getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) =
 tName :: TT.Name
 tName = TT.UN "TESTNAME"
   
+showU :: TT.UExp -> String
+showU (TT.UVar s l) = "Universe variable number: " ++ show l ++ " in file: " ++ show s
+showU (TT.UVal l) = "Universe level: " ++ show l
+  
 tttPDecl :: TT.Type -> Maybe PDecl
 tttPDecl (TT.P nametype n tt) = tttPDecl tt
 tttPDecl (TT.V i) = undefined
 tttPDecl b@(TT.Bind n binder tt) = Just
-  -- TODO START HERE
+  -- TODO Critical BUG
   -- `n` is not the right name in the first position.
   -- Possibly the correct name is not here on this level. Correct. 
   -- This is everything that comes after `test :`
@@ -812,7 +837,10 @@ tttPDecl (TT.Proj tt i) = undefined
 tttPDecl (TT.Erased) = Nothing
 tttPDecl (TT.Impossible) = undefined
 tttPDecl (TT.Inferred tt) = undefined
-tttPDecl (TT.TType uexp) = Nothing -- TODO Translate universe levels here!
+tttPDecl (TT.TType uexp) = trace ("### tttPDecl TT.TType: " ++ showU uexp) Nothing -- TODO Translate universe levels here!
+    -- data UExp = UVar String Int -- ^ universe variable, with source file to
+    --                                  disambiguate
+    --           | UVal Int -- ^ explicit universe level
 tttPDecl (TT.UType universe) = undefined
 
 tttPTerm :: TT.Type -> PTerm
@@ -837,7 +865,7 @@ tttPTerm (TT.Inferred tt) = undefined
   -- TODO Translate universe levels here!
   -- TODO This is it!
   -- u : UExp is eiter an explicit level or a variable with source file
-tttPTerm (TT.TType u) = tttU u
+tttPTerm (TT.TType u) = trace ("###tttPTerm TType of level: " ++ showU u) (tttU u)
 tttPTerm (TT.UType universe) = undefined
 
 
@@ -915,8 +943,8 @@ tttExpr (TT.Proj tt i) = undefined
 tttExpr (TT.Erased) = undefined
 tttExpr (TT.Impossible) = undefined
 tttExpr (TT.Inferred tt) = undefined
-tttExpr t@(TT.TType uexp) = do putStrLn $ "TType" ++ (show uexp)
-                               return (iden $ show uexp)
+tttExpr t@(TT.TType uexp) = do putStrLn $ "TType" ++ (showU uexp)
+                               return (iden $ showU uexp)
 tttExpr (TT.UType universe) = undefined
 
 itaTTNameType :: TT.NameType -> Name
