@@ -1,26 +1,39 @@
-% CREATED BY DAVID FRISK, 2016
 \chapter{Background}
 
-\section{Figure}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.45\linewidth, trim=3cm 11cm 3cm 11cm]{figure/X.pdf}
-\includegraphics[width=0.45\linewidth, trim=3cm 11cm 3cm 11cm]{figure/Y.pdf}
-\caption{Surface and contour plots showing the two dimensional function $z(x,y)=\sin(x+y)\cos(2x)$.}
-\end{figure}
+\section{Previous work}
 
+Source level transpilation of a dependently type programming lanugage has not
+been done before. However several translations between proofs systems have been
+attempted. The benefit of reusing existing proofs in a new system is obvious.
 
+However, in practice there are lots of implemnetations difficulties.
 
-\section{Source code listing}
-\begin{minted}[frame=single]{matlab}
-% Generate x- and y-nodes
-x=linspace(0,1); y=linspace(0,1);
+A dependently typed programming language can also be used for computer-checked
+proofs thanks to the Curry-Howard correspondence. A type signature represents
+a proposition and any implementation which type checks is a proof of that
+proposition. Agda is designed to be both a programming language and proof
+assistant. Idris is mainly designed to be a programming language. There are
+several other projects which are mainly proof assistants and not useful for
+general purpose programming. Some examples are: Coq, HOL and NuPRL.
 
-% Calculate z=f(x,y)
-for i=1:length(x)
- for j=1:length(y)
-  z(i,j)=x(i)+2*y(j);
- end
-end
-\end{minted}
+There is not much work on transpiling between dependently type programming
+languages, but there are a lot of work done on translating between different
+proof assistants.
 
+One interesting project is Dedukti~\cite{assaf2016dedukti}. The authors sees
+the possibility to use Dedukti as a unifing framework for large parts of logic
+and many proof systems. They plan to implement tranpilers/translators from most
+proof systems to Dedukti. One such translator is described
+in~\cite{assaf2015translating} where they translat HOL into Dedukti. They claim
+to successfully translate the standard library of OpenTheory. % TODO describe OpenTheory
+They also claim that their translator is more scalable
+then~\cite{obua2006importing} for example.
+
+Most previous work tries to convert the proof from one system for use in
+another. \cite{felty1997hybrid} takes another apporach. The try to use HOL and
+NuPRL in conjuction for one single proof.
+
+\cite{denney2000prototype} translates from HOL to Coq using a own intermediate
+representation. Specifically it tries to make the destination format readable.
+This is the only other translator which has human readable destination format
+as a goal besides my project.
