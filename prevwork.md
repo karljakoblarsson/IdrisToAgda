@@ -58,7 +58,7 @@ used together. However there are many previous cases where systems are linked,
 a problem of a specific form is imported into another system.  See: [13] [15]
 
 Both Nuprl and HOL uses tactics derived from LCF[6]. Both systems use really
-similar reasoning. Some parts where HOL uses special purpose tactixs needed to
+similar reasoning. Some parts where HOL uses special purpose tactics needed to
 be reimplemented in Nuprl.
 
 ### Further refs to check out
