@@ -1,3 +1,107 @@
-% CREATED BY DAVID FRISK, 2016
 \chapter{Results}
-Describe you results. Use tables, diagrams etc. for illustration.
+
+% Somewhat done. Patrik:
+% This is relevant text, but should perhaps be split into proper results, and
+% comments / discussion.  Concretely, what is before "This is good" are clearly
+% results, but then you switch to "discussion" in the middle of a paragraph.
+% Before that I would have expected some measure of how much of the SDP
+% implementation in IdrisLibs (if any) can be translated at this stage [the
+% planning report explicitly mentioned this - the (half-time) report should
+% therefore relate to that].
+%
+% This is somewhat done.
+
+% TODO START HERE
+% DONE For over till officiella mallen.
+% TODO Beskriv och visa program som faktiskt kor och g[r igenom `ita`
+% Med faktiska kod exempel.
+% TODO Testa pa idrisLibs vilka filer som faktiskt inte kraschar och vad den
+% kraschar pa. Testa alla filer i IdrisLibs/SequentialDesicionProblems/ och se
+% vilka som fungerar och inte fungerar.
+% TODO Hitta en fil med beroenden som fungerar fran idrislibs.
+
+
+We have constructed a transpiler from a subset of Idris to Agda. It handles the
+expression language, type signatures and data declarations.  It fails for
+implicit arguments, which have to be declared in Agda but not in Idris. The
+transpiler re-uses both the Idris parser and the Agda pretty-printer from their
+main implementations.
+
+% TODO Maybe split into proper results/discussion.
+Currently it is not possible to run the transpiler on most parts of IdrisLibs.
+This is due to some bugs with relative imports when loading modules. The
+transpiler is not searching for modules in the same places as the main Idris
+compiler.
+
+We have made some progress, but not as much as planned. It has taken quite some
+time working with and around the existing code.  Real-life implementations make
+a lot of practical considerations which complicates the code a lot, and are not
+relevant for this project.
+
+% We have developed a tool to translate simple Idris programs into Agda. It works
+% for a subset of Idris, namely:
+
+The problem of building both project with the same version of GHC and
+dependencies took time. It was a manual process of comparing cabal-files and
+trying to find versions of dependencies which matches both. And in some cases
+change one project to use a more recent version of a dependency with a updated
+interface. Idris also uses a custom build process which need some revision to
+work in a new folder structure.
+
+% Idris uses a custom build process which was a pain to use with a different
+% folder structure. Since we wanted to pull in both Idris and Agda as `git`
+% submodules in our repo we needed to change the folder structure and the build
+% process. The was maybe not worth the effort.
+
+
+We have not yet done any verification beyond manual inspection.  But transpiled
+programs type-checks in Idris. It is one verification step.  But the goal is
+the have a more thorough verification in the end of the project.
+
+The development process in the beginning the process was to run the transpiler , then try to load the program in Agda and see if it compiles.
+Then we would manually fix the program until it compiles.
+After that we changed the transpiler to perform the same change we just did
+manually.
+
+% Implicit arguments are only known and calculated in the elaboration step of
+% Idris compilation. There for it is hard to translate them after only parsing.
+
+% TODO Write this better
+% Somewhat done Patrik:
+% Some overlap
+The transpiler does not handle implicit arguments yet.
+% Agda requires more explicit definitions, implicit arguments have to be defined.
+% Idris automatically considers all lower case variables in type signatures to be
+% a implicit variable.
+Since the implicit arguments in Idris are elaborated in the Type-checker we can
+not use the parser output to reconstruct them.
+Only after Idris is compiled to a lower level intermediate
+language called \texttt{tt\_elab} the type-checking and elaboration is run.
+
+Therefore we need to run the elaboration and then extract the implicit
+arguments from the intermediate representation before translating them to
+Agda.  We are going to do this in a pre-precessing step before the translation,
+we translate the intermediate back into the high level AST Idris. This makes it
+possible the then just use the main transpiler.  This has the side effect of
+making that translation useful for a Idris automatic refactoring tool. It is
+often useful to change between implicit and explicit arguments when developing
+a dependently typed program.
+
+% This was used to guide and prioritize the implementation of the main tool. For
+% the most part it matches our intuitive guess. But it gives us a better argument
+% for that the transpiler is useful, even though it is unfinished.
+
+% \subsection{Implementation difficulties}
+% As expected we ran it to a lot of non project related difficulties when trying
+% to reuse existing Agda and Idris sources.
+
+% Something something about the crazy Idris implementation with a big state
+% monad used everywhere. It is almost an imperative program,
+% just written in Haskell.
+
+% The next version of Idris is developed from scratch in a new project, and some
+% of the reasons for that is the current implantation, and the difficulties in
+% working with it.
+
+% Just trying to find the internal interface of the Idris parser took a long
+% time.

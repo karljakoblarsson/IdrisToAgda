@@ -292,6 +292,7 @@ as possible.
 % second phase is the "refactored Idris" -> Agda part [which is harder to
 % verify].
 
+% TODO Det har ar inte sant. Skriv hur `ita` faktiskt ar uppbyggd.
 The transpiler could be seen as divided into two passes. First, a Idris to
 Idris refactoring to resolve syntactic sugar and gather information from the
 type-checker into the AST. The second pass is the Idris to Agda translation.
@@ -306,6 +307,9 @@ languages in the scope of a master's thesis.  The languages are not the same,
 so we will not work on features only present in Idris or Agda.  Only
 transpiling from Idris to Agda will be considered. Bidirectional transpiling is
 a interesting goal for further projects.
+
+% TODO Skriv vad jag faktiskt hanterar och vad som inte ar gjort och vad som ar
+% halvags
 
 There will not be any consideration for run-time characteristics of the
 translated program.
@@ -449,6 +453,8 @@ section~\ref{sec:methveri}.
 Idris is a large language. We need to build the transpiler in small steps. To
 maximise utility of the transpiler we should prioritize the most used features,
 and leave more obscure features for later.
+
+% TODO Graph
 
 Therefore we wrote a tool to capture usage statistics of the top level abstract
 syntax tree (AST). The tool show which syntactic constructs are most often
@@ -649,8 +655,8 @@ enumerated below:
 
 \begin{enumerate}
 \item The program transpiles without errors.
-\item The transpiled program type-checks in Agda.
 \item Manually inspect that the type signatures are the same.
+\item The transpiled program type-checks in Agda.
 \item The transpiled program runs without errors.
 \item The transpiled program runs with expected output.
 \item The source and transpiled programs both returns the same output for
@@ -658,6 +664,8 @@ enumerated below:
 \item The source and transpiled programs are formally verified to have the same
   semantics.
 \end{enumerate}
+% TODO Beskriv att den har listan ar lite naiv. Att det finns m[nga stege
+% mellan varje steg.
 
 % \item The transpiler passes generated tests.
 % \item The transpiler is formally proved to be correct.
@@ -692,6 +700,16 @@ translation.
 % therefore relate to that].
 %
 % This is somewhat done.
+
+% TODO START HERE
+% TODO For over till officiella mallen.
+% TODO Beskriv och visa program som faktiskt kor och g[r igenom `ita`
+% Med faktiska kod exempel.
+% TODO Testa pa idrisLibs vilka filer som faktiskt inte kraschar och vad den
+% kraschar pa. Testa alla filer i IdrisLibs/SequentialDesicionProblems/ och se
+% vilka som fungerar och inte fungerar.
+% TODO Hitta en fil med beroenden som fungerar fran idrislibs.
+
 
 We have constructed a transpiler from a subset of Idris to Agda. It handles the
 expression language, type signatures and data declarations.  It fails for

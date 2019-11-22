@@ -7,15 +7,61 @@
 \documentclass[12pt,a4paper,twoside,openright]{report}
 \input{include/settings/Settings}
 
-\newcommand{\oneLineTitle}{A Chalmers University of Technology Master's thesis template for \LaTeX}
-\newcommand{\multiLineTitle}[1]{A Chalmers University of Technology \\[#1]  Master's thesis template for \LaTeX}
+\newcommand{\oneLineTitle}{A source-to-source transpiler from Idris to Agda}
+\newcommand{\multiLineTitle}[1]{A source-to-source transpiler from Idris to
+Agda}
 % The term [#1] indicates that there will be 1 rowbreak to split the title into
 % two pieces, first part before \\[#1] and second part after. If you have
 % a very long title and need to split it up into 3 rows, just use \\[#1]
 % multiple times.
 
-\newcommand{\oneLineSubtitle}{A Subtitle that can be Very Much Longer if Necessary}
+% TODO Write a subtitle
+\newcommand{\oneLineSubtitle}{Placeholder Subtitle }
 
+
+%%%%%%%% ITA Specific settings %%%%%%%%
+
+\usepackage[style=ieee]{biblatex}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, decorations.markings}
+\usepackage{chngcntr}
+\counterwithout{figure}{section}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{idrislang}
+
+\definecolor{mypink}{RGB}{228,77,77}
+\lstset{language=Haskell,keywordstyle={\bfseries \color{mypink}}}
+% \lstset{language=Idris,keywordstyle={\bfseries \color{mypink}}}
+\lstset{literate={
+  {->}{$\rightarrow$}{1}
+  {=>}{$\Rightarrow$}{1}
+}}
+\renewcommand{\IdrisKeyword}[1]{{{\bfseries\color{mypink} #1 }}}
+
+\addbibresource{ita.bib}
+
+\lstdefinelanguage{Lambda}{%
+  morekeywords={%
+    % if,then,else,fix % keywords go here
+    where, data
+  },%
+  morekeywords={[2]int},   % types go here
+  otherkeywords={:}, % operators go here
+  literate={% replace strings with symbols
+    {->}{{$\rightarrow$}}{2}
+    {=>}{{$\Rightarrow$}}{2}
+    {lambda}{{$\lambda$}}{1}
+    {forall}{{$\forall$}}{1}
+  },
+  basicstyle={\sffamily},
+  keywordstyle={\bfseries},
+  keywordstyle={[2]\itshape}, % style for types
+  keepspaces,
+  mathescape % optional
+}[keywords,comments,strings]%
+%%%%%%%% --- -------- -------- %%%%%%%%
 
 \begin{document}
 
@@ -72,6 +118,8 @@
 \cleardoublepage
 \addcontentsline{toc}{chapter}{Bibliography}
 \input{include/backmatter/References}
+
+% \printbibliography{}
 
 % APPENDICES
 \cleardoublepage

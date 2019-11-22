@@ -1,8 +1,22 @@
 % CREATED BY DAVID FRISK, 2016
 \chapter{Conclusion}
 
-You may consider to instead divide this chapter into discussion of the results and a summary. 
+% You may consider to instead divide this chapter into discussion of the
+% results and a summary.
+
+\section{Results}
+
+WE have created a tool which translates Idris source code into Agda. The
+resulting Agda code can compile and work probably if the Idris source don't use
+most language feature.
+
+However Agda and Idris handles universe levels differently so code which relies
+on universe cumulativley won't work in Agda. The transpiler doesen't account
+for universe levels so int only works on level 1 which is something else.
+
 
 \section{Discussion}
+
+
 
 \section{Conclusion}

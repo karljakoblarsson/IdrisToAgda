@@ -1,137 +1,107 @@
 % CREATED BY DAVID FRISK, 2015
 \chapter{Introduction}
 
-% * Background to the assignment. Why is it relevant?
-Agda~\cite{agda} and Idris~\cite{idris} are two dependently typed programming
-languages.  Agda is mainly focused on interactive theorem proving while Idris
-prioritizes general purpose programming.  However, while both languages have
-different focus, they share most of their features. Their type systems are
-similar.
+% The paradigm is actually orthogonal to the type system.
+Writing correct software is hard. Over the years several methods and languages
+have been developed to make it easier. Types allow the compiler to check some
+properties about a program before run-time. More advanced type systems allow
+more complicated properties be checked.
+One advanced types system is dependent types. It is the subject of plenty
+of research.
 
-% Mostly the same as the proposal. And read a few other dependent types
-% paper-intros, and write something similar.
+Dependently typed programming languages, however, are far from mainstream.
+There are many factors which hinders adoption. One is community fragmentation.
+The dependently typed community, is split between several languages.
+Idris, Agda, ATS, F* and Epigram are some of the most used.
 
+A common obstacle for adoption of a new programming language is the
+availability of quality libraries. Productive application development requires
+many different libraries.  For example, network protocols, parser combinators
+and cryptography.  Implementing all common libraries is a huge task.  There is
+a lot of duplicated effort when every language needs to implement similar
+libraries.  If it would be possible to re-use libraries between languages,
+language implementers could focus on developing their language.
+% instead of writing the same libraries over and over for every new language.
 
-% * Aim for the work. What should be accomplished?
-% This part is an okay draft now.
-We wish to investigate if it is possible to construct a source to source
-translation of a common subset from Idris to Agda. A translation which
-preserves semantics. The translation should handle as large subset of Idris as
-possible, but it is unreasonable to expect to cover 100\% of the language.
-A goal for further projects is to do bidirectional translation between the
-languages.
-
-This translator would allow Idris libraries to be reused in Agda. A Idris
-program may be more easily proved in Agda.  It will also increase the
-confidence in a given proof if it is valid in both languages.  The first
-challenge is to find a common subset for which it is possible to translate. The
-task is to construct a compiler which handles as much of this subset as
-possible.
-
-
-\section{Limitations}
-% * Limitations. What should be left out and why?
-% TODO This part needs to be improved.
-Only translation from Idris to Agda will be considered in this project. We will
-target Idris 1.3.1 and Agda 2.6.0. It is not feasible to translate every
-language feature and edge case.  The goal is to cover a large subset of Idris
-features, but it is hard to give an exact goal.  The translator will built step
-by step, supporting a bigger subset of language features for each step. The
-translator should be usable early on and then improved.
-% progression, and where it's reasonable to land.
-
-% Code which is untranslateable
-There may be valid Idris code which is impossible to translate to Agda. There
-may also be code where the correct translation is application dependent. Those
-parts will be left as holes for the user to fill in a reasonable translation in
-that specific case.
-% should be left as holes, with the source as comments.
-
-% Dependent records
-
-% Cummutally Set hierarchy. Type in type in Idris.
-% Remove since Idris has different levels of Set as well, only it is always
-% interfered and cannot be explicitly specified by the programmer.
-% In Agda there are different levels of \texttt{Set} since the set of types can
-% not be part of itself. This is useful for proofs, but will not be considered in
-% this project.
-
-% Automated testing of program output is probably to hard, I need a simpler
-% verification criteria.
-
-% Comment from NAD:  Man kan t ex inspektera typsignaturer manuellt och sedan
-% förlita sig på att typcheckaren gör sitt jobb (om typsignaturen är
-% tillräckligt precis). TODO
-Här är det lite bra input. Det låter som en rimlig start.
-Ideally we would run both the source and translated program with randomized
-input to automatically test the they return the same result. However, it is
-probably infeasible to get larger programs to type check and run without manual
-intervention.  Therefore we will use weaker forms of validation.
-
-\section{Problem}
-% * The formulation of the problem at hand and, the assignment. This should
-%   include an extended version of the scientific problem definition and
-%   references to knowledge within the area given in the thesis proposal.
-
-Dependently typed programming is the application of
-% Martin-Löf
-% TODO
-% Maybe mention about other forms of type theories. Agda is explicitly based on
-% Martin-Löf, it says so in the first paragraph of the documentation.
-% "It is an extension of Martin-Löf’s type theory, and is the latest in the
-% tradition of languages developed in the programming logic group at Chalmers."
-Intuitionistic Type Theory~\cite{martinlof} to practical programming.
-Types are allowed to depend on values, which allows the compiler to check much
-richer properties about the program than Hindley-Milner~\cite{hindley}~\cite{milner}
-style types. However, how to efficiently implement a dependently typed
-programming language is active research.
-
-Agda and Idris are two of the mostly widely used dependently type programming
-languages, with much in common. The Idris website states that Idris is inspired
+% Patrik: Good paragraph
+Agda~\cite{agda} and Idris~\cite{idris} are two of the most used dependently
+typed programming languages.
+The Idris website states that Idris is inspired
 by Agda but with more focus on practical
 programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
-An automatic translator form Idris to Agda source code could increase the
-usefulness of both languages. The work of implementation of it can give us
-greater knowledge of the differences between the type systems. As well as the
-strengths and weaknesses of both languages.
+Agda's main focus is on interactive theorem proving, though it is used as
+a general purpose programming language as well.
+However, while they have different focus, both languages share most of their features and their type systems are similar.
 
-% Semi-automatic translator is maybe a more correct description.
-The goal of this project is to construct a semi-automatic translator which can
-translate a subset of Idris into valid Agda. The language features which are
-not yet implemented will be left as holes to allow the user to provide the
-missing parts.
+We wish to investigate if it is possible to construct a source-to-source
+compiler from Idris to Agda. The source-to-source compiler, from here on called
+transpiler, should handle a common subset of Idris and Agda.  The transpiler
+would allow Idris libraries to be reused in Agda. This would increase the
+number of available Agda libraries and increase the audience for every new
+Idris library.
 
-% I should mention which parts are extra hard. Like: dependent types, records,
-% classes/interfaces. Implicit arguments. Maybe partial functions. But I'm not
-% sure which parts are yet.
+Dependent types allow for all propositions in predicate logic to be encoded as
+types. A program which type-checks is a proof of the proposition encoded in
+its type signature. A dependently type programming language is also a theorem
+prover. If the transpiler is correct and verified it can be used to increase
+the confidence of theorems. A proof which is valid in both languages is
+stronger than one which is only valid in one language.
 
-% I should some paper related to transpiling and cite. As well as both Idris and
-% Agda implementation-papers. Maybe the faq about differences between the
-% languages.
 
-Dependent type systems are still an active research topic, which makes the
-translation hard.
-% redo this sentence. The question is what it means and not mean if both
-% programs type check.
-Even if both the source and translated programs type check, it does not
-necessarily mean the translation is correct.  Where the translator fails we
-wish to leave holes for the user to provide the correct translation. The holes
-must be constructed so that is possible which is non-obvious to do.
+% Gather everything about the goals in this section.
+% \subsection{Goals}
+The goal of this project is to construct a transpiler which can translate
+a subset of Idris into valid Agda. The transpiler is intended as an aid to
+a human programmer which adapts and Idris library for use in Agda.  It is not
+intended as a automatic compiler which runs Idris programs using the Agda
+runtime. Therefore we will leave untranslatable parts as holes for the user to
+manually specify. This also means we aim to produce output which is easy for
+the human user to understand.
 
-% How to test and verify to translations? It's not feasible to get a lot
-% of code runnable without manual intervention. Can I even get it to type check?
-% And what does it mean just that the code is well typed in both languages.
-% Equality is hard, especially with dependent types.
-It is not obvious how to verify the translation, ideally the translated
-programs both type check and can be run. Then it would be possible to compare
-the outputs are the same. However it is hard enough to get the programs to type
-check without manual intervention. The type systems are similar but not
-identical. This means that even if both the source and translated program
-type check we can not be sure that they represent the same semantics.
-Especially if one of the programs contain holes. It is hard to reason about
-equality in the context of dependent types.
-% TODO Add specific Ideas about how to verify the implementation.
-% Ideas:
-% - 
-% - 
+% Expand
+% Since dependently typed programming is often used for formal proofs it is
+% important that the user can understand the program.
+
+% The language features which are
+% not yet implemented will be left as holes to allow the user to provide the
+% missing parts.
+
+The transpiler should preserve the semantics of the translated program.
+Otherwise it would not be a useful tool.  We will verify that the transpiler
+preserves the program semantics.  However, this is hard to do formally,
+especially with an incomplete transpiler.  The verification will be done as far
+as possible.
+
+% SOMEWHAT DONE Patrik:
+% Could mention [here or later] the relation to refactoring: the translation
+% can be seen as divided into two phases where the first phase is an Idris ->
+% Idris refactoring [which should be possible to verify within Idris] and the
+% second phase is the "refactored Idris" -> Agda part [which is harder to
+% verify].
+
+% TODO Det har ar inte sant. Skriv hur `ita` faktiskt ar uppbyggd.
+The transpiler could be seen as divided into two passes. First, a Idris to
+Idris refactoring to resolve syntactic sugar and gather information from the
+type-checker into the AST. The second pass is the Idris to Agda translation.
+The first pass should be possible to verify within Idris. The second pass is
+harder to verify.
+
+
+
+\subsection{Scope}
+
+It is not feasible to correctly translate between 100\% of the
+languages in the scope of a master's thesis.  The languages are not the same,
+so we will not work on features only present in Idris or Agda.  Only
+transpiling from Idris to Agda will be considered. Bidirectional transpiling is
+a interesting goal for further projects.
+
+% TODO Skriv vad jag faktiskt hanterar och vad som inte ar gjort och vad som ar
+% halvags
+
+There will not be any consideration for run-time characteristics of the
+translated program.
+Thus an efficient Idris program may well be translated into a slow Agda program.
+
+We will target Idris 1.3.1 and Agda 2.6.0.
 
