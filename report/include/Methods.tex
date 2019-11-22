@@ -1,63 +1,245 @@
-% CREATED BY DAVID FRISK, 2016
 \chapter{Methods}
 
-The first step is to translate simple declarations of types and functions,
-without dependent types. A subset roughly corresponding to Simply Typed Lambda
-Calculus. Since dependent types are the focus of the project the next step is
-to translate them. Starting with application in the type level, and functions
-definitions. Continuing with indexed data types.
-Both Idris and Agda are large languages, some features are more important to
-implement then other.  For example \texttt{mutual}-blocks and
-\texttt{do}-notation. They are de-sugared in the Idris compiler so are not
-strictly necessary to implement. However correctly translating them will
-increase the readability and the usefulness of the generated code.
-% TODO Talk about the type language.
-% type lang
-% base types
-% variable
-% application t1 t2
-% function definition (x : t1) -> t2
+Idris is a large language. We need to build the transpiler in small steps. To
+maximise utility of the transpiler we should prioritize the most used features,
+and leave more obscure features for later.
 
-% Sum/ simple enumeration T | F
-% prod/data P = P Bool Bool
+Therefore we wrote a tool to capture usage statistics of the top level abstract
+syntax tree (AST). The tool show which syntactic constructs are most often
+used, and therefore should be prioritized. It also gives the user the
+incentive to refactor Idris code which uses less-used language features,
+which may result in cleaner and more easily understood code.
 
-% Indexerad data typer
-
-% Kriteriet for att oversatta eller inte ar inte om det ar latt eller
-% svart. Both Idris and Agda are large languages. What features are most
-% important to translate?
-
-% Developing from the Idris 1 or Blodwen codebase, utilizing as much of the AST
-% and pretty printer from the Agda-source as possible.
-
-We wish to reuse the Idris complier front-end for our implementation, by
-implementing the translator as a back-end. Hopefully we can reuse the abstract
-syntax tree (AST) definition and pretty-printer from the Agda implementation as
-well. This means that most of the code needed is handling the actual
-translation, minimizing work needed on surrounding infrastructure.  However,
-there is always a challenge to interface with existing code.
-
-% | Below is stated elsewhere.
-% Another hard task is to find the biggest common subset of the languages.
-% It is trivial to name a few common features, bu a useful compiler needs to
-% support most widely used features. But there are incompatible differences
-% between Agda and Idris which complicates things.
-
-Working step by step, we first translate only very simple programs, then adding
-more and more features. Currently unimplemented features are represented with
-holes so that it is always possible to translate code. The output becomes more
-and more complete as the project progresses. The number of holes left for
-a given project also works as an informal method of verification, less holes
-corresponds to a better translator.
-
-To test the implementation we will use the Sequential Decision Problem (SDP)
-implementation in
-IdrisLibs\footnote{\url{https://gitlab.pik-potsdam.de/botta/IdrisLibs}} which
-is one of the bigger Idris codebases available. This will guide our
-implementation by first supporting the features used in the core parts of the
-SDP library. And then work to support more and more of the library.
+Usability oriented features are often are implemented as syntactic sugar and
+not part of the core language. They are not necessary to implement in a working
+transpiler, but are important for it to be a useful tool. There is a trade-off
+there we need to make. If the transpiler would output code on the level of
+assembly, just encoded in Agda syntax, even if correct, it would not be a useful
+tool. Since we specifically aim to develop a tool whose output is easy to
+understand for a human programmer, it is good to transpile some syntactic sugar.
 
 
+% \subsection{Holes}
+
+There may be valid Idris code which is not yet implemented by our transpiler.
+Instead of failing, those parts will be left as holes for the user to fill in
+a reasonable translation.
+The holes must be constructed so that this is possible.
+Consider example below, a implementation of vector concatenation, written in
+Idris.
+%in listing~\ref{lst:hole1}.
+
+\begin{lstlisting}[language=Idris,label={lst:hole1},caption={}]
+concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat Nil rest = rest
+concat (Cons x rest) y = concat rest (Cons x y)
+\end{lstlisting}
+
+% TODO Patrik: be more positive here maybe.
+% Somewhat done.
+The first prototype of the transpiler may look like the listing below.
+Simply replacing the whole program with a hole is not incorrect, but not very
+useful.
+% A terribly unhelpful translation is the one below. %in listing~\ref{lst:hole2}.
+
+\begin{lstlisting}[language=Idris,label={lst:hole2},caption={}]
+concat : ?
+concat = ?
+\end{lstlisting}
+
+A more useful transpiler translate as big part of the programs as it can. See
+this example: %in~\ref{lst:hole3}.
+
+\begin{lstlisting}[language=Idris,label={lst:hole3},caption={}]
+concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat Nil rest = rest
+concat (Cons x rest) y = ?
+\end{lstlisting}
+
+An even better transpiler would also add more info from the compiler, for
+example as a comment. It could potentially look as in this:
+% listing~\ref{lst:hole4}
+
+\begin{lstlisting}[language=Idris,label={lst:hole4},caption={}]
+concat : Vec g a -> Vec g b -> Vec g (add a b)
+concat Nil rest = rest
+concat (Cons x rest) y = concat rest ?a
+-- The type of hole `?a` is: `Vec g c`
+-- Availible bindings are:
+    -- add : N -> N -> N
+    -- Cons : g -> Vec a n -> Vec a (Suc n)
+    -- x : g
+    -- y : Vec g b
+    -- b : N
+\end{lstlisting}
+
+
+\subsection{Implementation details}
+
+We reuse the Idris complier front-end and AST for our implementation. This
+makes sure that we are able to parse all Idris code, and we don't introduce any
+bugs in the parser. It could in theory save a lot of time since we don't need
+to write a parser. It is however a lot of extra work to reuse real-world code.
+Similarly, we reuse the AST and pretty-printer from Agda. This means that most
+of the code we need to write is handling the actual translation.
+
+% TODO Patrik:
+% [if true]
+% On the Agda side this means we will be able to print syntactically correct
+% code and we could even use Agda-internal type checking functions to make sure
+% what we have produced is type correct.  [If I remember correctly this second
+% part is not yet possible due to difficulties in filling in all the data in
+% the internal datatypes]
+%
+% It is sort of true. But not really. I think it is possible to encode
+% non-valid Agda in the Agda AST. But using the compiler should be possible.
+% But I have not tried it yet.
+
+Both Agda and Idris 1 are written in Haskell.  This allows us to build both as
+a single Cabal project using Stack.  This makes it easy to reuse all parts of
+both languages implementations if needed.  We use Git and import both projects
+as Git submodules. This makes the changes we make to the upstream
+implementations explicitly recorded. It is also possible to apply our changes
+on top of new versions of the upstream projects.  We take care to only make
+minor changes to the upstream implementations, this should make it easier to
+use newer versions in the future.  But since our code depends a lot on internal
+interfaces, it will still be hard to keep up with new versions.
+
+% TODO Is there something good in this paragraph?
+% Trying to reuse the Agda AST as well has problems. The good thing is that
+% Agda is designed to be able to print it's AST back out in the exact same
+% representations as the input. However, this means that the parser, AST and
+% pretty print has to keep track of a lot of things, not needed for the semantics
+% of the program. This made it hard to reconstruct a valid AST from another
+% program, we had to guess what parts of the data structure are meaningful or not
+% for our use case. And construct dummy data just to keep the compiler
+% happy, while not making any difference for the output. We still felt this was
+% a reasonable trade off, since constructing a AST and pretty printer from
+% scratch would probably be an equal amount of work, but it would be much more
+% work to keep it in synch with newer versions of Agda, so the final tool would
+% be less useful.
+
+
+Further work on a more robust implementation could define a new intermediate
+language which covers the union of Agda and Idris features.
+This will make clear in the intermediate AST what features we support and which
+are not implemented.
+It also makes it possible to do bidirectional transpiling in the future.
+We could also use QuickCheck to generate programs in this intermediate language
+to test the code generation.
+
+
+\subsection{Statistics tool}
+Ideally we want the transpiler to handle as much real-world code as possible.
+To guide our implementation we wrote a tool which parses Idris into its AST and
+then records which data constructors are most often used. Then we ran this tool
+on the Idris Prelude.
+\footnote{ All the files in the \textit{libs/prelude/Prelude/} directory in commit \textit{61cf812}.
+\url{https://github.com/idris-lang/Idris-dev/tree/61cf812e97c0cf07a9596c1d36ab5a70eb5758b2/libs/prelude/Prelude}}
+See the results in table~\ref{tbl:stats}.
+
+
+\begin{table}[h]
+  \caption {Usage statistics of constructors in the Idris AST used in the Idris
+  Prelude.}
+  \label{tbl:stats}
+\begin{center}
+  \begin{tabular}{ l l l r }
+    Variable reference       & PTerm:   &    PRef            &    38.72 \% \\
+    Application              & PTerm:   &    PApp            &    25.71 \% \\
+    $\rightarrow$            & PTerm:   &    PPi             &    12.05 \% \\
+    Patten clauses           & PClause: &    PClauses        &    7.74  \% \\
+    Type declaration         & PTerm:   &    PTy             &    5.70  \% \\
+    Constant                 & PTerm:   &    PConstant       &    3.87  \% \\
+    Interface implementation & PDecl:   &    PImplementation &    1.58  \% \\
+    \\
+                             & PTerm:   &    PRewrite        &    0.63  \% \\
+                             & PDecl:   &    PDirective      &    0.53  \% \\
+    Data declaration         & PTerm:   &    PPair           &    0.53  \% \\
+                             & PTerm:   &    Placeholder     &    0.48  \% \\
+                             & PTerm:   &    PCase           &    0.35  \% \\
+    Let clause               & PTerm:   &    PLet            &    0.32  \% \\
+    Data declaration         & PDecl:   &    PData           &    0.27  \% \\
+    Interface declaration    & PDecl:   &    PInterface      &    0.23  \% \\
+    With-clause              & PClause: &    PWith           &    0.21  \% \\
+                             & PTerm:   &    PImpossible     &    0.20  \% \\
+    Fixity declaration       & PDecl:   &    PFix            &    0.18  \% \\
+                             & PTerm:   &    PType           &    0.18  \% \\
+                             & PTerm:   &    PAlternative    &    0.17  \% \\
+                             & PTerm:   &    PConstSugar     &    0.17  \% \\
+    Lambda function          & PTerm:   &    PLam            &    0.13  \% \\
+    Namespace declaration    & PDecl:   &    PNamespace      &    0.03  \% \\
+    Record declaration       & PDecl:   &    PRecord         &    0.02  \% \\
+
+  \end{tabular}
+\end{center}
+\end{table}
+
+
+% We aim to have implemented ?? of the most widely used constructors when this
+% project is done.
+
+
+\subsection{Verification} \label{sec:methveri}
+
+% Ideally the transpiled programs both type-check and runs, then we can compare its output to that of the source program.
+% However, it is hard enough to get the programs to type check without manual intervention.
+% This means that even if both the source and translated program type-check we can not be
+% sure that they represent the same semantics.  Especially if one of the programs
+% contain holes. It is hard to reason about equality in the context of dependent
+% types.
+
+As stated in sub-section~\ref{sec:veri}, it is hard to verify the correctness
+of the transpiler, especially while it is a work in progress. It is not
+feasible to create a 100\% correct transpiler in the time of this master`s
+thesis, so we have to somehow verify an unfinished transpiler.
+
+Even to verify that a single non-trivial program is transpiled correctly is
+hard. Since the two languages have slightly different semantics, even a source
+and transpiled program pair which seems to be the same for the human
+programmer, might have different results for some edge-case. Some possible
+verification methods for as single programs, in rough order of difficulty, is
+enumerated below:
+
+\begin{enumerate}
+\item The program transpiles without errors.
+\item Manually inspect that the type signatures are the same.
+\item The transpiled program type-checks in Agda.
+\item The transpiled program runs without errors.
+\item The transpiled program runs with expected output.
+\item The source and transpiled programs both returns the same output for
+  automatically generated tests.
+\item The source and transpiled programs are formally verified to have the same
+  semantics.
+\end{enumerate}
+% TODO Beskriv att den har listan ar lite naiv. Att det finns m[nga stege
+% mellan varje steg.
+
+% \item The transpiler passes generated tests.
+% \item The transpiler is formally proved to be correct.
+
+However, we need to show that our transpiler works for different programs.
+That rules out some methods which are too manual.  In a perfect world we would
+have test suit with a lot of different programs translated and proven correct in
+both languages. But no such test suite exists for Agda and Idris.
+
+% redo This paragraph.
+% Ideally we would run both the source and translated program with randomized
+% input to automatically test the they return the same result. However, it is
+% probably infeasible to get larger programs to type-check and run without manual
+% intervention.  Therefore we will use weaker forms of validation.
+
+To formally prove correctness of the translation is the ideal verification, but
+it is far outside the scope of this project, so we will have to settle for less
+rigorous methods. It is the safest way, and what would provide full confidence.
+But hopefully we can still provide some degree of confidence in the
+translation.
+
+
+
+
+
+%%%%%%%%
 % About the Types Graph
 Re-using an exisiting major codebase is hard. Production ready code is usually
 filled with special cases, performance considerations and other "works for

@@ -35,6 +35,16 @@ clean:
 	rm -f ${csvFiles}
 	rm -rf stats
 	mkdir stats
+	rm -f rerport/Main.pdf
+
+report: report/Main.tex report/ita.bib
+	pdflatex -shell-escape report/Main.tex
+
+report-full: report/Main.tex report/ita.bib
+	pdflatex -shell-escape report/Main.tex
+	biber report/Main
+	pdflatex -shell-escape report/Main.tex
+	pdflatex -shell-escape report/Main.tex
 
 typesgraph:
 	dot -Tsvg types.dot -o types.svg

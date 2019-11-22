@@ -1,12 +1,145 @@
 \chapter{Background}
 
+
+\section{Background}
+
+% TODO Find relevant articles
+A source-to-source compiler, often called a transcompiler or transpiler, is
+a compiler which translates source code in one programming language into
+another language, usually of similar level of abstraction. A traditional
+compiler takes a higher level language as input and will output a lower level
+language, often machine code.  Since Agda and Idris are similar languages we will write a transpiler.
+
+Source-to-source transpilers exists for many language pairs. Even so, there are
+no published attempts of a transpiler to and from dependently
+typed languages.
+
+% DONE Should this be here?
+% No!
+% Dependent type systems are still an active research topic and it is hard
+% to determine if two statements in different systems are equal. This is
+% a big challenge when trying to show that the transpiler works correctly.
+
+
+
+% TODO is this a useful heading? I already talk about this two paragraphs up.
+\subsection{Dependently Typed Programming}
+
+Dependent types are types which depend on values.
+This allows the compiler to check richer properties about programs than
+a regular strong static type system, such as the one in Haskell.
+A common example is a vector type which is indexed on the length of
+the vector. This allows the programmer to encode constraints and invariants in
+the type system.
+This mixing of values and types goes both ways, types can appear in expression
+and values can appear in type signatures.
+
+
+For example see the definition of a vector (a list with a specific length) in
+listing~\ref{lst:depex}. The datatype contains the length of the vector, we can
+then use the length in the type signatures.
+The functions \texttt{head} and \textit{tail} can only type-check if their
+bodies adhere to the constraint specified in the type.
+For both \texttt{head} and \textit{tail} the type-checker requires that they
+are applied to non-empty vectors.
+
+
+% Dependent types goes further and make it possible to specify propositions from
+% predicate logic as types. In theory this allows for the compiler to formally
+% verify a program.
+
+\begin{lstlisting}[language=Haskell,label={lst:depex},caption={Definition of
+a vector type in Idris, the type signatures of \textit{head} and \textit{tail}. \textit{n} is a type parameter, in this case it is a natural number.  }]
+data Vector : Type -> Nat -> Type where
+  Nil : {a : Type} -> Vec a 0
+  Cons : {a : Type} -> {n : Nat} -> a -> Vector a n -> Vector a (n + 1)
+
+head : Vector a (Suc n) -> a
+tail : Vector a (Suc n) -> Vector a n
+\end{lstlisting}
+
+
+% Talk about parametrized types and indexed types, and their differences.
+% It will be useful later, when talking about problems with my implementation.
+% Maybe in the Idris subsection.
+
+% \subsection{Agda and Idris}
+
+% TODO Patrik:
+% I think the head and tail part of the listing would fit better here as an
+% example of the implicit argument text.  But please also include the
+% corresponding Agda code (or the refactored Idris code with the arguments
+% added).
+%
+% You may also need to explain the two aspects of hidden arguments.
+% 1. Avoiding "declaration" (binding) of arguments [as in the type signatures
+%    in Listing 1]
+% 2. Avoiding "use" (application) of arguments [not shown, but you should
+%    probably show it]
+
+One specific difference between Idris and Agda relevant for this project is
+implicit arguments. In dependently typed programming you often want to have
+some type as a parameter to a function, but the compiler can often infer that
+type, so it is very redundant to specify the type in every call to the function
+if the compiler can infer it itself. Therefore both Agda and Idris allows for
+a type argument to be specified implicit. However the syntax differ, in Agda
+a implicit argument needs to be defined in the function definition. In Idris
+every name in a type signature which starts with a lower case letter is assumed
+to be implicit.
+
+A feature of both languages is a so called 'hole'. This is not something unique
+to dependently typed languages, but it is more useful with a more advanced
+compiler. A hole is a part of program which is left unimplemented. This is
+represented syntactically with a question mark in both Agda and Idris. It
+is then possible to ask the compiler what the type of the expression in the
+hole should be, as well as what bindings are in scope and theirs types. This
+allows the user to interactively refine the program.
+
+
+\subsection{Verification}\label{sec:veri}
+
+We need to verify that the transpiler is correct. The transpiler is correct if
+the transpiled program has the same semantics as the source.
+This is simple to define in theory.
+Let $tr$ be the transpiler.
+Given two functions $s_A$ and $s_I$ which maps an Agda or Idris program
+respectively, into some formal definition of semantics.
+The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
+% TODO Patrik:
+% or simply s_I = s_a . tr
+% Perhaps add something like:
+% Thus we could see the task of implementing a transpiler as factoring the
+% semantics of (a subset of) Idris.
+
+\begin{equation} \label{eq:veri1}
+  s_A : A \rightarrow S,
+  \ s_I : I \rightarrow S,
+  \ tr : I \rightarrow A,
+\end{equation}
+\begin{equation} \label{eq:veri2}
+  s_I = s_A\ .\ tr
+\end{equation}
+
+This is hard to show in practice however. Simply defining $s_A$ or $s_I$ for
+a subset of the language is a big project, and way beyond the scope of this
+thesis.
+Further, equation~\ref{eq:veri2} needs to hold for every possible program.
+It is of course impossible to enumerate every possible program in a finite
+time, so we either need to construct a formal proof or test a subset of $p$.
+Developing a formal correctness proof is an huge undertaking, there
+exists only a handful of formally verified compilers published. Therefore we
+will focus on partial verification by testing, we explore our options in
+section~\ref{sec:methveri}.
+
+
+
 \section{Previous work}
 
 Source level transpilation of a dependently type programming lanugage has not
 been done before. However several translations between proofs systems have been
 attempted. The benefit of reusing existing proofs in a new system is obvious.
 
-However, in practice there are lots of implemnetations difficulties.
+However, in practice there are lots of implementations difficulties.
 
 A dependently typed programming language can also be used for computer-checked
 proofs thanks to the Curry-Howard correspondence. A type signature represents
@@ -37,3 +170,4 @@ NuPRL in conjuction for one single proof.
 representation. Specifically it tries to make the destination format readable.
 This is the only other translator which has human readable destination format
 as a goal besides my project.
+
