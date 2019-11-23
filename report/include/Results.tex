@@ -58,10 +58,10 @@ We have not yet done any verification beyond manual inspection.  But transpiled
 programs type-checks in Idris. It is one verification step.  But the goal is
 the have a more thorough verification in the end of the project.
 
-The development process in the beginning the process was to run the transpiler , then try to load the program in Agda and see if it compiles.
-Then we would manually fix the program until it compiles.
-After that we changed the transpiler to perform the same change we just did
-manually.
+The development process in the beginning the process was to run the transpiler
+, then try to load the program in Agda and see if it compiles.  Then we would
+manually fix the program until it compiles.  After that we changed the
+transpiler to perform the same change we just did manually.
 
 % Implicit arguments are only known and calculated in the elaboration step of
 % Idris compilation. There for it is hard to translate them after only parsing.
@@ -69,15 +69,19 @@ manually.
 % TODO Write this better
 % Somewhat done Patrik:
 % Some overlap
-The transpiler does not handle implicit arguments yet.
+The transpiler does not handle implicit arguments yet.\todo{This should now be
+elaborated in several paragraphs}
 % Agda requires more explicit definitions, implicit arguments have to be defined.
 % Idris automatically considers all lower case variables in type signatures to be
 % a implicit variable.
+
 Since the implicit arguments in Idris are elaborated in the Type-checker we can
 not use the parser output to reconstruct them.
 Only after Idris is compiled to a lower level intermediate
 language called \texttt{tt\_elab} the type-checking and elaboration is run.
 
+\todo{Since this is done now, the language should be changed.}
+\todo{And moved to methods}
 Therefore we need to run the elaboration and then extract the implicit
 arguments from the intermediate representation before translating them to
 Agda.  We are going to do this in a pre-precessing step before the translation,

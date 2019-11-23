@@ -30,8 +30,9 @@ The Idris website states that Idris is inspired
 by Agda but with more focus on practical
 programming.\footnote{\url{http://docs.idris-lang.org/en/latest/faq/faq.html\#what-are-the-differences-between-agda-and-idris}}
 Agda's main focus is on interactive theorem proving, though it is used as
-a general purpose programming language as well.
-However, while they have different focus, both languages share most of their features and their type systems are similar.
+a general purpose programming language as well.  However, while they have
+different focus, both languages share most of their features and their type
+systems are similar.
 
 We wish to investigate if it is possible to construct a source-to-source
 compiler from Idris to Agda. The source-to-source compiler, from here on called
@@ -79,7 +80,7 @@ as possible.
 % second phase is the "refactored Idris" -> Agda part [which is harder to
 % verify].
 
-% TODO Det har ar inte sant. Skriv hur `ita` faktiskt ar uppbyggd.
+\todo{ TODO Det har ar inte sant. Skriv hur `ita` faktiskt ar uppbyggd.}
 The transpiler could be seen as divided into two passes. First, a Idris to
 Idris refactoring to resolve syntactic sugar and gather information from the
 type-checker into the AST. The second pass is the Idris to Agda translation.
@@ -96,8 +97,8 @@ so we will not work on features only present in Idris or Agda.  Only
 transpiling from Idris to Agda will be considered. Bidirectional transpiling is
 a interesting goal for further projects.
 
-% TODO Skriv vad jag faktiskt hanterar och vad som inte ar gjort och vad som ar
-% halvags
+\todo{ TODO Skriv vad jag faktiskt hanterar och vad som inte ar gjort och vad
+som ar halvags}
 
 There will not be any consideration for run-time characteristics of the
 translated program.

@@ -212,8 +212,9 @@ enumerated below:
 \item The source and transpiled programs are formally verified to have the same
   semantics.
 \end{enumerate}
-% TODO Beskriv att den har listan ar lite naiv. Att det finns m[nga stege
-% mellan varje steg.
+
+\todo{ TODO Beskriv att den har listan ar lite naiv. Att det finns m[nga stege
+mellan varje steg. }
 
 % \item The transpiler passes generated tests.
 % \item The transpiler is formally proved to be correct.
@@ -241,13 +242,13 @@ translation.
 
 %%%%%%%%
 % About the Types Graph
-Re-using an exisiting major codebase is hard. Production ready code is usually
+Re-using an existing major codebase is hard. Production ready code is usually
 filled with special cases, performance considerations and other "works for
 now"-code. The made this project harder than anticipated. While trying to
 understand the Idris code base we produced a dependency graph for the types
 used in the front end. This is one advantaged of strictly typed programming
-that the types, their dependicies tells us a lot about the code and how it
-works. And compared to writte documentation, the compiler guarantees that this
+that the types, their dependencies tells us a lot about the code and how it
+works. And compared to write documentation, the compiler guarantees that this
 information is up to date.
 
 \newcommand{\pterm}{\textit{PTerm}}
@@ -256,6 +257,8 @@ information is up to date.
 \newcommand{\tti}{\textit{TT}}
 
 % TODO which
+\todo{Insert the graph}
+\todo{This is only a stream-of-conciousness draft.}
 This graph of type dependencies can be found in appendix X. By looking at the
 graph it is easy to see which types are central in the implementation and which
 are only used peripherally. In figure~\ref{fig:types-crop} we see part of the

@@ -16,13 +16,14 @@ Agda}
 % multiple times.
 
 % TODO Write a subtitle
-\newcommand{\oneLineSubtitle}{Placeholder Subtitle }
+\newcommand{\oneLineSubtitle}{TODO Write a Subtitle }
 
 
 %%%%%%%% ITA Specific settings %%%%%%%%
 
 \usepackage[style=ieee]{biblatex}
 
+\usepackage{todonotes}
 \usepackage{tikz}
 \usetikzlibrary{arrows, decorations.markings}
 \usepackage{chngcntr}
@@ -61,6 +62,11 @@ Agda}
   keepspaces,
   mathescape % optional
 }[keywords,comments,strings]%
+
+\newcommand\reviewer[1]{
+    \todo[color=blue!50!white]
+    {{\bfseries#1}}}
+
 %%%%%%%% --- -------- -------- %%%%%%%%
 
 \begin{document}
