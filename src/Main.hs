@@ -67,7 +67,12 @@ import Debug.Trace (trace)
 -- by unification. Instance arguments are similar to Haskell's type class
 -- constraints. They are enclodsed in double brackets '{{ a : Show }}'
 
-itaDecls :: [PDecl] -> [Declaration]
+type AST = [PDecl]
+
+-- TODO Should I use this representation instead?
+-- itaDecls :: Map TT.Name (AST, TTDecl) -> [Declaration]
+-- And the `itaDecl` has the same.
+itaDecls :: AST -> [Declaration]
 itaDecls pd = concat $ map itaDecl pd
 
 itaDecl :: PDecl -> [Declaration]
@@ -544,11 +549,11 @@ test = do res <- runIdr $ loadIdr f >> parseF True
   -- where f = "../IdrisLibs/SequentialDecisionProblems/FullTheory.lidr"
   -- where f = "Idris-dev/test/basic001/basic001a.idr"
   -- where f = "Idris-dev/libs/prelude/Prelude/Algebra.idr"
-  -- where f = "Idris-dev/test/basic003/test027.idr "
+  where f = "Idris-dev/test/basic003/test027.idr "
   -- where f = "patrik.idr" -- [working 2019-08-15]
   -- where f = "simpleIdris.idr"
   -- where f = "simpleIdrisImpl.idr"
-  where f = "exImpIdr.idr"
+  -- where f = "exImpIdr.idr"
 
 getDefinitions c = Map.keys $ definitions c
 
@@ -645,7 +650,6 @@ parseF impex = do
 -- one AST again.
 -- The plan is to do exactly that.
 
-type AST = [PDecl]
 
 -- TODO START HERE
 -- I should do this differently. I should traverse the `AST` and when needed (an
@@ -811,6 +815,9 @@ getTTType (CaseOp caseInfo ty argTypes origDef simplifedDef cases) =
 
 tName :: TT.Name
 tName = TT.UN "TESTNAME"
+
+apparg :: TT.Name
+apparg = TT.UN "__app_arg"
   
 showU :: TT.UExp -> String
 showU (TT.UVar s l) = "Universe variable number: " ++ show l ++ " in file: " ++ show s
@@ -831,6 +838,8 @@ tttPDecl b@(TT.Bind n binder tt) = Just
   -- It is really stupid of me to stop here. There is a big task ahead, not a
   -- small one. Just do it! Jump right in!
   (PTy emptyDocstring [] defaultSyntax TT.NoFC [] tName TT.NoFC (tttPBind n binder tt))
+  -- TODO This won't work
+-- tttPDecl (TT.App appstatus tt1 tt2) = Just $ PApp TT.NoFC (tttPTerm tt1) [PExp 0 [] apparg (tttPTerm tt2)]
 tttPDecl (TT.App appstatus tt1 tt2) = undefined
 tttPDecl (TT.Constant const) = undefined
 tttPDecl (TT.Proj tt i) = undefined
