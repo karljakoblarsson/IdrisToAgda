@@ -11,7 +11,6 @@
 %
 % This is somewhat done.
 
-% TODO START HERE
 % DONE For over till officiella mallen.
 % TODO Beskriv och visa program som faktiskt kor och g[r igenom `ita`
 % Med faktiska kod exempel.
@@ -46,17 +45,37 @@ dependencies took time. It was a manual process of comparing cabal-files and
 trying to find versions of dependencies which matches both. And in some cases
 change one project to use a more recent version of a dependency with a updated
 interface. Idris also uses a custom build process which need some revision to
-work in a new folder structure.
+work in a new folder structure.\todo{Update to current progress}
 
 % Idris uses a custom build process which was a pain to use with a different
 % folder structure. Since we wanted to pull in both Idris and Agda as `git`
 % submodules in our repo we needed to change the folder structure and the build
 % process. The was maybe not worth the effort.
 
+For programs which only use a subset of the Idris\todo{Specify which subset}
+language it is possible to transpile a program, which then type checks in Agda
+and finally can the compiled Agda output be run. Manual inspection of the type
+signature matches the expected for the programs we have tested. We have
+however, not done any comparison of the run time results. But from the types
+the translation seem correct.\todo{Remove duplication and false statements}
 
-We have not yet done any verification beyond manual inspection.  But transpiled
-programs type-checks in Idris. It is one verification step.  But the goal is
-the have a more thorough verification in the end of the project.
+The transpiler works but does not handle a large enough subset of Idris to be
+able to compile substantial programs. Therefore it is hard to test the
+transpiler thoroughly.\todo{This is not true. It handles large programs just
+not many language features.}
+
+
+% TODO Remove everything which is not true in this paragraph.
+The verification level we have done is manual inspection of the type
+signatures. Further verification is not possible without implementing
+dependency chasing and providing the Idris standard library in Agda. Both tasks
+are large software engineering tasks which take a lot of time and effort. But
+they are not interesting from an academic standpoint.
+
+However it would be intresting to try to transpile the Idris standard library,
+most of it is implemented in Idris itself so it is possible. But it uses many
+language features which we have not implemented yet.
+% Which is expexted since it is developed by the Idris maintainers.
 
 The development process in the beginning the process was to run the transpiler
 , then try to load the program in Agda and see if it compiles.  Then we would
@@ -78,7 +97,8 @@ elaborated in several paragraphs}
 Since the implicit arguments in Idris are elaborated in the Type-checker we can
 not use the parser output to reconstruct them.
 Only after Idris is compiled to a lower level intermediate
-language called \texttt{tt\_elab} the type-checking and elaboration is run.
+language called \texttt{tt\_elab} the type-checking and elaboration is
+run.\todo{Remove this and write what actually works today and what does not.}
 
 \todo{Since this is done now, the language should be changed.}
 \todo{And moved to methods}

@@ -4,6 +4,10 @@
 % You may consider to instead divide this chapter into discussion of the
 % results and a summary.
 
+% TODO START HERE
+% Write something at all here.
+
+
 \section{Results}
 
 \todo{This section is only a placeholder for now.}
@@ -17,7 +21,20 @@ for universe levels so int only works on level 1 which is something else.
 
 
 \section{Discussion}
+The utility of transpiler between Agda and Idris is obvious. It has the
+possibility of removing a lot of duplicated effort for the developers.
+Especially the reuse of libraries and proofs between systems is very valuble.
+This is evident from the vast number of previous works in this area, and the
+whole reason for projects like Dedukti.~\cite{assaf2016dedukti}
 
+The value of a source-to-source transpiler which produces human readable ouput
+is more unclear though. The use case where one wants to continue a started work
+in another language is a narrower.
+
+It is certanly possible to construct the transpiler. It only requiers a big
+effort before it is a useful tool. Most of the problems are software
+engineering problems and not in the logic. But diferences in the foundation
+make certain corner cases untranslatable.
 
 
 \section{Conclusion}
