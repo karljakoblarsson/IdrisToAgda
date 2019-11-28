@@ -31,11 +31,12 @@ Currently it is not possible to run the transpiler on most parts of IdrisLibs.
 This is due to some bugs with relative imports when loading modules. The
 transpiler is not searching for modules in the same places as the main Idris
 compiler.
+\reviewer{I know this isn't done, but for future reference: Start with a high level overview, focusing on what it can do, and then what targets you didn't hit. The exact reasons why can be discussed later.}
 
 We have made some progress, but not as much as planned. It has taken quite some
 time working with and around the existing code.  Real-life implementations make
 a lot of practical considerations which complicates the code a lot, and are not
-relevant for this project.
+relevant for this project.\reviewer{Try to keep it specific, don't be too ``fluffy''.}
 
 % We have developed a tool to translate simple Idris programs into Agda. It works
 % for a subset of Idris, namely:
@@ -45,7 +46,7 @@ dependencies took time. It was a manual process of comparing cabal-files and
 trying to find versions of dependencies which matches both. And in some cases
 change one project to use a more recent version of a dependency with a updated
 interface. Idris also uses a custom build process which need some revision to
-work in a new folder structure.\todo{Update to current progress}
+work in a new folder structure.\todo{Update to current progress}\reviewer{Again, this needs to come late, don't open with what you can't do.}
 
 % Idris uses a custom build process which was a pain to use with a different
 % folder structure. Since we wanted to pull in both Idris and Agda as `git`
@@ -60,8 +61,8 @@ however, not done any comparison of the run time results. But from the types
 the translation seem correct.\todo{Remove duplication and false statements}
 
 The transpiler works but does not handle a large enough subset of Idris to be
-able to compile substantial programs. Therefore it is hard to test the
-transpiler thoroughly.\todo{This is not true. It handles large programs just
+able to compile substantial programs.\reviewer{Vague. Say what programs work, and which don't.} Therefore it is hard to test the
+transpiler thoroughly.\reviewer{What makes it hard? You mean you have to write your own tests, you can't just use a lot of existing code? It would be hard to test regardless, since you need to fill in holes manually, right?}\todo{This is not true. It handles large programs just
 not many language features.}
 
 

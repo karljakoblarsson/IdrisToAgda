@@ -1,17 +1,17 @@
 \chapter{Background}
 
+\reviewer{This chapter should contain a good number of citations.}
 
 \section{Background}
 
 % TODO Find relevant articles
 A source-to-source compiler, often called a transcompiler or transpiler, is
 a compiler which translates source code in one programming language into
-another language, usually of similar level of abstraction. A traditional
-compiler takes a higher level language as input and will output a lower level
-language, often machine code.  Since Agda and Idris are similar languages we will write a transpiler.
+another language, usually of similar level of abstraction.
+Since Agda and Idris are similar languages our tool will be a transpiler.
 
 Source-to-source transpilers exists for many language pairs. Even so, there are
-no published attempts of a transpiler to and from dependently
+no published attempts of a making transpiler to and from dependently
 typed languages.
 
 % DONE Should this be here?
@@ -33,9 +33,7 @@ the vector. This allows the programmer to encode constraints and invariants in
 the type system.
 This mixing of values and types goes both ways, types can appear in expression
 and values can appear in type signatures.
-
-
-For example see the definition of a vector (a list with a specific length) in
+For example, see the definition of a vector (a list with a specific length) in
 listing~\ref{lst:depex}. The datatype contains the length of the vector, we can
 then use the length in the type signatures.
 The functions \texttt{head} and \textit{tail} can only type-check if their
@@ -80,19 +78,20 @@ tail : Vector a (Suc n) -> Vector a n
 One specific difference between Idris and Agda relevant for this project is
 implicit arguments. In dependently typed programming you often want to have
 some type as a parameter to a function, but the compiler can often infer that
-type, so it is very redundant to specify the type in every call to the function
+type, so it is very\reviwer{UA} redundant to specify the type in every call to the function
 if the compiler can infer it itself. Therefore both Agda and Idris allows for
-a type argument to be specified implicit. However the syntax differ, in Agda
-a implicit argument needs to be defined in the function definition. In Idris
+a type argument to be specified implicit. However, the syntaxes differ; in Agda
+an implicit argument needs to be defined in the function definition. In Idris
 every name in a type signature which starts with a lower case letter is assumed
 to be implicit.
+\reviewer{Show with an example}
 
-A feature of both languages is a so called 'hole'. This is not something unique
+A feature of both languages is a so called ``hole''. This is not something unique
 to dependently typed languages, but it is more useful with a more advanced
 compiler. A hole is a part of program which is left unimplemented. This is
 represented syntactically with a question mark in both Agda and Idris. It
 is then possible to ask the compiler what the type of the expression in the
-hole should be, as well as what bindings are in scope and theirs types. This
+hole should be, as well as what bindings are in scope and their types. This
 allows the user to interactively refine the program.
 
 
@@ -100,10 +99,10 @@ allows the user to interactively refine the program.
 
 We need to verify that the transpiler is correct. The transpiler is correct if
 the transpiled program has the same semantics as the source.
-This is simple to define in theory.
+This is simple to define in theory.\reviewer{Well, not trivial.}
 Let $tr$ be the transpiler.
 Given two functions $s_A$ and $s_I$ which maps an Agda or Idris program
-respectively, into some formal definition of semantics.
+respectively, into some formal definition of the semantics.
 The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
 % TODO Patrik:
 % or simply s_I = s_a . tr
@@ -118,18 +117,18 @@ The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
 \end{equation}
 \begin{equation} \label{eq:veri2}
   s_I = s_A\ .\ tr
-\end{equation}
+\end{equation}\reviewer{Use the function composition ring. A $.$ is programmer-speak for composition, not typical mathematical notation}
 
-This is hard to show in practice however. Simply defining $s_A$ or $s_I$ for
-a subset of the language is a big project, and way beyond the scope of this
-thesis.
+This is hard to show in practice however.\reviewer{Well, you don't know that, since that is not what you are investigating.} Simply defining $s_A$ or $s_I$ for
+subsets of the languages is a big project. Verifying the above equation is way\reviewer{UA} beyond the scope of this
+thesis.\reviewer{You should phrase things differently. As you say, a trivial transpiler is ``correct''. You also should mention how you will have any idea at all that your definitions are correct if you don't prove the above correspondence -- just defining $s_A$ and $s_I$ with no regards to correctness is easy.}
 Further, equation~\ref{eq:veri2} needs to hold for every possible program.
 It is of course impossible to enumerate every possible program in a finite
-time, so we either need to construct a formal proof or test a subset of $p$.
-Developing a formal correctness proof is an huge undertaking, there
-exists only a handful of formally verified compilers published. Therefore we
+time, so we either need to construct a formal correctness proof or test a subset of $p$.
+Developing a formal correctness proof is an huge\reviewer{UA} undertaking, there
+exists only a handful of formally verified compilers published.\reviewer{2, as far as I'm aware, CakeML and CompCert (apart from toy compilers). Good place to add citations.} Therefore we
 will focus on partial verification by testing, we explore our options in
-section~\ref{sec:methveri}.
+section~\ref{sec:methveri}.\reviewer{Note that it's a different game to verify a compiler and a transpiler. In theory, the transpiler would have way fewer steps, which could make proving easier. Rather than talking about how very hard things are, just say it's a matter for further research. You sound defensive when you paint your limitations as set by very hard problems. It's okay to just say it is out of scope. Focus on what you are doing, and what you want to include in your thesis. If the scope is sensible, it will seem sensible to the reader (it does, a transpiler for a good subset of Idris and Agda is in itself a very interesting and decently-sized project, no one would expect much formal verification. But I would expect at least some reasoning about correctness, or the software engineering aspects, in lieu of actual verification, not just labeling it ``hard'' and moving it to the side.)}
 
 
 
@@ -137,8 +136,8 @@ section~\ref{sec:methveri}.
 \todo{This is only a first draft}
 
 Source level transpilation of a dependently type programming languages has not
-been done before. However several translations between proofs systems have been
-attempted. The benefit of reusing existing proofs in a new system is obvious.
+been done before.\reviewer{... to the best of our knowledge.} However several translations between proof systems have been
+attempted. The benefit of reusing existing proofs in a new system is obvious\reviewer{Not obvious, but you explained it in the intro.}.
 
 However, in practice there are lots of implementations difficulties.
 
