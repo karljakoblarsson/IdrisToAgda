@@ -1,29 +1,45 @@
 % CREATED BY DAVID FRISK, 2015
 \chapter{Introduction}
 
+\reviewer{You probably want some form of indent in the left margin when you start a new paragraph.
+Hard to read without it.}
+
+\reviewer{You use unsupported adjectives (UA) or adjective-like structures, more than you need to.
+  I find this is bad style in scientific writing, and they need to be used with care. Use as few as possible.
+  ``Delete all the adjectives, and the truth remains.''
+  Example: ``far from'', ``plenty'', ``most used''.
+  Some can be supported with evidence (``most used'' for example), but then should have evidence attached.
+}
+
+\reviewer{Use grammarly (grammarly.com) before handing in. Lot's of small errors can be fixed that way.}
+
 % The paradigm is actually orthogonal to the type system.
 Writing correct software is hard. Over the years several methods and languages
 have been developed to make it easier. Types allow the compiler to check some
-properties about a program before run-time. More advanced type systems allow
+properties about a program before run-time. More advanced \reviewer{In comparison to ...}type systems allow
 more complicated properties be checked.
-One advanced types system is dependent types. It is the subject of plenty
+One advanced types system is dependent types. It is the subject of plenty\reviewer{UA}
 of research.
+\reviewer{A bit short-cropped sentences, stilty feel.}
 
-Dependently typed programming languages, however, are far from mainstream.
-There are many factors which hinders adoption. One is community fragmentation.
-The dependently typed community, is split between several languages.
-Idris, Agda, ATS, F* and Epigram are some of the most used.
+Dependently typed programming languages, however, are far from\reviewer{UA} mainstream.
+There are many\reviewer{UA} factors which hinder adoption. One is community fragmentation.
+The dependently typed community \reviewer{The community is not dependently typed. ``dependent types community''} is split between several languages.
+Idris, Agda, ATS, F* and Epigram are some of the most used\reviewer{UA}.
 
-A common obstacle for adoption of a new programming language is the
+A common\reviewer{UA} obstacle for adoption of a programming language is the
 availability of quality libraries. Productive application development requires
-many different libraries.  For example, network protocols, parser combinators
-and cryptography.  Implementing all common libraries is a huge task.  There is
-a lot of duplicated effort when every language needs to implement similar
-libraries.  If it would be possible to re-use libraries between languages,
+many different libraries, for example, network protocols, parser combinators
+and cryptography.\reviewer{Rephrase. Currently it says these 3 are required}
+Implementing all common libraries is a huge\reviewer{UA} task.  There is
+a lot of\reviewer{UA} duplicated effort when every language needs to implement similar
+libraries.  If it was possible to re-use libraries between languages\reviewer{``re-use between'' sounds wrong},
 language implementers could focus on developing their language.
 % instead of writing the same libraries over and over for every new language.
 
-% Patrik: Good paragraph
+\reviewer{I'll stop pointing out UA, but be mindful of them in your writing.}
+
+% Patrik: Good paragraph % Rikard: Agreed. Much more straight-forward.
 Agda~\cite{agda} and Idris~\cite{idris} are two of the most used dependently
 typed programming languages.
 The Idris website states that Idris is inspired
@@ -36,27 +52,28 @@ systems are similar.
 
 We wish to investigate if it is possible to construct a source-to-source
 compiler from Idris to Agda. The source-to-source compiler, from here on called
-transpiler, should handle a common subset of Idris and Agda.  The transpiler
+transpiler, \reviewer{Weird structure. Maybe just say that a s2s compiler is called a transpiler. Now it sounds like you are making a definition rather than stating some common fact.} should handle a common subset of Idris and Agda.  The transpiler
 would allow Idris libraries to be reused in Agda. This would increase the
 number of available Agda libraries and increase the audience for every new
 Idris library.
+\reviewer{This is very clearly written before work is done. Revise after results, so that you can state what you have done, rather than what you wish to do. If you want it to be phrased as a research question, you can state it as such in a paragraph before.}
 
-Dependent types allow for all propositions in predicate logic to be encoded as
-types. A program which type-checks is a proof of the proposition encoded in
-its type signature. A dependently type programming language is also a theorem
-prover. If the transpiler is correct and verified it can be used to increase
+Dependent types allow for all propositions in \reviewer{first order (?)} predicate logic to be encoded as
+types. A dependently-typed program which type-checks is a proof of the proposition encoded in
+its type signature. Thus, a dependently type programming language compiler is also a theorem
+prover. \reviewer{There is no continuity between these sentences. Not immediately clear that what comes before is a motivation for what comes after.} If the transpiler is correct and verified it can be used to increase
 the confidence of theorems. A proof which is valid in both languages is
-stronger than one which is only valid in one language.
+stronger than one which is only valid in one language. \reviewer{Why? Give at least some small reason (maybe one type-checker is unsound, etc.)}
 
 
 % Gather everything about the goals in this section.
 % \subsection{Goals}
 The goal of this project is to construct a transpiler which can translate
-a subset of Idris into valid Agda. The transpiler is intended as an aid to
-a human programmer which adapts and Idris library for use in Agda.  It is not
+a subset of Idris into valid\reviewer{Unnecessary? Valid Idris to valid Agda, or just Idris to Agda} Agda. The transpiler is intended as an aid for
+a human programmer who adapts and Idris library for use in Agda.  It is not
 intended as a automatic compiler which runs Idris programs using the Agda
-runtime. Therefore we will leave untranslatable parts as holes for the user to
-manually specify. This also means we aim to produce output which is easy for
+runtime. Therefore we will leave untranslatable\reviewer{Strong. ``Parts it cannot translate''?} parts as holes for the user to
+manually specify\reviewer{You don't specify a hole, you fill it in}. This also means\reviewer{Sounds like a natural consequence. Maybe ``Therefore'' or something else?} we aim to produce output which is easy for
 the human user to understand.
 
 % Expand
@@ -72,6 +89,7 @@ Otherwise it would not be a useful tool.  We will verify that the transpiler
 preserves the program semantics.  However, this is hard to do formally,
 especially with an incomplete transpiler.  The verification will be done as far
 as possible.
+\reviewer{This is strange. Many tools which do not preserve semantics are useful (say, gcc, which has small bugs). Maybe be more exact here. Also, it is strange that you say you *will* verify, but that it is hard to do and you will only do a best-effort approach. It makes sense: verifying a transpiler would be A LOT of work. Do you even have the Agda and Idris semantics in one or the other of the tools, or some other prover? Maybe state how you will do it, if not formally.}
 
 % SOMEWHAT DONE Patrik:
 % Could mention [here or later] the relation to refactoring: the translation
@@ -85,24 +103,27 @@ The transpiler could be seen as divided into two passes. First, a Idris to
 Idris refactoring to resolve syntactic sugar and gather information from the
 type-checker into the AST. The second pass is the Idris to Agda translation.
 The first pass should be possible to verify within Idris. The second pass is
-harder to verify.
+harder to verify.\reviewer{Why? How is the Idris 2 Idris tool verified? Preserving types =/= preserving semantics.}
 
 
 
 \subsection{Scope}
 
 It is not feasible to correctly translate between 100\% of the
-languages in the scope of a master's thesis.  The languages are not the same,
-so we will not work on features only present in Idris or Agda.  Only
+languages\reviewer{Sounds like it would between all in a set of languages, rather than 100\% of each language.} in the scope of a Master's thesis. \reviewer{Prefer to say that it is out of scope for for this thesis, don't make a general claim over all theses. You are surely correct, but better stick to facts, as always.} The languages are not the same\reviewer{Sounds strange -- of course they are not the same. Be more exact: I supports features not present in A, and vice versa.},
+so we will not support features only present in Idris or Agda.  Only
 transpiling from Idris to Agda will be considered. Bidirectional transpiling is
 a interesting goal for further projects.
+\reviewer{This is very stilty. Better make it a list.}
 
 \todo{ TODO Skriv vad jag faktiskt hanterar och vad som inte ar gjort och vad
 som ar halvags}
 
-There will not be any consideration for run-time characteristics of the
-translated program.
-Thus an efficient Idris program may well be translated into a slow Agda program.
+There will not be any consideration of runtime characteristics of the
+translated program.\reviewer{Characteristics? Do you mean performance?}
+Thus an efficient Idris program may well be translated into an inefficient Agda program.
 
 We will target Idris 1.3.1 and Agda 2.6.0.
 
+
+\reveiwer{In general, very good intro, carves out a research niche and makes it clear that it is doable and useful.}
