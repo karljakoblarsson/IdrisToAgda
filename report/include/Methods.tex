@@ -287,3 +287,22 @@ compromised of many smaller step. On a high-level the compilator goes through
 the following stages: Parsing to PDecl-lang. Elaboration and translation to
 \textit{TT}. Type checking. Further compilation to smaller languages. Then
 lastly translation to the target, i.e. C or JS usually.
+
+\subsection{Implicit arguments and back-elaboration}
+\todo{language}
+The implicit arguments in Idris are elaborated in the Type-checker. Therefore
+we can not use the parser output to reconstruct them.  Only after Idris is
+compiled to a lower level intermediate language called \texttt{tt\_elab} the
+type-checking and elaboration is run. Therfore the information needed to
+reconstruct the arguments need to be lifted from the \texttt{tt}-language.
+
+This is done by running the elaboration to \tt and then extracting the
+elaborated definitions. In the concrete AST each pattern clause is its own
+statements, so the concrete AST is converted to a dictonary index by the
+definition name and contains every statement which is part of that definition.
+Then the concrete definiton and \tt definiton are paired up. If the
+typesignature contains implicit arguments the program takes the type signature
+from the \tt-level and does the elaboration backwards into concrete syntax
+again. The original type signature is then replaced with the backported one.
+
+
