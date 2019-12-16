@@ -7,7 +7,6 @@
 % TODO START HERE
 % Write something at all here.
 
-% TODO Write about further research.
 
 % TODO write something about soruce-level transpilation vs. logic level. When
 % translating a proof from one system to another it is possible to model features
@@ -44,5 +43,27 @@ effort before it is a useful tool. Most of the problems are software
 engineering problems and not in the logic. But diferences in the foundation
 make certain corner cases untranslatable.
 
+% TODO Write about further research.
+\subsection{Further research}
+\todod{lang}
+There is still a lot to do. There are many more features of Idris which would
+need to be implemented for the transpiler to handle most real-world programs.
+The next logical step would be to implement bi-directional transpiling. Both
+from Idris to Agda and from Agda to Idris. That however, has its own set of
+challenges, only parts can be reused from this project.
+
+An interesting side project would be to re-use the implicit argument conversion
+as a refactoring tool. Refactoring for dependently typed languages are not very
+well researched. But some ideas are in~\cite{wibergh2019}. There is some
+overlap in the transpiler and refactoring. Both tools work with and rearrange
+the concrete syntax, possibly using information from other compilation steps.
+
 
 \section{Conclusion}
+
+\todo{flesh out}
+This project show that it is possible to construct
+a useful transpiler. To construct a perfect one however is not possible within
+a reasonable amount of work.
+
+

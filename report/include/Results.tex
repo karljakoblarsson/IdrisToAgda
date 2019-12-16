@@ -9,19 +9,35 @@ kraschar pa. Testa alla filer i IdrisLibs/SequentialDesicionProblems/ och se
 vilka som fungerar och inte fungerar.}
 \todo{Hitta en fil med beroenden som fungerar fran idrislibs.}
 
-
 We have constructed a transpiler from a subset of Idris to Agda. It handles the
 expression language, type signatures and data declarations.
 The transpiler re-uses both the Idris parser and the Agda pretty-printer from
 their main implementations.
 
-It fails for implicit arguments, which have to be declared in Agda but not in
-Idris.
+The transpiler is able to translate programs which only use a subset of Idris
+features. In table~\ref{tbl:idrisfeatures} we can see a summary of the parts
+implemented and the parts which are not implemented.
 
-Currently it is not possible to run the transpiler on most parts of IdrisLibs.
-This is due to some bugs with relative imports when loading modules. The
-transpiler is not searching for modules in the same places as the main Idris
-compiler.
+\todo{Write which constructors are actually implemented}
+\todo{table}
+
+We have developed several test programs which the transpiler handles correctly.
+A subset can be seen in appendix~\ref{app:tests}. However there are many
+features which are not implemented. Some of the more important one can be seen
+in table~\ref{tbl:notimplemented}.
+
+As discussed in section~\ref{sec:methveri}, it is unclear how to verify an
+incomplete transpiler. Our plan was to run it on the open source library
+IdrisLibs, and then compare the output with the Idris version.
+
+However, currently it is not possible to run the transpiler on most parts of
+IdrisLibs.  This is due to some bugs with relative imports when loading
+modules. The transpiler is not searching for modules in the same places as the
+main Idris compiler.
+\todo{Below is discussion}
+This is possible to fix but it is a software engineering
+problem and not the subject of this thesis. Therfore we could not spend to much
+time on it. This hindered our initial verification plans.
 
 We have made some progress, but not as much as planned. It has taken quite some
 time working with and around the existing code.  Real-life implementations make
@@ -36,7 +52,8 @@ dependencies took time. It was a manual process of comparing cabal-files and
 trying to find versions of dependencies which matches both. And in some cases
 change one project to use a more recent version of a dependency with a updated
 interface. Idris also uses a custom build process which need some revision to
-work in a new folder structure.\todo{Update to current progress}
+work in a new folder structure.
+\todo{Update to current progress}
 
 % Idris uses a custom build process which was a pain to use with a different
 % folder structure. Since we wanted to pull in both Idris and Agda as `git`
@@ -51,7 +68,7 @@ however, not done any comparison of the run time results. But from the types
 the translation seem correct.\todo{Remove duplication and false statements}
 
 The transpiler works but does not handle a large enough subset of Idris to be
-able to compile substantial programs. Therefore it is hard to test the
+able to compile most programs. Therefore it is hard to test the
 transpiler thoroughly.\todo{This is not true. It handles large programs just
 not many language features.}
 
@@ -79,9 +96,10 @@ transpiler to perform the same change we just did manually.
 % TODO Write this better
 % The transpiler does not handle implicit arguments yet.\todo{This should now be
 % elaborated in several paragraphs}
-
+//
 \todo{Move parts of this to methods and write proper results here.}
-\todo{language} Implicit arguments are handled differently in Idris and Agda as
+\todo{language}
+Implicit arguments are handled differently in Idris and Agda as
 stated in section~\ref{sec:meth:impl}. The transpiler has a command line
 argument if to translate implict implict arguments to explicit implicit
 arguents. There are bugs, thats way it is behind a switch. This
