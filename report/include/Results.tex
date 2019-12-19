@@ -12,7 +12,8 @@ vilka som fungerar och inte fungerar.}
 We have constructed a transpiler from a subset of Idris to Agda. It handles the
 expression language, type signatures and data declarations.
 The transpiler re-uses both the Idris parser and the Agda pretty-printer from
-their main implementations.
+their main implementations. Therefore it will parse any valid Idris code. The
+transpiler will then work as long as only supported language features are used.
 
 The transpiler is able to translate programs which only use a subset of Idris
 features. In table~\ref{tbl:idrisfeatures} we can see a summary of the parts
@@ -29,7 +30,6 @@ in table~\ref{tbl:notimplemented}.
 As discussed in section~\ref{sec:methveri}, it is unclear how to verify an
 incomplete transpiler. Our plan was to run it on the open source library
 IdrisLibs, and then compare the output with the Idris version.
-
 However, currently it is not possible to run the transpiler on most parts of
 IdrisLibs.  This is due to some bugs with relative imports when loading
 modules. The transpiler is not searching for modules in the same places as the

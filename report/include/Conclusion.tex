@@ -43,6 +43,17 @@ effort before it is a useful tool. Most of the problems are software
 engineering problems and not in the logic. But diferences in the foundation
 make certain corner cases untranslatable.
 
+The choice to re-use the main Idris and Agda implementation for the frontend
+and backend of the transpiler respektivly should be evaluated. While it allows
+for feature parity with the main-line implemnetation and other perks, it
+significantly slows development. We have sunk much time into mainly the Idris
+codebase. A real-world compiler does a lot of things and are very
+complex.\todo{no general statements, talk about Idris} It is possible that we
+whould have gotten further if we would have developed the frontend parser from
+scratch. But it is impossible to know. It took a lot of time which is not of
+value for the academic project, but will be useful for eventual real-world use.
+
+
 % TODO Write about further research.
 \subsection{Further research}
 \todod{lang}
