@@ -1,5 +1,8 @@
 % CREATED BY DAVID FRISK, 2015
 \chapter{Introduction}
+\todo{Determine if parskip or intendation}
+\todo{Remove all unsupported adjectives}
+\todo{Check with grammarly}
 
 % The paradigm is actually orthogonal to the type system.
 Writing correct software is hard. Over the years several methods and languages
@@ -7,14 +10,14 @@ have been developed to make it easier. Types allow the compiler to check some
 properties about a program before run-time. More advanced type systems allow
 more complicated properties be checked.
 One advanced types system is dependent types. It is the subject of plenty
-of research.
+of research.\todo{short cropped sentence}
 
 Dependently typed programming languages, however, are far from mainstream.
-There are many factors which hinders adoption. One is community fragmentation.
-The dependently typed community, is split between several languages.
+There are many factors which hinder adoption. One is community fragmentation.
+The dependently typed community\todo{The community is not typed} is split between several languages.
 Idris, Agda, ATS, F* and Epigram are some of the most used.
 
-A common obstacle for adoption of a new programming language is the
+A common obstacle for adoption of a programming language is the
 availability of quality libraries. Productive application development requires
 many different libraries.  For example, network protocols, parser combinators
 and cryptography.  Implementing all common libraries is a huge task.  There is
@@ -37,26 +40,31 @@ systems are similar.
 We wish to investigate if it is possible to construct a source-to-source
 compiler from Idris to Agda. The source-to-source compiler, from here on called
 transpiler, should handle a common subset of Idris and Agda.  The transpiler
+\todo{Weird structure. Maybe just say that s2s compiler is called a transpiler,
+now it sounds like you are makng a definition rather than stating som common
+fact.}
 would allow Idris libraries to be reused in Agda. This would increase the
 number of available Agda libraries and increase the audience for every new
-Idris library.
+Idris library.\todo{Update after work is done now}
 
-Dependent types allow for all propositions in predicate logic to be encoded as
-types. A program which type-checks is a proof of the proposition encoded in
-its type signature. A dependently type programming language is also a theorem
-prover. If the transpiler is correct and verified it can be used to increase
-the confidence of theorems. A proof which is valid in both languages is
-stronger than one which is only valid in one language.
+Dependent types allow for all propositions in first order predicate logic to be
+encoded as types. A dependently typed program which type-checks is a proof of
+the proposition encoded in its type signature. Thus a, dependently type
+programming language compiler is also a theorem prover.\todo{No continuity
+between theese two sentences} If the transpiler is correct and verified it can
+be used to increase the confidence of theorems. A proof which is valid in both
+languages is stronger than one which is only valid in one language.\todo{Why?
+Give context}
 
 
 % Gather everything about the goals in this section.
 % \subsection{Goals}
 The goal of this project is to construct a transpiler which can translate
-a subset of Idris into valid Agda. The transpiler is intended as an aid to
-a human programmer which adapts and Idris library for use in Agda.  It is not
+a subset of Idris into Agda. The transpiler is intended as an aid for
+a human programmer who adapts and Idris library for use in Agda.  It is not
 intended as a automatic compiler which runs Idris programs using the Agda
 runtime. Therefore we will leave untranslatable parts as holes for the user to
-manually specify. This also means we aim to produce output which is easy for
+manually fill in. Therefore we aim to produce output which is easy for
 the human user to understand.
 
 % Expand
