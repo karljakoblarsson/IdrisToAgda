@@ -19,6 +19,7 @@ The transpiler is able to translate programs which only use a subset of Idris
 features. In table~\ref{tbl:idrisfeatures} we can see a summary of the parts
 implemented and the parts which are not implemented.
 
+\reviewer{I know this isn't done, but for future reference: Start with a high level overview, focusing on what it can do, and then what targets you didn't hit. The exact reasons why can be discussed later.}
 \todo{Write which constructors are actually implemented}
 \todo{table}
 
@@ -38,6 +39,7 @@ main Idris compiler.
 This is possible to fix but it is a software engineering
 problem and not the subject of this thesis. Therfore we could not spend to much
 time on it. This hindered our initial verification plans.
+\reviewer{Try to keep it specific, don't be too ``fluffy''.}
 
 
 % We have developed a tool to translate simple Idris programs into Agda. It works
@@ -50,6 +52,7 @@ change one project to use a more recent version of a dependency with a updated
 interface. Idris also uses a custom build process which need some revision to
 work in a new folder structure.
 \todo{Update to current progress}
+\reviewer{Again, this needs to come late, don't open with what you can't do.}
 
 % Idris uses a custom build process which was a pain to use with a different
 % folder structure. Since we wanted to pull in both Idris and Agda as `git`
@@ -64,8 +67,8 @@ however, not done any comparison of the run time results. But from the types
 the translation seem correct.\todo{Remove duplication and false statements}
 
 The transpiler works but does not handle a large enough subset of Idris to be
-able to compile most programs. Therefore it is hard to test the
-transpiler thoroughly.\todo{This is not true. It handles large programs just
+able to compile most programs.\reviewer{Vague. Say what programs work, and which don't.} Therefore it is hard to test the
+transpiler thoroughly.\reviewer{What makes it hard? You mean you have to write your own tests, you can't just use a lot of existing code? It would be hard to test regardless, since you need to fill in holes manually, right?}\todo{This is not true. It handles large programs just
 not many language features.}
 
 

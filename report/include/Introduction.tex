@@ -1,7 +1,15 @@
 % CREATED BY DAVID FRISK, 2015
 \chapter{Introduction}
 \todo{Determine if parskip or intendation}
+\reviewer{You probably want some form of indent in the left margin when you start a new paragraph.
+Hard to read without it.}
 \todo{Remove all unsupported adjectives}
+\reviewer{You use unsupported adjectives (UA) or adjective-like structures, more than you need to.
+  I find this is bad style in scientific writing, and they need to be used with care. Use as few as possible.
+  ``Delete all the adjectives, and the truth remains.''
+  Example: ``far from'', ``plenty'', ``most used''.
+  Some can be supported with evidence (``most used'' for example), but then should have evidence attached.
+}
 \todo{Check with grammarly}
 
 % The paradigm is actually orthogonal to the type system.
@@ -54,7 +62,7 @@ programming language compiler is also a theorem prover.\todo{No continuity
 between theese two sentences} If the transpiler is correct and verified it can
 be used to increase the confidence of theorems. A proof which is valid in both
 languages is stronger than one which is only valid in one language.\todo{Why?
-Give context}
+Give some context}
 
 
 % Gather everything about the goals in this section.
@@ -80,6 +88,7 @@ Otherwise it would not be a useful tool.  We will verify that the transpiler
 preserves the program semantics.  However, this is hard to do formally,
 especially with an incomplete transpiler.  The verification will be done as far
 as possible.
+\reviewer{This is strange. Many tools which do not preserve semantics are useful (say, gcc, which has small bugs). Maybe be more exact here. Also, it is strange that you say you *will* verify, but that it is hard to do and you will only do a best-effort approach. It makes sense: verifying a transpiler would be A LOT of work. Do you even have the Agda and Idris semantics in one or the other of the tools, or some other prover? Maybe state how you will do it, if not formally.}
 
 % SOMEWHAT DONE Patrik:
 % Could mention [here or later] the relation to refactoring: the translation
@@ -93,24 +102,25 @@ The transpiler could be seen as divided into two passes. First, a Idris to
 Idris refactoring to resolve syntactic sugar and gather information from the
 type-checker into the AST. The second pass is the Idris to Agda translation.
 The first pass should be possible to verify within Idris. The second pass is
-harder to verify.
+harder to verify.\reviewer{Why? How is the Idris 2 Idris tool verified? Preserving types =/= preserving semantics.}
 
 
 
 \subsection{Scope}
 
 It is not feasible to correctly translate between 100\% of the
-languages in the scope of a master's thesis.  The languages are not the same,
-so we will not work on features only present in Idris or Agda.  Only
+languages\reviewer{Sounds like it would between all in a set of languages, rather than 100\% of each language.} in the scope of a Master's thesis. \reviewer{Prefer to say that it is out of scope for for this thesis, don't make a general claim over all theses. You are surely correct, but better stick to facts, as always.} The languages are not the same\reviewer{Sounds strange -- of course they are not the same. Be more exact: I supports features not present in A, and vice versa.},
+so we will not support features only present in Idris or Agda.  Only
 transpiling from Idris to Agda will be considered. Bidirectional transpiling is
 a interesting goal for further projects.
+\reviewer{This is very stilty. Better make it a list.}
 
 \todo{ TODO Skriv vad jag faktiskt hanterar och vad som inte ar gjort och vad
 som ar halvags}
 
-There will not be any consideration for run-time characteristics of the
-translated program.
-Thus an efficient Idris program may well be translated into a slow Agda program.
+There will not be any consideration of runtime characteristics of the
+translated program.\reviewer{Characteristics? Do you mean performance?}
+Thus an efficient Idris program may well be translated into an inefficient Agda program.
 
 We will target Idris 1.3.1 and Agda 2.6.0.
 

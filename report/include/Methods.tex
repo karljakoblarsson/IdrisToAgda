@@ -1,30 +1,30 @@
 \chapter{Methods}
 
-Idris is a large language. We need to build the transpiler in small steps. To
-maximise utility of the transpiler we should prioritize the most used features,
+Idris is a large\reviewer{UA} language. We need\reviewer{Maybe ``we mitigate X by doing Y''} to build the transpiler in small steps. To
+maximize utility of the transpiler we prioritize the most used features,
 and leave more obscure features for later.
+\reviewer{You write ``prioritize'', so you should write ``maximize''}
 
 Therefore we wrote a tool to capture usage statistics of the top level abstract
-syntax tree (AST). The tool show which syntactic constructs are most often
-used, and therefore should be prioritized. It also gives the user the
-incentive to refactor Idris code which uses less-used language features,
-which may result in cleaner and more easily understood code.
+syntax tree (AST)\reviewer{Damn that's cool!}. The tool shows which syntactic constructs are most often
+used\reviewer{What do you mean ``use''? Can you be more precise? It's not like anyone ``uses'' the AST, it's an internal representation. ``use'' sounds like a human act}, and therefore should be prioritized. It also incentivizes the user to refactor Idris code which uses less-used language features,
+which may result in cleaner and more easily understood code.\reviewer{I don't understand this last part. Why would more common language features give cleaner and easier-to-read code? Couldn't it have the opposite effect?}
 
 Usability oriented features are often are implemented as syntactic sugar and
 not part of the core language. They are not necessary to implement in a working
-transpiler, but are important for it to be a useful tool. There is a trade-off
-there we need to make. If the transpiler would output code on the level of
-assembly, just encoded in Agda syntax, even if correct, it would not be a useful
+transpiler, but are important for it to be a useful tool\reviewer{Why? Elaborate.}. This forces us to make a trade-off.
+If the transpiler would output code on the level of
+assembly language, just encoded in Agda syntax, even if correct, it would not be a useful
 tool. Since we specifically aim to develop a tool whose output is easy to
 understand for a human programmer, it is good to transpile some syntactic sugar.
 
 
 % \subsection{Holes}
 
-There may be valid Idris code which is not yet implemented by our transpiler.
-Instead of failing, those parts will be left as holes for the user to fill in
-a reasonable translation.
-The holes must be constructed so that this is possible.
+There will be valid Idris code which is not implemented by our transpiler.
+Instead of failing, those parts will be left as ``holes'' for the user to fill in
+with a reasonable translation.
+The holes must be constructed so that this is possible.\reviewer{Possible? You mean easy?}
 Consider example below, a implementation of vector concatenation, written in
 Idris.
 %in listing~\ref{lst:hole1}.
@@ -37,8 +37,8 @@ concat (Cons x rest) y = concat rest (Cons x y)
 
 % TODO Patrik: be more positive here maybe.
 % Somewhat done.
-The first prototype of the transpiler may look like the listing below.
-Simply replacing the whole program with a hole is not incorrect, but not very
+The first prototype of the transpiler may\reviewer{Again, this language needs to be revised after you have your results.} look like the listing below.
+Simply replacing the whole program with a hole is correct, but not very
 useful.
 % A terribly unhelpful translation is the one below. %in listing~\ref{lst:hole2}.
 
@@ -277,7 +277,7 @@ the main data type of the \tti language. \tti has fully explicit types. It
 contains all the information which is necessary for type-checking. A lot of
 useful information is generated in the elaboration.
 
-\textit{TT} is dependtly typed lambda-calculus augmented with algebraic data
+\textit{TT} is dependently typed lambda-calculus augmented with algebraic data
 types and pattern matching. \textit{TT} is full explicitly typed.~\cite{idris}
 \textit{TT} is delibratly kept small to be sure it is correct. It is consisted
 of well known parts.
