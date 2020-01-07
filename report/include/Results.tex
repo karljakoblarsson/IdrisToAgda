@@ -19,7 +19,9 @@ The transpiler is able to translate programs which only use a subset of Idris
 features. In table~\ref{tbl:idrisfeatures} we can see a summary of the parts
 implemented and the parts which are not implemented.
 
-\reviewer{I know this isn't done, but for future reference: Start with a high level overview, focusing on what it can do, and then what targets you didn't hit. The exact reasons why can be discussed later.}
+\reviewer{I know this isn't done, but for future reference: Start with a high
+level overview, focusing on what it can do, and then what targets you didn't
+hit. The exact reasons why can be discussed later.}
 \todo{Write which constructors are actually implemented}
 \todo{table}
 
@@ -42,8 +44,8 @@ time on it. This hindered our initial verification plans.
 \reviewer{Try to keep it specific, don't be too ``fluffy''.}
 
 
-% We have developed a tool to translate simple Idris programs into Agda. It works
-% for a subset of Idris, namely:
+% We have developed a tool to translate simple Idris programs into Agda. It
+% works for a subset of Idris, namely:
 
 The problem of building both project with the same version of GHC and
 dependencies took time. It was a manual process of comparing cabal-files and
@@ -67,9 +69,12 @@ however, not done any comparison of the run time results. But from the types
 the translation seem correct.\todo{Remove duplication and false statements}
 
 The transpiler works but does not handle a large enough subset of Idris to be
-able to compile most programs.\reviewer{Vague. Say what programs work, and which don't.} Therefore it is hard to test the
-transpiler thoroughly.\reviewer{What makes it hard? You mean you have to write your own tests, you can't just use a lot of existing code? It would be hard to test regardless, since you need to fill in holes manually, right?}\todo{This is not true. It handles large programs just
-not many language features.}
+able to compile most programs.\reviewer{Vague. Say what programs work, and
+which don't.} Therefore it is hard to test the transpiler
+thoroughly.\reviewer{What makes it hard? You mean you have to write your own
+tests, you can't just use a lot of existing code? It would be hard to test
+regardless, since you need to fill in holes manually, right?}\todo{This is not
+true. It handles large programs just not many language features.}
 
 
 % TODO Remove everything which is not true in this paragraph.
@@ -98,6 +103,7 @@ transpiler to perform the same change we just did manually.
 
 \todo{Move parts of this to methods and write proper results here.}
 \todo{language}
+\subsection{Implicit Arguments}
 Implicit arguments are handled differently in Idris and Agda as
 stated in section~\ref{sec:meth:impl}. The transpiler has a command line
 argument if to translate implict implict arguments to explicit implicit
@@ -107,6 +113,7 @@ reuse the code for an automatic Idris refactoring.  It can be useful to change
 between implicit and explicit arguments when developing a dependently typed
 program.
 
+\todo{Talk about how the translation works. And where it fails}
 
 % This was used to guide and prioritize the implementation of the main tool. For
 % the most part it matches our intuitive guess. But it gives us a better argument
@@ -126,3 +133,7 @@ program.
 
 % Just trying to find the internal interface of the Idris parser took a long
 % time.
+
+\subsection{Universe Levels}
+Here the transpiler fails. But we know why, and it would be possible to
+counteract.

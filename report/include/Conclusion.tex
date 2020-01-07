@@ -22,11 +22,6 @@ We have created a tool which translates Idris source code into Agda. The
 resulting Agda code can compile and work probably if the Idris source don't use
 most language feature.
 
-However Agda and Idris handles universe levels differently so code which relies
-on universe cumulativley won't work in Agda. The transpiler doesen't account
-for universe levels so int only works on level 1 which is something else.
-
-
 \section{Discussion}
 The utility of transpiler between Agda and Idris is obvious. It has the
 possibility of removing a lot of duplicated effort for the developers.
@@ -59,6 +54,9 @@ value for the academic project, but will be useful for eventual real-world use.
 \todod{lang}
 There is still a lot to do. There are many more features of Idris which would
 need to be implemented for the transpiler to handle most real-world programs.
+
+\todo{Talk more about Bi-directional translation and how this project aids that
+endeavor.}
 The next logical step would be to implement bi-directional transpiling. Both
 from Idris to Agda and from Agda to Idris. That however, has its own set of
 challenges, only parts can be reused from this project.
@@ -83,9 +81,12 @@ usable.
 This project also show where Idris and Agda differ, this is useful for
 comparing the lanugagres and programmers switching from one to the other.
 
+We can also compare the languages in their AST form which hides the effects of
+syntacitc sugar. We can more easily reason about which type system we prefer.
+\todo{This is not obvious.}
+
 As part of the transpiler we have written source code transformation which
-could be useful for automatic refactoring tools. That is one of the main take
-away from this.
+could be useful for automatic refactoring tools.
 
 
 

@@ -1,22 +1,25 @@
 \chapter{Methods}
 
-Idris is a large\reviewer{UA} language. We need\reviewer{Maybe ``we mitigate X by doing Y''} to build the transpiler in small steps. To
-maximize utility of the transpiler we prioritize the most used features,
-and leave more obscure features for later.
-\reviewer{You write ``prioritize'', so you should write ``maximize''}
+Idris is a general purpose language with many features.  To mitigate this we
+build the transpiler in small steps.  To maximize utility of the transpiler we
+prioritize the most used features, and leave more obscure features for later.
 
+\todo{Several short paragraphs}
 Therefore we wrote a tool to capture usage statistics of the top level abstract
-syntax tree (AST)\reviewer{Damn that's cool!}. The tool shows which syntactic constructs are most often
-used\reviewer{What do you mean ``use''? Can you be more precise? It's not like anyone ``uses'' the AST, it's an internal representation. ``use'' sounds like a human act}, and therefore should be prioritized. It also incentivizes the user to refactor Idris code which uses less-used language features,
-which may result in cleaner and more easily understood code.\reviewer{I don't understand this last part. Why would more common language features give cleaner and easier-to-read code? Couldn't it have the opposite effect?}
+syntax tree (AST). The tool shows which syntactic constructs are most
+frequently occuring in the AST, and therefore should be prioritized. This tool
+is described in subsection~\ref{sec:meth-stats}.
 
 Usability oriented features are often are implemented as syntactic sugar and
 not part of the core language. They are not necessary to implement in a working
-transpiler, but are important for it to be a useful tool\reviewer{Why? Elaborate.}. This forces us to make a trade-off.
-If the transpiler would output code on the level of
-assembly language, just encoded in Agda syntax, even if correct, it would not be a useful
-tool. Since we specifically aim to develop a tool whose output is easy to
-understand for a human programmer, it is good to transpile some syntactic sugar.
+transpiler, but are important for it to be a useful tool. It takes effort for
+the user to refactor their code before using the transpiler. This creates
+a barrier for use, ideally the transpiler should handle any source code without
+modification, which is a lot of work.  This forces us to make a trade-off.  If
+the transpiler would output code on the level of assembly language, just
+encoded in Agda syntax, even if correct, it would not be a useful tool. Since
+we specifically aim to develop a tool whose output is easy to understand for
+a human programmer, it is good to transpile some syntactic sugar.
 
 
 % \subsection{Holes}
@@ -24,7 +27,7 @@ understand for a human programmer, it is good to transpile some syntactic sugar.
 There will be valid Idris code which is not implemented by our transpiler.
 Instead of failing, those parts will be left as ``holes'' for the user to fill in
 with a reasonable translation.
-The holes must be constructed so that this is possible.\reviewer{Possible? You mean easy?}
+The holes must be constructed so that this is reasonably easy.
 Consider example below, a implementation of vector concatenation, written in
 Idris.
 %in listing~\ref{lst:hole1}.
@@ -35,12 +38,9 @@ concat Nil rest = rest
 concat (Cons x rest) y = concat rest (Cons x y)
 \end{lstlisting}
 
-% TODO Patrik: be more positive here maybe.
-% Somewhat done.
-The first prototype of the transpiler may\reviewer{Again, this language needs to be revised after you have your results.} look like the listing below.
-Simply replacing the whole program with a hole is correct, but not very
-useful.
-% A terribly unhelpful translation is the one below. %in listing~\ref{lst:hole2}.
+The first prototyp of the transpiler looked like the listing below.  Simply
+replacing the whole program with a hole is correct, but not very useful.
+\todo{Again, this language needs to be revised after you have your results.}
 
 \begin{lstlisting}[language=Idris,label={lst:hole2},caption={}]
 concat : ?
@@ -83,7 +83,7 @@ to write a parser. It is however a lot of extra work to reuse real-world code.
 Similarly, we reuse the AST and pretty-printer from Agda. This means that most
 of the code we need to write is handling the actual translation.
 
-% TODO Patrik:
+% Patrik:
 % [if true]
 % On the Agda side this means we will be able to print syntactically correct
 % code and we could even use Agda-internal type checking functions to make sure
@@ -120,6 +120,7 @@ interfaces, it will still be hard to keep up with new versions.
 % be less useful.
 
 
+\todo{Is this relevant at all?}
 Further work on a more robust implementation could define a new intermediate
 language which covers the union of Agda and Idris features.
 This will make clear in the intermediate AST what features we support and which
@@ -129,7 +130,7 @@ We could also use QuickCheck to generate programs in this intermediate language
 to test the code generation.
 
 
-\subsection{Statistics tool}
+\subsection{Statistics tool}\label{sec:meth-stats}
 Ideally we want the transpiler to handle as much real-world code as possible.
 To guide our implementation we wrote a tool which parses Idris into its AST and
 then records which data constructors are most often used. Then we ran this tool
@@ -176,10 +177,6 @@ See the results in table~\ref{tbl:stats}.
 \end{table}
 
 
-% We aim to have implemented ?? of the most widely used constructors when this
-% project is done.
-
-
 \subsection{Verification} \label{sec:methveri}
 
 % Ideally the transpiled programs both type-check and runs, then we can compare its output to that of the source program.
@@ -213,7 +210,7 @@ enumerated below:
   semantics.
 \end{enumerate}
 
-\todo{ TODO Beskriv att den har listan ar lite naiv. Att det finns m[nga stege
+\todo{ Beskriv att den har listan ar lite naiv. Att det finns manga stege
 mellan varje steg. }
 
 % \item The transpiler passes generated tests.
@@ -256,14 +253,29 @@ information is up to date.
 \newcommand{\term}{\textit{Term}}
 \newcommand{\tti}{\textit{TT}}
 
+\todo{Better caption}
+\begin{figure}\ref{fig:fulltypegraph}
+  \centering
+  \includegraphics{../types.svg}
+  \caption{The full type graph.}
+\end{figure}
+
+\todo{Better caption 2}
+\begin{figure}\ref{fig:fulltypegraph}
+\begin{figure}\ref{fig:croppedtypegraph}
+  \centering
+  \includegraphics{../types_crop.svg}
+  \caption{A interesting corp of the types graph}
+\end{figure}
+
 % TODO which
-\todo{Insert the graph}
-\todo{This is only a stream-of-conciousness draft.}
+\todo{Revise the language}
 This graph of type dependencies can be found in appendix X. By looking at the
 graph it is easy to see which types are central in the implementation and which
 are only used peripherally. In figure~\ref{fig:types-crop} we see part of the
 graph centered on \textit{Term}.
 
+\todo{Revise the language}
 In the graph we cna clearly see that two of the most central data types are
 \textit{PTerm} and \textit{Term}. \textit{PTerm} is the main data type of the
 conrete syntax, i.e. what the parser produces. A program is a collection of
@@ -271,7 +283,8 @@ declarations \textit{PDecl} which are constructed out of \pterm. \pterm
 contains everything which is known at parse-time. This is not enough for the
 purpose of our transpiler.
 
-% Idris internals again
+\todo{Revise the language}
+\todo{This is about Idris internals, does it belong here?}
 The next step of compilation is elaboration and translation to \tti. \term is
 the main data type of the \tti language. \tti has fully explicit types. It
 contains all the information which is necessary for type-checking. A lot of
@@ -289,7 +302,7 @@ the following stages: Parsing to PDecl-lang. Elaboration and translation to
 lastly translation to the target, i.e. C or JS usually.
 
 \subsection{Implicit arguments and back-elaboration}
-\todo{language}
+\todo{Revise the language}
 The implicit arguments in Idris are elaborated in the Type-checker. Therefore
 we can not use the parser output to reconstruct them.  Only after Idris is
 compiled to a lower level intermediate language called \texttt{tt\_elab} the
