@@ -1,14 +1,9 @@
 \chapter{Background}
-% TODO START HERE
-% Go through the todos and fix some of them.
 
-
-\section{Background}
-
-% TODO Find relevant articles
+% DONE Find relevant articles about transpilers
 A source-to-source compiler, often called a transcompiler or transpiler, is
 a compiler which translates source code in one programming language into
-another language, usually of similar level of abstraction.
+another language, usually of similar level of abstraction.~\cite{transpiler2015}
 Since Agda and Idris are similar languages our tool will be a transpiler.
 
 Source-to-source transpilers exists for many language pairs. Even so, there are
@@ -23,7 +18,7 @@ typed languages.
 
 
 
-% TODO is this a useful heading? I already talk about this two paragraphs up.
+% DONE Yes this is ok. is this a useful heading? I already talk about this two paragraphs up.
 \subsection{Dependently Typed Programming}
 
 Dependent types are types which depend on values.
@@ -121,16 +116,27 @@ The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
 \reviewer{Use the function composition ring. A $.$ is programmer-speak for composition, not typical mathematical notation}
 \todo{I'm not sure if that is a good idea.}
 
-This is hard to show in practice however.\reviewer{Well, you don't know that, since that is not what you are investigating.} Simply defining $s_A$ or $s_I$ for
-subsets of the languages is a big project. Verifying the above equation is way\reviewer{UA} beyond the scope of this
-thesis.\reviewer{You should phrase things differently. As you say, a trivial transpiler is ``correct''. You also should mention how you will have any idea at all that your definitions are correct if you don't prove the above correspondence -- just defining $s_A$ and $s_I$ with no regards to correctness is easy.}
-Further, equation~\ref{eq:veri2} needs to hold for every possible program.
-It is of course impossible to enumerate every possible program in a finite
-time, so we either need to construct a formal correctness proof or test a subset of $p$.
-Developing a formal correctness proof is an huge\reviewer{UA} undertaking, there
-exists only a handful of formally verified compilers published.\reviewer{2, as far as I'm aware, CakeML and CompCert (apart from toy compilers). Good place to add citations.} Therefore we
-will focus on partial verification by testing, we explore our options in
-section~\ref{sec:methveri}.
+This is hard to show in practice however.
+\reviewer{Well, you don't know that, since that is not what you are
+investigating.}
+Simply defining $s_A$ or $s_I$ for subsets of the languages is a big project.
+Verifying the above equation is beyond the scope of this thesis.
+\reviewer{You should phrase things differently. As you say, a trivial
+transpiler is ``correct''. You also should mention how you will have any idea
+at all that your definitions are correct if you don't prove the above
+correspondence -- just defining $s_A$ and $s_I$ with no regards to correctness
+is easy.}
+Further, equation~\ref{eq:veri2} needs to hold for every possible program.  It
+is of course impossible to enumerate every possible program in a finite time,
+so we either need to construct a formal correctness proof or test a subset of
+$p$.  Developing a formal correctness proof is an huge\reviewer{UA}
+undertaking, there exists only a handful of formally verified compilers
+published.
+\reviewer{2, as far as I'm aware, CakeML and CompCert (apart from toy
+compilers). Good place to add citations.}
+Therefore we will focus on partial verification by testing, we explore our
+options in section~\ref{sec:methveri}.
+
 \reviewer{Note that it's a different game to verify a compiler and
 a transpiler. In theory, the transpiler would have way fewer steps, which could
 make proving easier. Rather than talking about how very hard things are, just
@@ -151,11 +157,16 @@ labeling it ``hard'' and moving it to the side.)}
 \todo{Revise}
 
 Source level transpilation of a dependently type programming languages has not
-been done before.\reviewer{... to the best of our knowledge.} However several translations between proof systems have been
-attempted. The benefit of reusing existing proofs in a new system is obvious\reviewer{Not obvious, but you explained it in the intro.}.
+been done before to the best of our knowledge.
+However several translations between proof systems have been attempted. As
+stated in the introduction, there is much overlap between a dependently type
+programming language and a proof system.\todo{Describe what is a proof system.}
+The benefit of reusing existing proofs in a new system is also described in
+the introduction, section~\ref{sec:intro}.
 
-However, in practice there are lots of implementations difficulties.
+However, there are many implementations details in practice.
 
+\todo{Same as stated abouw}
 A dependently typed programming language can also be used for computer-checked
 proofs thanks to the Curry-Howard correspondence. A type signature represents
 a proposition and any implementation which type checks is a proof of that
@@ -166,7 +177,11 @@ general purpose programming. Some examples are: Coq, HOL and NuPRL.
 
 There is not much work on transpiling between dependently type programming
 languages, but there are a lot of work done on translating between different
-proof assistants.
+proof assistants. As we have seen thoose can be the same thing. But the focus
+is different. The focus of this project is between two practial programming
+languages, where syntactic sugar and so on is important, just a logical
+correspondence would not be helpful. This area has not been explored before as
+far as we know.
 
 One interesting project is Dedukti~\cite{assaf2016dedukti}. The authors sees
 the possibility to use Dedukti as a unifing framework for large parts of logic

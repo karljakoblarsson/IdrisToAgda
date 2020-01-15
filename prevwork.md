@@ -12,7 +12,7 @@ They represent proofs in a backwards style.
 
 Their translation is done in four passes. First a pass in HOL, translation of
 interference steps in HOL, most information is discarded. Secondly, The list of
-HOL interference steps is converted to a DAG. Thridly, START HERE TODO. Last,
+HOL interference steps is converted to a DAG. Thridly, TODO. Last,
 conversion from bytecode to Coq
 
 Section 2 is maybe interesting in how to write a language comparison.
