@@ -23,7 +23,8 @@ Agda}
 
 \usepackage[style=ieee]{biblatex}
 
-\usepackage{todonotes}
+\usepackage[]{todonotes}
+
 \usepackage{tikz}
 \usetikzlibrary{arrows, decorations.markings}
 \usepackage{chngcntr}
@@ -31,6 +32,7 @@ Agda}
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{idrislang}
+\usepackage{svg}
 
 \definecolor{mypink}{RGB}{228,77,77}
 \lstset{language=Haskell,keywordstyle={\bfseries \color{mypink}}}
@@ -67,8 +69,14 @@ Agda}
     \todo[color=blue!50!white]
     {{\bfseries#1}}}
 
-\newcommand\tt[0]{\texttt{tt}}
-\newcommand\code[1]{\texttt{#1}}
+% \renewcommand\todo[1]{}
+
+\newcommand\codei[1]{\texttt{#1}}
+
+\newcommand{\pterm}{\textit{PTerm}}
+\newcommand{\pdecel}{\textit{PDecl}}
+\newcommand{\term}{\textit{Term}}
+\newcommand{\tti}{\textit{TT}}
 %%%%%%%% --- -------- -------- %%%%%%%%
 
 \begin{document}
@@ -105,7 +113,7 @@ Agda}
 \cleardoublepage
 \setcounter{page}{1}
 \pagenumbering{arabic}      % Arabic numbering starting from 1 (one)
-\setlength{\parskip}{0pt plus 1pt}
+\setlength{\parskip}{5pt plus 1pt}
 
 % INTRODUCTION
 \input{include/Introduction}

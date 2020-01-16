@@ -248,25 +248,23 @@ that the types, their dependencies tells us a lot about the code and how it
 works. And compared to write documentation, the compiler guarantees that this
 information is up to date.
 
-\newcommand{\pterm}{\textit{PTerm}}
-\newcommand{\pdecel}{\textit{PDecl}}
-\newcommand{\term}{\textit{Term}}
-\newcommand{\tti}{\textit{TT}}
 
 \todo{Better caption}
 \begin{figure}\ref{fig:fulltypegraph}
   \centering
-  \includegraphics{../types.svg}
+  \includesvg[width=\textwidth]{../types}
   \caption{The full type graph.}
 \end{figure}
 
+\clearpage
+
 \todo{Better caption 2}
-\begin{figure}\ref{fig:fulltypegraph}
-\begin{figure}\ref{fig:croppedtypegraph}
-  \centering
-  \includegraphics{../types_crop.svg}
-  \caption{A interesting corp of the types graph}
-\end{figure}
+% \begin{figure}\ref{fig:fulltypegraph}
+% \begin{figure}\ref{fig:croppedtypegraph}
+%   \centering
+%   % \includegraphics{../types_crop.svg}
+%   \caption{A interesting corp of the types graph}
+% \end{figure}
 
 % TODO which
 \todo{Revise the language}
@@ -290,6 +288,7 @@ the main data type of the \tti language. \tti has fully explicit types. It
 contains all the information which is necessary for type-checking. A lot of
 useful information is generated in the elaboration.
 
+  \todo{Use defined TT macro}
 \textit{TT} is dependently typed lambda-calculus augmented with algebraic data
 types and pattern matching. \textit{TT} is full explicitly typed.~\cite{idris}
 \textit{TT} is delibratly kept small to be sure it is correct. It is consisted
@@ -307,15 +306,15 @@ The implicit arguments in Idris are elaborated in the Type-checker. Therefore
 we can not use the parser output to reconstruct them.  Only after Idris is
 compiled to a lower level intermediate language called \texttt{tt\_elab} the
 type-checking and elaboration is run. Therfore the information needed to
-reconstruct the arguments need to be lifted from the \texttt{tt}-language.
+reconstruct the arguments need to be lifted from the \tti-language.
 
-This is done by running the elaboration to \tt and then extracting the
+This is done by running the elaboration to \tti and then extracting the
 elaborated definitions. In the concrete AST each pattern clause is its own
 statements, so the concrete AST is converted to a dictonary index by the
 definition name and contains every statement which is part of that definition.
-Then the concrete definiton and \tt definiton are paired up. If the
+Then the concrete definiton and \tti definiton are paired up. If the
 typesignature contains implicit arguments the program takes the type signature
-from the \tt-level and does the elaboration backwards into concrete syntax
+from the \tti-level and does the elaboration backwards into concrete syntax
 again. The original type signature is then replaced with the backported one.
 
 \subsection{Universe level qualifiers}
@@ -330,7 +329,7 @@ $Set_0$. For all types it holds that $Set_n \in Set_{n+1}$ but not $Set_n \in
 Set_m$ in general.
 
 Idris on the other hand uses universe cumulativity, which is $Set_n \in Set_m
-\froall n <= m$. Universe levels in Idris are always infered by the compiler,
+\forall n <= m$. Universe levels in Idris are always infered by the compiler,
 it is not possible for the user to specify them explicitly. Translating between
 these two systems is not yet explored as far as we know. How to do it correctly
 is not part of the scope for this project and left for further research.
@@ -344,7 +343,7 @@ and cumulativity.
 
 In the other direction it is in some sense easier. Since it is not possible to
 specify explicit levels in Idris, every such statment has to be translated into
-\lstinlin{Type}. However, this will not have correct semantics, it is entierly
+\lstinline{Type}. However, this will not have correct semantics, it is entierly
 up to the Idris compiler to decied how it should be interpreded irregardless of
 the Agda programmers intention.
 
