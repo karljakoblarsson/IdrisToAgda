@@ -250,8 +250,10 @@ paren e = Paren NoRange e
 
 createTelescope :: TT.Name -> PTerm -> Telescope
 createTelescope name pterm = [TBind NoRange bargs (itaTerm pterm)]
-  where bargs = [barg]
-        barg = hiddenArg name (mkBoundName_ (itaName name))
+  where bargs :: [NamedArg BoundName]
+        bargs = [barg]
+        barg :: NamedArg BoundName
+        barg = hiddenArgNamed (show name) (mkBoundName_ (itaName name))
 
 -- data ArgOpt = AlwaysShow
 --             | HideDisplay
@@ -315,7 +317,6 @@ itaTerm (PAlternative namePair alttype terms) = case length terms of
   1 -> itaTerm $ head terms -- Safe because of case stmt.
   0 -> undefined
   _ -> itaTerm $ head terms -- TODO Probably wrong. But it's safe at least
-  -- TODO START HERE
   -- TODO Here I need to specify the universe levels
   -- I need info which is not present in the Idris AST.
   -- Should I modify it or provide that info in another way?
@@ -509,7 +510,7 @@ parse [infile] = return (infile, Nothing, False)
 parse ["-f", infile] = return (infile, Nothing, True)
 
 usage = putStrLn "Usage: ita [-vhf] [-o outfile.agda] [infile.idr]\n  -f Runs Impl to Excpl"
-version = putStrLn ("IdrisToAgda 0.2-" ++ gitHash)
+version = putStrLn ("IdrisToAgda 0.4-" ++ gitHash)
 exit = exitWith ExitSuccess
 die = exitWith (ExitFailure 1)
 success outfile =
@@ -572,7 +573,12 @@ loadIdr f = do
             --                       addImportDir (ddir </> unPkgName pkg)
             --                       fp <- findPkgIndex pkg
             --                      loadIBC True IBC_Building fp
-        let pkgdirs = ["../IdrisLibs"]
+        let pkgdirs = [ "../IdrisLibs"
+                      , "."
+                      , "IdrisLibs/SequentialDecisionProblems"
+                      , "../IdrisLibs/SequentialDecisionProblems"
+                      , "/SequentialDecisionProblems"
+                      ]
         setImportDirs pkgdirs
 
         -- Load StdLib
@@ -609,14 +615,13 @@ parseF impex = do
         let uDefs' = flattenMap uDefs
         let ptt = Map.intersectionWith (\a b -> (a, b)) spm uDefs'
 
-        iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
-        iPrint ("Length PDecl: " ++ (show $ length (ast i)))
-  -- TODO START HERE
+        -- iPrint ("Userdefined TTDecls: " ++ (show $ length uDefs))
+        -- iPrint ("Length PDecl: " ++ (show $ length (ast i)))
   -- This seem to work okay for now.
   -- Now I only need to map each item in `uDefs` to each in `sp`
   -- They should match one-to-one
-        iPrint ("Length splitAST: " ++ (show $ length sp))
-        iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
+        -- iPrint ("Length splitAST: " ++ (show $ length sp))
+        -- iPrint ("Length joined again splitAST: " ++ (show $ length $ concat sp))
 
         -- implEcplRefactor :: Map.Map TT.Name (AST, TTDecl) -> AST
         let reAST = implEcplRefactor ptt
@@ -651,7 +656,7 @@ parseF impex = do
 -- The plan is to do exactly that.
 
 
--- TODO START HERE
+-- TODO
 -- I should do this differently. I should traverse the `AST` and when needed (an
 -- argument, or `Type`) I should get the Info I need for the transform from the
 -- TT.
@@ -1064,10 +1069,10 @@ hArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
 --   , argInfoFreeVariables = UnknownFVs
 
 
-  -- Only hidden arguments can have names in Agda
--- hiddenArg :: String -> a -> NamedArg a
--- hiddenArg name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
---   Named (Just (Ranged NoRange name)) expr
+--   Only hidden arguments can have names in Agda
+hiddenArgNamed :: String -> a -> NamedArg a
+hiddenArgNamed name expr = Arg (ArgInfo Hidden modality UserWritten UnknownFVs) $
+  Named (Just (Ranged NoRange name)) expr
 
 -- type Named_ = Named RString
   -- | HiddenArg Range (Named_ Expr)              -- ^ ex: @{e}@ or @{x=e}@
