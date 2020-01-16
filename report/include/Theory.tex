@@ -116,10 +116,9 @@ The transpiler is correct if it satisfies equation~\ref{eq:veri2}.
 \reviewer{Use the function composition ring. A $.$ is programmer-speak for composition, not typical mathematical notation}
 \todo{I'm not sure if that is a good idea.}
 
-This is hard to show in practice however.
-\reviewer{Well, you don't know that, since that is not what you are
-investigating.}
-Simply defining $s_A$ or $s_I$ for subsets of the languages is a big project.
+Is it possible to show this is practice? 
+Simply defining $s_A$ or $s_I$ for subsets of the languages is a research
+project in itself.
 Verifying the above equation is beyond the scope of this thesis.
 \reviewer{You should phrase things differently. As you say, a trivial
 transpiler is ``correct''. You also should mention how you will have any idea
@@ -129,11 +128,9 @@ is easy.}
 Further, equation~\ref{eq:veri2} needs to hold for every possible program.  It
 is of course impossible to enumerate every possible program in a finite time,
 so we either need to construct a formal correctness proof or test a subset of
-$p$.  Developing a formal correctness proof is an huge\reviewer{UA}
-undertaking, there exists only a handful of formally verified compilers
-published.
-\reviewer{2, as far as I'm aware, CakeML and CompCert (apart from toy
-compilers). Good place to add citations.}
+$p$.  Developing a formal correctness proof is a large task, there exists only
+a handful of formally verified compilers published, most notably
+CompCert~\cite{compcert} and CakeML~\cite{cakeml}.
 Therefore we will focus on partial verification by testing, we explore our
 options in section~\ref{sec:methveri}.
 
@@ -153,7 +150,6 @@ labeling it ``hard'' and moving it to the side.)}
 
 
 \section{Previous work}
-\todo{This is only a first draft}
 \todo{Revise}
 
 Source level transpilation of a dependently type programming languages has not
@@ -166,7 +162,7 @@ the introduction, section~\ref{sec:intro}.
 
 However, there are many implementations details in practice.
 
-\todo{Same as stated abouw}
+\todo{Revise}
 A dependently typed programming language can also be used for computer-checked
 proofs thanks to the Curry-Howard correspondence. A type signature represents
 a proposition and any implementation which type checks is a proof of that
@@ -192,9 +188,15 @@ to successfully translate the standard library of OpenTheory. % TODO describe Op
 They also claim that their translator is more scalable
 then~\cite{obua2006importing} for example.
 
+\cite{obua2006importing} records the steps taken in each proof, and then
+replays them into the target system. No regard for how the source proof is
+written. That would be unsuitable for us. The problems they face is a space
+efficient representation for storing.
+
 Most previous work tries to convert the proof from one system for use in
 another. \cite{felty1997hybrid} takes another apporach. The try to use HOL and
-NuPRL in conjuction for one single proof.
+NuPRL in conjuction for one single proof. This is more in line with the goal of
+this project, re-using libraries from one language in another. Yada yada.
 
 \cite{denney2000prototype} translates from HOL to Coq using a own intermediate
 representation. Specifically it tries to make the destination format readable.

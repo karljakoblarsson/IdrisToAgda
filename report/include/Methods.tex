@@ -318,4 +318,33 @@ typesignature contains implicit arguments the program takes the type signature
 from the \tt-level and does the elaboration backwards into concrete syntax
 again. The original type signature is then replaced with the backported one.
 
+\subsection{Universe level qualifiers}
+\todo{In everything. Themself vs. Themselves}
+One area where Agda and Idris differ is the handling of Universes.
+A type whoose members are themself types is called a \textit{Universe}. Similar
+to Russell's paradox the type of types can not contain it self, in programming
+language research this is usually refered to as Girad's
+paradox~\cite{coquand1986analysis}.  In Idris \lstinline{Set} is called \lstinline{Type}. In Agda it is possible to define a type as
+$a : Set_n$ where $n$ is the level of universe. The set of regular types is
+$Set_0$. For all types it holds that $Set_n \in Set_{n+1}$ but not $Set_n \in
+Set_m$ in general.
+
+Idris on the other hand uses universe cumulativity, which is $Set_n \in Set_m
+\froall n <= m$. Universe levels in Idris are always infered by the compiler,
+it is not possible for the user to specify them explicitly. Translating between
+these two systems is not yet explored as far as we know. How to do it correctly
+is not part of the scope for this project and left for further research.
+
+When translating from Idris to Agda, as in this project, it is possible to use
+the Idris compiler to get the information needed. The Idris compiler infers an
+explicit universe level for every \lstinline{Type}. The specific level could be
+written explicitly in the generated Agda source. This will work for simpler
+problems, but does not account for the difference between universe polymorphims
+and cumulativity.
+
+In the other direction it is in some sense easier. Since it is not possible to
+specify explicit levels in Idris, every such statment has to be translated into
+\lstinlin{Type}. However, this will not have correct semantics, it is entierly
+up to the Idris compiler to decied how it should be interpreded irregardless of
+the Agda programmers intention.
 
