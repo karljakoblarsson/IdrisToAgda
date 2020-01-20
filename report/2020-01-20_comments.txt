@@ -1,0 +1,32 @@
+Some comments on the report:
+
+* Missing files?
+Running
+  latexmk -shell-escape -pdf Main
+gave these errors:
+atexmk: Missing input file: 'figure/auxiliary/frontpage_gu_eng_vec_m2.pdf' from line
+  'LaTeX Warning: File `figure/auxiliary/frontpage_gu_eng_vec_m2.pdf' not found on'
+Latexmk: Missing input file: 'figure/auxiliary/frontpage_gu_eng_vec_m2.pdf' from line
+  'LaTeX Warning: File `figure/auxiliary/frontpage_gu_eng_vec_m2.pdf' not found on input line 44.'
+Latexmk: Missing input file: 'figure/auxiliary/ChGULogoHog.pdf' from line
+  'LaTeX Warning: File `figure/auxiliary/ChGULogoHog.pdf' not found on input line '
+Latexmk: Missing input file: 'figure/auxiliary/ChGULogoHog.pdf' from line
+  'LaTeX Warning: File `figure/auxiliary/ChGULogoHog.pdf' not found on input line 68.'
+Latexmk: Missing input file: '`figure/auxiliary/ChGULogoHog.pdf'' from line
+  '! Package pdftex.def Error: File `figure/auxiliary/ChGULogoHog.pdf' not found: '
+
+* "Idris, Agda, ATS, F* and Epigram are some of the most used": Epigram is _not_ one of the most used.
+  It is not even listed in the "Comparison of languages with dependent types" table here:
+    https://en.wikipedia.org/wiki/Dependent_type
+
+* p3: "attempts of a making" ??
+* p3: you use three different styles for "head" within 10 lines of text. Don't.
+* p3: You start with "One specific difference" but go on to describe what is common for most of the paragraph. Restructure.
+* p5: A number-citation like [8] should be an additional explanation (an annotation) of a working sentence, not replace normal words (names) or phrases. Rewrite or change citation style.
+* p5 "translat": spelling
+* Avoid writing "of course", "obvious", etc.
+
+----
+
+I stopped reading after page 5 due to too many comments.
+Please act on most of the existing comments in the text first, then ask again.
