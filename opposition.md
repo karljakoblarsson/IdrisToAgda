@@ -1,6 +1,6 @@
 ---
 title: Opposition Notes
-subtitle: Thesis: Formally Verifing WebAssembly with KWasm
+subtitle: "Thesis: Formally Verifing WebAssembly with KWasm"
 author: Jakob Larsson
 documentclass: scrartcl
 ---
@@ -64,7 +64,7 @@ others. It would be interesting with a small survey about other possible tools.
 
 
 
-### List of Questions1
+### List of Questions
 
 - You choose K because you were familiar with it and because it as a Wasm
     embedding, as stated in the report. But have you done any surveying about
